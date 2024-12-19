@@ -39,7 +39,7 @@ int main() {
     }
 
     file.close();
-    double E_1 = E_0(states, elements);
+    double E_1 = E_0(elements);
     std::cout << E_1 << std::endl;
     return 0;
 }
