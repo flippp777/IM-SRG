@@ -10,27 +10,48 @@ int main() {
         return 1;
     }
 
-    std::vector<std::vector<int>> states;
+    std::vector<std::vector<float>> states;
+    std::vector<std::vector<float>> V;
     std::string line;
 
+    int i = 0;
     while (std::getline(file, line)) {
-        std::vector<int> row;
+        std::vector<float> row;
         std::istringstream iss(line);
-        int num;
-        while (iss >> num) {
-            row.push_back(num);
+        float num;
+        if (2 < i && i < 142) {
+            while (iss >> num) {
+                row.push_back(num);
+            }
+            states.push_back(row);
         }
-        states.push_back(row);
+        else if (145 < i) {
+            while (iss >> num) {
+                row.push_back(num);
+            }
+            V.push_back(row);
+        }
+        else {}
+        i++;
     }
 
     file.close();
 
-    for (const auto& row : states) {
-        for (const auto& num : row) {
-            std::cout << num << " ";
-        }
-        std::cout << std::endl;
-    }
+
+    
+    std::cout << states[0][0] << std::endl;
+    std::cout << states[0][0] << std::endl;
+    std::cout << V[0][0] << std::endl;
+    std::cout << V[0][0] << std::endl;
+    
+    // for (const auto& row : states) {
+    //     for (const auto& num : row) {
+    //         std::cout << num << " ";
+    //     }
+    //     std::cout << std::endl;
+    // }
+
+
 
     return 0;
 }

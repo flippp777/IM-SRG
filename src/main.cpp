@@ -25,6 +25,8 @@ int main() {
 
     file.close();
 
+    std::cout << states[0][0] << std::endl;
+
     for (const auto& row : states) {
         for (const auto& num : row) {
             std::cout << num << " ";
