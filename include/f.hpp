@@ -2,4 +2,4 @@
 
 using namespace std;
 
-vector<vector<double>> f_0(vector<vector<double>> elements);
+vector<vector<double>> f0(vector<vector<double>> elements);

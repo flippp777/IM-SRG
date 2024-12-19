@@ -5,6 +5,7 @@
 #include <string>
 
 #include "../include/E.hpp"
+#include "../include/f.hpp"
 
 int main() {
     std::ifstream file("../matrix_elements/hint_He4_chi2bM3A_srg0800_eMax04_nMax02_lMax04_hwHO020.me2m");
@@ -37,10 +38,15 @@ int main() {
         else {}
         i++;
     }
-
     file.close();
-    double E_1 = E_0(elements);
-    std::cout << E_1 << std::endl;
+
+    double E = E0(elements);
+    std::cout << E << std::endl;
+
+    std::vector<std::vector<double>> f = f0(elements);
+    std::cout << f.size() << "x" <<  f[0].size() << std::endl;
+
+
     return 0;
 }
 
