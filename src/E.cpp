@@ -3,7 +3,7 @@
 #include <numeric>
 
 
-double E_0(std::vector<std::vector<double>> elements) {
+double E0(std::vector<std::vector<double>> elements) {
    double E = 0;
 
    for (auto & element : elements) {
