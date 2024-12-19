@@ -1,13 +1,14 @@
-#include "E.hpp"
+#include "../include/E.hpp"
 
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <sstream>
 #include <numeric>
+#include <string>
 
-int E() {
-    std::ifstream file("../../../matrix_elements/hint_He4_chi2bM3A_srg0800_eMax04_nMax02_lMax04_hwHO020.me2m");
+double E(std::string  a) {
+    std::ifstream file("../matrix_elements/hint_He4_chi2bM3A_srg0800_eMax04_nMax02_lMax04_hwHO020.me2m");
     if (!file) {
         std::cerr << "error: could not open file" << std::endl;
         return 1;
@@ -42,7 +43,6 @@ int E() {
     
     double E_1 = (1-0.25) * 20 * (std::reduce(states[1].begin(), states[1].end()) + 1.5) * 0.5;
     
-    std::cout << E_1 << std::endl;
     
     // for (const auto& row : states) {
     //     for (const auto& num : row) {
@@ -53,5 +53,5 @@ int E() {
 
 
 
-    return 0;
+    return E_1;
 }

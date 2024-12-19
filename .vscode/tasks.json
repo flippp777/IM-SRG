@@ -5,11 +5,12 @@
             "label": "C/C++: g++.exe build active file",
             "command": "C:\\msys64\\ucrt64\\bin\\g++.exe",
             "args": [
+                "-std=c++23",
                 "-fdiagnostics-color=always",
                 "-g",
-                "${file}",
+                "C:\\Users\\phili.DESKTOP\\OneDrive\\Uni OneDrive\\Master\\Seminar\\CNSP\\Code\\src\\*.cpp",
                 "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+                "C:\\Users\\phili.DESKTOP\\OneDrive\\Uni OneDrive\\Master\\Seminar\\CNSP\\Code\\bin\\build.exe",
             ],
             "options": {
                 "cwd": "${fileDirname}"
