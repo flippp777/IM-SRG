@@ -6,7 +6,10 @@ using namespace std;
 
 
 double f_ij(const int i, int j, const vector<vector<double>> elements) {
-    double f_ij = 0; for (auto & element : elements) { if (element[0] == i && element[1] < 4 && element[2] == j && element[3] == element[1]) {
+    double f_ij = 0; 
+    
+    for (auto & element : elements) {
+        if (element[0] == i && element[1] < 4 && element[2] == j && element[3] == element[1]) {
             f_ij += element[4];
         }
         else if (element[1] == i && element[0] < 4 && element[3] == j && element[2] == element[1]) {

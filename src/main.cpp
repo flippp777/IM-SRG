@@ -8,7 +8,7 @@
 #include "../include/f.hpp"
 
 int main() {
-    std::ifstream file("../matrix_elements/hint_He4_chi2bM3A_srg0800_eMax04_nMax02_lMax04_hwHO020.me2m");
+    std::ifstream file("matrix_elements/hint_He4_chi2bM3A_srg0800_eMax04_nMax02_lMax04_hwHO020.me2m");
     if (!file) {
         std::cerr << "error: could not open file" << std::endl;
         return 1;
