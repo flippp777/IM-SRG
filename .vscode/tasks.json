@@ -8,9 +8,9 @@
                 "-std=c++23",
                 "-fdiagnostics-color=always",
                 "-g",
-                "C:\\Users\\phili.DESKTOP\\OneDrive\\Uni OneDrive\\Master\\Seminar\\CNSP\\Code\\src\\*.cpp",
+                "${fileDirname}\\*.cpp",
                 "-o",
-                "C:\\Users\\phili.DESKTOP\\OneDrive\\Uni OneDrive\\Master\\Seminar\\CNSP\\Code\\bin\\build.exe",
+                "${fileDirname}\\..\\${fileBasenameNoExtension}.exe"
             ],
             "options": {
                 "cwd": "${fileDirname}"
