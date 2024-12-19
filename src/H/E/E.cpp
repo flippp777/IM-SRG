@@ -1,24 +1,27 @@
+#include "E.hpp"
+
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <sstream>
+#include <numeric>
 
-int main() {
+int E() {
     std::ifstream file("../../../matrix_elements/hint_He4_chi2bM3A_srg0800_eMax04_nMax02_lMax04_hwHO020.me2m");
     if (!file) {
         std::cerr << "error: could not open file" << std::endl;
         return 1;
     }
 
-    std::vector<std::vector<float>> states;
-    std::vector<std::vector<float>> V;
+    std::vector<std::vector<double>> states;
+    std::vector<std::vector<double>> V;
     std::string line;
 
     int i = 0;
     while (std::getline(file, line)) {
-        std::vector<float> row;
+        std::vector<double> row;
         std::istringstream iss(line);
-        float num;
+        double num;
         if (2 < i && i < 142) {
             while (iss >> num) {
                 row.push_back(num);
@@ -36,13 +39,10 @@ int main() {
     }
 
     file.close();
-
-
     
-    std::cout << states[0][0] << std::endl;
-    std::cout << states[0][0] << std::endl;
-    std::cout << V[0][0] << std::endl;
-    std::cout << V[0][0] << std::endl;
+    double E_1 = (1-0.25) * 20 * (std::reduce(states[1].begin(), states[1].end()) + 1.5) * 0.5;
+    
+    std::cout << E_1 << std::endl;
     
     // for (const auto& row : states) {
     //     for (const auto& num : row) {
