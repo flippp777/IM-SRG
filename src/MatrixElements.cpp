@@ -50,7 +50,9 @@ void MatrixElements::setTruncatedElements(int Nmax) {
 void MatrixElements::E0() {
     double E0 = 0.0;
     for (const auto& element : elements) {
-        E0 += element.me;
+        if (element.s1 < 4 && element.s2 < 4 && element.s1 == element.ss1 && element.s2 == element.ss2) {
+            E0 += element.me;
+        }   
     }
     E = E0;
 }
