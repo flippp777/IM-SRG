@@ -4,6 +4,8 @@
 #include <fstream>
 #include <vector>
 #include <sstream>
+#include <omp.h>
+#include <cmath>
 
 MatrixElements::MatrixElements(std::string filename) {
     std::ifstream file(filename);
@@ -55,4 +57,28 @@ void MatrixElements::E0() {
         }   
     }
     E = E0;
+}
+
+void MatrixElements::f0() {
+    f.resize(states.size(), std::vector<double>(states.size(), 0.0));
+    int steps = states.size() * states.size();
+    int step_count = 0;
+
+#pragma omp parallel for collapse(2)
+    for (int i = 0; i < states.size(); i++) {
+        for (int j = 0; j < states.size(); j++) {
+            double f_ij = 0.0;
+            for (const auto& element : elements) {
+                if (element.s1 == i && element.s2 < 4 && element.ss1 == j && element.ss2 == element.s2) {
+                    f_ij += element.me;
+                } else if (element.s2 == i && element.s1 < 4 && element.ss2 == j && element.ss1 == element.s1) {
+                    f_ij += element.me;
+                }
+            }
+            if (abs(f_ij) > 1e-10) {
+                f[i][j] = f_ij;
+                f[j][i] = f_ij;
+            }
+        }
+    }
 }

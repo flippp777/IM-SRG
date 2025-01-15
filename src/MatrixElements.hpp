@@ -12,6 +12,7 @@ private:
     std::vector<MatrixElement> elements;
 public:
     double E;
+    std::vector<std::vector<double>> f;
 
     MatrixElements(std::string filename);
     const std::vector<int>& getStates() const { return states; }
@@ -19,6 +20,7 @@ public:
     std::vector<MatrixElement> truncateElements(int Nmax) const;
     void setTruncatedElements(int Nmax);
     void E0();
+    void f0();
 
 };
 
