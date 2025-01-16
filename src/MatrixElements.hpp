@@ -13,6 +13,7 @@ private:
 public:
     double E;
     std::vector<std::vector<double>> f;
+    std::vector<std::vector<std::vector<std::vector<double>>>> Gamma;
 
     MatrixElements(std::string filename);
     const std::vector<int>& getStates() const { return states; }
@@ -21,6 +22,7 @@ public:
     void setTruncatedElements(int Nmax);
     void E0();
     void f0();
+    void Gamma0();
 
 };
 

@@ -6,6 +6,8 @@
 #include <sstream>
 #include <omp.h>
 #include <cmath>
+#include <array>
+#include <algorithm>
 
 MatrixElements::MatrixElements(std::string filename) {
     std::ifstream file(filename);
@@ -78,6 +80,32 @@ void MatrixElements::f0() {
             if (abs(f_ij) > 1e-10) {
                 f[i][j] = f_ij;
                 f[j][i] = f_ij;
+            }
+        }
+    }
+}
+
+void MatrixElements::Gamma0() {
+#pragma omp parallel for collapse(4)
+    for (int i = 0; i < states.size(); i++) {
+        for (int j = 0; j < states.size(); j++) {
+            for (int k = 0; k < states.size(); k++) {
+                for (int l = 0; l < states.size(); l++) {
+                    for (const auto& element : elements) {
+                        if (element.s1 == i && element.s2 == j && element.ss1 == k && element.ss2 == l) {
+                            double gamma_ijkl = element.me;
+
+                            std::array<int, 4> indices = {i, j, k, l};
+                            int permutation = 0;
+                            if (abs(gamma_ijkl) > 1e-10) {
+                                do {
+                                    Gamma[indices[0]][indices[1]][indices[2]][indices[3]] = gamma_ijkl * std::pow(-1, permutation);
+                                    permutation++;
+                                }   while (std::next_permutation(indices.begin(), indices.end()));
+                            }
+                        }
+                    }
+                }
             }
         }
     }

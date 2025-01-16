@@ -9,13 +9,11 @@ int main() {
     H0.E0();
     std::cout << "E0 = " << H0.E << std::endl;
 
-    H0.f0();
-    for (const auto& row : H0.f) {
-        for (const auto& element : row) {
-            std::cout << element << " ";
-        }
-        std::cout << std::endl;
+    H0.Gamma0();
+    for (int i = 0; i < H0.Gamma.size(); i++) {
+        std::cout << H0.Gamma[i][0][0][0];
     }
+
 
     return 0;
 }
