@@ -48,10 +48,7 @@ Hamiltonian::Hamiltonian(std::string filename) {
 #pragma omp parallel for collapse(2)
   for (int i = 0; i < num_states; ++i) {
     for (int j = 0; j < num_states; ++j) {
-      OneBody fij;
-      fij.s = i;
-      fij.ss = j;
-      fij.me = 0;
+      OneBody fij = OneBody(i, j, 0);
       for (int k = 0; k < Gamma.size(); ++k) {
         if (Gamma[k].s1 == i && Gamma[k].ss1 == j && Gamma[k].s2 < 4 &&
             Gamma[k].ss2 == Gamma[k].s2) {
