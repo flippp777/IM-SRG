@@ -6,7 +6,6 @@
 #include <omp.h>
 #include <ostream>
 #include <sstream>
-#include <vector>
 
 Hamiltonian::Hamiltonian(std::string filename) {
   // Open file

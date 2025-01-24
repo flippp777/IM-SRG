@@ -1,9 +1,8 @@
+#include "Hamiltonian.hpp"
+
 #include <iostream>
 #include <ostream>
-#include <string>
-#include <vector>
 
-#include "Hamiltonian.hpp"
 
 int main() {
   std::string filepath = "matrix_elements/"
