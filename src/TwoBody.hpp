@@ -1,4 +1,5 @@
 class TwoBody {
+public:
   int s1, s2, ss1, ss2;
   double me;
 

@@ -1,4 +1,5 @@
 struct OneBody {
+public:
   int s, ss;
   double me;
 
