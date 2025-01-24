@@ -1,11 +1,13 @@
 #include "Hamiltonian.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <iostream>
 #include <omp.h>
 #include <ostream>
 #include <sstream>
+#include <vector>
 
 Hamiltonian::Hamiltonian(std::string filename) {
   // Open file
@@ -37,7 +39,14 @@ Hamiltonian::Hamiltonian(std::string filename) {
   for (int i = 0; i < Gamma.size(); ++i) {
     if (Gamma[i].s1 < 4 && Gamma[i].s2 < 4 && Gamma[i].s1 == Gamma[i].ss1 &&
         Gamma[i].s2 == Gamma[i].ss2) {
-      E0 += Gamma[i].me;
+      std::vector<int> indices = {Gamma[i].s1, Gamma[i].s2, Gamma[i].ss1,
+                                  Gamma[i].ss2};
+      int permutation = 0;
+      do {
+        E0 += Gamma[i].me * std::pow(-1, permutation);
+        ++permutation;
+      } while (std::next_permutation(indices.begin(), indices.end()));
+      // std::cout << permutation << std::endl;
     }
   }
   E = E0;
@@ -49,15 +58,40 @@ Hamiltonian::Hamiltonian(std::string filename) {
     for (int j = 0; j < num_states; ++j) {
       OneBody fij = OneBody(i, j, 0);
       for (int k = 0; k < Gamma.size(); ++k) {
+        // <ia|H|ja>n_a
         if (Gamma[k].s1 == i && Gamma[k].ss1 == j && Gamma[k].s2 < 4 &&
             Gamma[k].ss2 == Gamma[k].s2) {
           fij.me += Gamma[k].me;
         }
+        // <ai|H|ja>n_a
+        if (Gamma[k].s2 == i && Gamma[k].ss1 == j && Gamma[k].s1 < 4 &&
+            Gamma[k].ss2 == Gamma[k].s1) {
+          fij.me += -Gamma[k].me;
+        }
+        // <ia|H|aj>n_a
+        if (Gamma[k].s1 == i && Gamma[k].ss2 == j && Gamma[k].s2 < 4 &&
+            Gamma[k].ss1 == Gamma[k].s2) {
+          fij.me += -Gamma[k].me;
+        }
+        // <ai|H|aj>n_a
+        if (Gamma[k].s2 == i && Gamma[k].ss2 == j && Gamma[k].s1 < 4 &&
+            Gamma[k].ss1 == Gamma[k].s1) {
+          fij.me += Gamma[k].me;
+        }
       }
-      if (fij.me != 0) {
+      if (fij.me != 0 && std::abs(fij.me) > 1e-9) {
         f0.push_back(fij);
       }
     }
   }
+  // std::sort(f0.begin(), f0.end(),
+  //           [](OneBody a, OneBody b) { return a.ss < b.ss; });
+  std::sort(f0.begin(), f0.end(), [](OneBody a, OneBody b) {
+    if (a.s == b.s) {
+      return a.ss < b.ss;
+    } else {
+      return a.s < b.s;
+    }
+  });
   f = f0;
 }
