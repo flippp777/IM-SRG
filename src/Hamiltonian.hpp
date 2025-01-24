@@ -1,14 +1,15 @@
-#include <string>
-#include <vector>
-
 #include "OneBody.hpp"
 #include "TwoBody.hpp"
 
+#include <string>
+#include <vector>
 
+#ifndef HAMILTONIAN
+#define HAMILTONIAN
 
 class Hamiltonian {
 private:
-  int num_states = 139;
+  int num_states = 140;
 
   double E;
   std::vector<OneBody> f;
@@ -26,7 +27,11 @@ public:
   const double &get_zero_body() const {
     return E;
   }
+  const int &get_num_states() const {
+    return num_states;
+  }
 
   void f0();
   void Gamma0();
 };
+#endif // !HAMILTONIAN

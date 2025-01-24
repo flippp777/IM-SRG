@@ -1,7 +1,10 @@
 #include "Hamiltonian.hpp"
+#include "Generator.hpp"
+#include "OneBody.hpp"
 
 #include <iostream>
 #include <ostream>
+#include <vector>
 
 
 int main() {
@@ -12,12 +15,24 @@ int main() {
   Hamiltonian H = Hamiltonian(filepath);
 
   std::cout << "E0 = " << H.get_zero_body() << std::endl;
+  std::cout << std::endl;
 
+  std::cout << "f" << std::endl;
   std::vector<OneBody> f0 = H.get_one_body();
   for (const auto &element : f0) {
     std::cout << element.s << " " << element.ss << " " << element.me << std::endl;
   }
-  
+  std::cout << std::endl;
+
+  Generator eta = Generator(H);
+
+  std::vector<OneBody> eta_1body = eta.get_one_body();
+
+  std::cout << "eta_1body" << std::endl;
+  for (const auto & element : eta_1body) {
+    std::cout << element.s << " " << element.ss << " " << element.me << std::endl;
+  }
+
 
   // H.Gamma0();
   // for (int i = 0; i < H.Gamma.size(); i++) {

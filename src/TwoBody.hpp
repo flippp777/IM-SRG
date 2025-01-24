@@ -1,3 +1,6 @@
+#ifndef TWOBODY
+#define TWOBODY
+
 class TwoBody {
 public:
   int s1, s2, ss1, ss2;
@@ -6,3 +9,5 @@ public:
   TwoBody();
   TwoBody(int s1, int s2, int ss1, int ss2, double me);
 };
+
+#endif // !TWOBODY
