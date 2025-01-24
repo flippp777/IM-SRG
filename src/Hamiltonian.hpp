@@ -1,15 +1,10 @@
 #include <string>
 #include <vector>
 
-struct OneBody {
-  int s, ss;
-  double me;
-};
+#include "OneBody.hpp"
+#include "TwoBody.hpp"
 
-struct TwoBody {
-  int s1, s2, ss1, ss2;
-  double me;
-};
+
 
 class Hamiltonian {
 private:
