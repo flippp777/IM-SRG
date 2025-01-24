@@ -1,4 +1,5 @@
 #include <iostream>
+#include <ostream>
 #include <string>
 #include <vector>
 
@@ -11,18 +12,14 @@ int main() {
 
   Hamiltonian H = Hamiltonian(filepath);
 
-
   std::cout << "E0 = " << H.get_zero_body() << std::endl;
 
-  // H.f0();
-  // for (int i = 0; i < H.f.size(); i++) {
-  //   for (int j = 0; j < H.f[i].size(); j++) {
-  //     std::cout << H0.f[i][j] << " ";
-  //   }
-  //   std::cout << std::endl;
-  // }
-  // std::cout << std::endl;
-  //
+  std::vector<OneBody> f0 = H.get_one_body();
+  for (const auto &element : f0) {
+    std::cout << element.s << " " << element.ss << " " << element.me << std::endl;
+  }
+  
+
   // H.Gamma0();
   // for (int i = 0; i < H.Gamma.size(); i++) {
   //   for (int j = 0; j < H.Gamma[i].size(); j++) {

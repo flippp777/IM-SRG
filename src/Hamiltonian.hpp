@@ -13,6 +13,8 @@ struct TwoBody {
 
 class Hamiltonian {
 private:
+  int num_states = 139;
+
   double E;
   std::vector<OneBody> f;
   std::vector<TwoBody> Gamma;
