@@ -84,8 +84,8 @@ Hamiltonian::Hamiltonian(std::string filename) {
       }
     }
   }
-  // std::sort(f0.begin(), f0.end(),
-  //           [](OneBody a, OneBody b) { return a.ss < b.ss; });
+
+  // sort like Gamma
   std::sort(f0.begin(), f0.end(), [](OneBody a, OneBody b) {
     if (a.s == b.s) {
       return a.ss < b.ss;
