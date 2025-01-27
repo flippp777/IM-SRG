@@ -21,11 +21,20 @@ public:
   const std::vector<TwoBody> &get_two_body() const {
     return Gamma;
   }
+  const void set_two_body(std::vector<TwoBody> new_Gamma) {
+    Gamma = new_Gamma;
+  }
   const std::vector<OneBody> &get_one_body() const {
     return f;
   }
+  const void set_one_body(std::vector<OneBody> new_f) {
+    f = new_f;
+  }
   const double &get_zero_body() const {
     return E;
+  }
+  const void set_zero_body(double new_E) {
+    E = new_E;
   }
   const int &get_num_states() const {
     return num_states;
