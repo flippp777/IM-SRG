@@ -8,8 +8,10 @@ Generator::Generator(Hamiltonian H) {
   std::vector<TwoBody> Gamma = H.get_two_body();
   int num_states = H.get_num_states();
 
+#pragma omp parallel
+  {
 // one-body part
-#pragma omp parallel for
+#pragma omp for nowait
   for (int i = 0; i < f.size(); ++i) {
     if (f[i].s < 4 && f[i].ss > 3) {
       double delta = 0;
@@ -33,7 +35,7 @@ Generator::Generator(Hamiltonian H) {
   }
 
 // two-body part
-#pragma omp parallel for
+#pragma omp for
   for (int i = 0; i < Gamma.size(); ++i) {
     if (Gamma[i].s1 < 4 && Gamma[i].s2 < 4 && Gamma[i].ss1 > 3 &&
         Gamma[i].ss2 > 3) {
@@ -61,4 +63,4 @@ Generator::Generator(Hamiltonian H) {
       }
     }
   }
-}
+}}
