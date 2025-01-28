@@ -54,8 +54,9 @@ int main() {
   std::cout << "dEds = " << dEds << std::endl;
   std::cout << std::endl;
 
-  std::cout << "dfds:" << std::endl;
   std::vector<OneBody> dfds = rk.get_one_body_flow_eq();
+  sort(dfds);
+  std::cout << "dfds:" << std::endl;
   for (const auto &element : dfds) {
     std::cout << element.s << "\t" << element.ss << "\t" << element.me << std::endl;
   }

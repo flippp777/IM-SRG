@@ -72,22 +72,18 @@ void RungeKutta::set_one_body_flow_eq(Hamiltonian H, Generator eta) {
   int eta1_size = eta1.size();
   int eta2_size = eta2.size();
 
-#pragma omp parallel
-  {
-#pragma omp for nowait
-    for (int i = 0; i < eta1_size; ++i) {
-      OneBody df_ijds = OneBody();
-      for (const OneBody &ff : f) {
-        dfds = dfds + OneBody(eta1[i].s, ff.ss, eta1[i].me*ff.me);
-        dfds = dfds + OneBody(eta1[i].s, ff.s, eta1[i].me*ff.me);
-        dfds = dfds + OneBody(eta1[i].ss, ff.ss, eta1[i].me*ff.me);
-        dfds = dfds + OneBody(eta1[i].ss, ff.s, eta1[i].me*ff.me);
+  for (int i = 0; i < eta1_size; ++i) {
+    OneBody df_ijds = OneBody();
+    for (const OneBody &ff : f) {
+      dfds = dfds + OneBody(eta1[i].s, ff.ss, eta1[i].me * ff.me);
+      dfds = dfds + OneBody(eta1[i].s, ff.s, eta1[i].me * ff.me);
+      dfds = dfds + OneBody(eta1[i].ss, ff.ss, -eta1[i].me * ff.me);
+      dfds = dfds + OneBody(eta1[i].ss, ff.s, -eta1[i].me * ff.me);
 
-        dfds = dfds + OneBody(ff.s, eta1[i].ss, eta1[i].me*ff.me);
-        dfds = dfds + OneBody(ff.s, eta1[i].s, eta1[i].me*ff.me);
-        dfds = dfds + OneBody(ff.ss, eta1[i].ss, eta1[i].me*ff.me);
-        dfds = dfds + OneBody(ff.ss, eta1[i].s, eta1[i].me*ff.me);
-      }
+      // dfds = dfds + OneBody(ff.s, eta1[i].ss, eta1[i].me * ff.me);
+      // dfds = dfds + OneBody(ff.s, eta1[i].s, eta1[i].me * ff.me);
+      // dfds = dfds + OneBody(ff.ss, eta1[i].ss, -eta1[i].me * ff.me);
+      // dfds = dfds + OneBody(ff.ss, eta1[i].s, -eta1[i].me * ff.me);
     }
   }
 }
