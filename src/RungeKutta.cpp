@@ -75,6 +75,7 @@ void RungeKutta::set_one_body_flow_eq(Hamiltonian H, Generator eta) {
   for (int i = 0; i < eta1_size; ++i) {
     OneBody df_ijds = OneBody();
     for (const OneBody &ff : f) {
+      // first sum (*2?)
       dfds = dfds + OneBody(eta1[i].s, ff.ss, eta1[i].me * ff.me);
       dfds = dfds + OneBody(eta1[i].s, ff.s, eta1[i].me * ff.me);
       dfds = dfds + OneBody(eta1[i].ss, ff.ss, -eta1[i].me * ff.me);
