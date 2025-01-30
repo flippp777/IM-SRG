@@ -73,18 +73,27 @@ void RungeKutta::set_one_body_flow_eq(Hamiltonian H, Generator eta) {
   int eta2_size = eta2.size();
 
   for (int i = 0; i < eta1_size; ++i) {
-    OneBody df_ijds = OneBody();
     for (const OneBody &ff : f) {
-      // first sum (*2?)
-      dfds = dfds + OneBody(eta1[i].s, ff.ss, eta1[i].me * ff.me);
-      dfds = dfds + OneBody(eta1[i].s, ff.s, eta1[i].me * ff.me);
-      dfds = dfds + OneBody(eta1[i].ss, ff.ss, -eta1[i].me * ff.me);
-      dfds = dfds + OneBody(eta1[i].ss, ff.s, -eta1[i].me * ff.me);
-
-      // dfds = dfds + OneBody(ff.s, eta1[i].ss, eta1[i].me * ff.me);
-      // dfds = dfds + OneBody(ff.s, eta1[i].s, eta1[i].me * ff.me);
-      // dfds = dfds + OneBody(ff.ss, eta1[i].ss, -eta1[i].me * ff.me);
-      // dfds = dfds + OneBody(ff.ss, eta1[i].s, -eta1[i].me * ff.me);
+      // first sum
+      if (eta1[i].ss == ff.s) {
+        dfds = dfds + OneBody(eta1[i].s, ff.ss, eta1[i].me * ff.me);
+      }
+      if (eta1[i].ss == ff.ss) {
+        dfds = dfds + OneBody(eta1[i].s, ff.s, eta1[i].me * ff.me);
+      }
+      if (eta1[i].s == ff.s) {
+        dfds = dfds + OneBody(eta1[i].ss, ff.ss, -eta1[i].me * ff.me);
+      }
+      if (eta1[i].s == ff.ss) {
+        dfds = dfds + OneBody(eta1[i].ss, ff.s, -eta1[i].me * ff.me);
+      }
     }
+
+    // for (int i = 0; i < eta1_size; ++i) {
+    //   if (eta1[i].s < 4 && eta1[i].ss > 3) {
+    //     for (const Twobody &gamma : gamma) {
+    //     }
+    //   }
+    // }
   }
 }
