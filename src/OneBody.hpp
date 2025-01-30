@@ -13,6 +13,7 @@ public:
 
 std::vector<OneBody> operator+(const std::vector<OneBody> &v,
                                const OneBody &a);
+
 void sort(std::vector<OneBody> &v);
 
 #endif // !ONEBODY

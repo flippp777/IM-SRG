@@ -1,7 +1,7 @@
 #include "Hamiltonian.hpp"
+#include "OneBody.hpp"
 #include "TwoBody.hpp"
 
-#include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <iostream>
@@ -32,85 +32,78 @@ Hamiltonian::Hamiltonian(std::string filename) {
   }
   file.close();
 
-  // Calculate and set zero-body
+  // full gamma
+  const int gamma_init_size = Gamma.size();
+  std::vector<TwoBody> gamma_full;
+  for (const auto &g : Gamma) {
+    if (g.s1 == g.ss1 && g.s2 == g.ss2) {
+      // <ab|H|ab>
+      gamma_full.push_back(TwoBody(g.s1, g.s2, g.ss1, g.ss2, g.me));
+      // <ba|H|ab>
+      gamma_full.push_back(TwoBody(g.s2, g.s1, g.ss1, g.ss2, -g.me));
+      // <ba|H|ba>
+      gamma_full.push_back(TwoBody(g.s2, g.s1, g.ss2, g.ss1, g.me));
+      // <ab|H|ba>
+      gamma_full.push_back(TwoBody(g.s1, g.s2, g.ss2, g.ss1, -g.me));
+    } else {
+      // <ab|H|cd>
+      gamma_full.push_back(TwoBody(g.s1, g.s2, g.ss1, g.ss2, g.me));
+      // <ba|H|cd>
+      gamma_full.push_back(TwoBody(g.s2, g.s1, g.ss1, g.ss2, -g.me));
+      // <ba|H|dc>
+      gamma_full.push_back(TwoBody(g.s2, g.s1, g.ss2, g.ss1, g.me));
+      // <ab|H|dc>
+      gamma_full.push_back(TwoBody(g.s1, g.s2, g.ss2, g.ss1, -g.me));
+
+      // <cd|H|ab>
+      gamma_full.push_back(TwoBody(g.ss1, g.ss2, g.s1, g.s2, g.me));
+      // <dc|H|ab>
+      gamma_full.push_back(TwoBody(g.ss2, g.ss1, g.s1, g.s2, -g.me));
+      // <dc|H|ba>
+      gamma_full.push_back(TwoBody(g.ss2, g.ss1, g.s2, g.s1, g.me));
+      // <cd|H|ba>
+      gamma_full.push_back(TwoBody(g.ss1, g.ss2, g.s2, g.s1, -g.me));
+    }
+  }
+
+  Gamma = gamma_full;
+
   double E0 = 0.0;
-#pragma omp parallel for reduction(+ : E0)
-  for (int i = 0; i < Gamma.size(); ++i) {
-    if (Gamma[i].s1 < 4 && Gamma[i].s2 < 4 && Gamma[i].s1 == Gamma[i].ss1 &&
-        Gamma[i].s2 == Gamma[i].ss2) {
-      std::vector<int> indices = {Gamma[i].s1, Gamma[i].s2, Gamma[i].ss1,
-                                  Gamma[i].ss2};
-      int permutation = 0;
-      do {
-        E0 += Gamma[i].me * std::pow(-1, permutation);
-        ++permutation;
-      } while (std::next_permutation(indices.begin(), indices.end()));
-      // std::cout << permutation << std::endl;
+  std::vector<OneBody> f_new;
+  const int gamma_size = Gamma.size();
+
+#pragma omp parallel
+  {
+#pragma omp for reduction(+ : E0)
+    for (int i = 0; i < gamma_size; ++i) {
+      if (Gamma[i].s1 < 4 && Gamma[i].s2 < 4 && Gamma[i].s1 == Gamma[i].ss1 &&
+          Gamma[i].s2 == Gamma[i].ss2) {
+        E0 += Gamma[i].me;
+      }
+    }
+
+    // calculate and set one-body
+#pragma omp for
+    for (int i = 0; i < gamma_size; ++i) {
+      if (Gamma[i].s2 < 4 && Gamma[i].ss2 < 4) {
+#pragma omp critical
+        f = f + OneBody(Gamma[i].s1, Gamma[i].ss1, Gamma[i].me);
+      }
+    }
+    // remove 0
+#pragma omp for
+    for (int i = 0; i < f.size(); ++i) {
+      if (abs(f[i].me) > 10 - 9) {
+#pragma omp critical
+        f_new.push_back(f[i]);
+      }
     }
   }
   E = E0;
-
-  // calculate and set one-body
-#pragma omp parallel for collapse(2)
-  for (int i = 0; i < num_states; ++i) {
-    for (int j = 0; j < num_states; ++j) {
-      OneBody fij = OneBody(i, j, 0);
-      OneBody fji = OneBody(j, i, 0);
-      for (int k = 0; k < Gamma.size(); ++k) {
-        // <ia|H|ja>n_a
-        if (Gamma[k].s1 == i && Gamma[k].ss1 == j && Gamma[k].s2 < 4 &&
-            Gamma[k].ss2 == Gamma[k].s2) {
-          fij.me += Gamma[k].me;
-          fji.me += Gamma[k].me;
-        }
-        // <ai|H|ja>n_a
-        if (Gamma[k].s2 == i && Gamma[k].ss1 == j && Gamma[k].s1 < 4 &&
-            Gamma[k].ss2 == Gamma[k].s1) {
-          fij.me += -Gamma[k].me;
-          fji.me += -Gamma[k].me;
-        }
-        // <ia|H|aj>n_a
-        if (Gamma[k].s1 == i && Gamma[k].ss2 == j && Gamma[k].s2 < 4 &&
-            Gamma[k].ss1 == Gamma[k].s2) {
-          fij.me += -Gamma[k].me;
-          fji.me += -Gamma[k].me;
-        }
-        // <ai|H|aj>n_a
-        if (Gamma[k].s2 == i && Gamma[k].ss2 == j && Gamma[k].s1 < 4 &&
-            Gamma[k].ss1 == Gamma[k].s1) {
-          fij.me += Gamma[k].me;
-          fji.me += Gamma[k].me;
-        }
-      }
-      if (fij.me != 0 && std::abs(fij.me) > 1e-9) {
-#pragma omp critical
-        {
-          f.push_back(fij);
-          if (j != i) {
-            f.push_back(fji);
-          }
-        }
-      }
-    }
-  }
-  // sort like Gamma
-  sort(f);
-
-  const int gamma_size = Gamma.size();
-  std::vector<TwoBody> gamma_full;
-  for (int i = 0;i<gamma_size;++i) {
-    std::vector<int> indices = {Gamma[i].s1, Gamma[i].s2, Gamma[i].ss1,
-                                Gamma[i].ss2};
-    int permutation = 0;
-    do {
-      gamma_full.push_back(TwoBody(indices[0], indices[1], indices[2], indices[3], Gamma[i].me * std::pow(-1, permutation)));
-      ++permutation;
-    } while (std::next_permutation(indices.begin(), indices.end()));
-  }
-  Gamma = gamma_full;
+  f = f_new;
 }
 
-const void Hamiltonian::print_zero_body(){
+const void Hamiltonian::print_zero_body() {
   std::cout << "E: " << E << std::endl;
 }
 
@@ -125,8 +118,8 @@ const void Hamiltonian::print_one_body() {
 const void Hamiltonian::print_two_body() {
   std::cout << "Gamma:" << std::endl;
   for (const TwoBody &gg : Gamma) {
-    std::cout << gg.s1 << "\t" << gg.s2 << "\t" << gg.ss1 << "\t"
-    <<gg.ss2 << "\t" << gg.me << std::endl;
+    std::cout << gg.s1 << "\t" << gg.s2 << "\t" << gg.ss1 << "\t" << gg.ss2
+              << "\t" << gg.me << std::endl;
   }
   std::cout << std::endl;
 }
