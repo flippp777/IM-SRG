@@ -1,4 +1,5 @@
 .vscode
 .vs
 bin
-build.sh
+compile.sh
+compile_and_run.sh
