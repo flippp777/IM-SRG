@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <chrono>
 #include <iostream>
-#include <ostream>
+#include <fstream>
 #include <vector>
 
 int main() {
@@ -14,29 +14,35 @@ int main() {
                          "hint_He4_chi2bM3A_srg0800_eMax04_nMax02_lMax04_"
                          "hwHO020.me2m";
 
-  // auto start = std::chrono::high_resolution_clock::now();
+  auto start = std::chrono::high_resolution_clock::now();
 
   Hamiltonian H = Hamiltonian(filepath);
-  Generator eta = Generator(H);
+  // Generator eta = Generator(H);
 
-  // auto stop_constructors = std::chrono::high_resolution_clock::now();
-  //
-  // auto duration_constructors =
-  // std::chrono::duration_cast<std::chrono::seconds>(
-  //     stop_constructors - start);
-  // std::cout << "Constructor H and eta time: " <<
-  // duration_constructors.count()
-  //           << " s" << std::endl;
-  // std::cout << std::endl;
+  auto stop_constructors = std::chrono::high_resolution_clock::now();
 
-  // std::vector<TwoBody> gamma = H.get_two_body();
-  // std::cout << "Gamma:" << std::endl;
-  // for (const TwoBody &gg : gamma) {
-  //   std::cout << gg.s1 << "\t" << gg.s2 << "\t" << gg.ss1 << "\t"
-  //   <<gg.ss2 << "\t" << gg.me << std::endl;
-  // }
-  // std::cout << std::endl;
-  //
+  auto duration_constructors =
+  std::chrono::duration_cast<std::chrono::seconds>(
+      stop_constructors - start);
+  std::cout << "Constructor H and eta time: " <<
+  duration_constructors.count()
+            << " s" << std::endl;
+  std::cout << std::endl;
+
+  std::vector<TwoBody> gamma = H.get_two_body();
+
+  std::ofstream gamma_file;
+  gamma_file.open("full_gamma.txt");
+  for (const auto &gg : gamma) {
+    gamma_file << gg.s1 << "\t" << gg.s2 << "\t" << gg.ss1 << "\t" << gg.ss2 << "\t" << gg.me << "\n";
+  }
+  gamma_file.close();
+
+  // H.print_zero_body();
+  // H.print_one_body();
+  // H.print_two_body();
+
+
   // std::vector<TwoBody> eta_2 = eta.get_two_body();
   // std::cout << "eta_2body:" << std::endl;
   // for (const TwoBody &eta : eta_2) {
@@ -45,21 +51,20 @@ int main() {
   // }
   // std::cout << std::endl;
 
-  RungeKutta rk = RungeKutta(H, eta);
+  // RungeKutta rk = RungeKutta(H, eta);
+  //
 
-  std::cout << "E0 = " << H.get_zero_body() << std::endl;
-  std::cout << std::endl;
-
-  double dEds = rk.get_zero_body_flow_eq();
-  std::cout << "dEds = " << dEds << std::endl;
-  std::cout << std::endl;
-
-  std::vector<OneBody> dfds = rk.get_one_body_flow_eq();
-  sort(dfds);
-  std::cout << "dfds:" << std::endl;
-  for (const auto &element : dfds) {
-    std::cout << element.s << "\t" << element.ss << "\t" << element.me << std::endl;
-  }
+  //
+  // double dEds = rk.get_zero_body_flow_eq();
+  // std::cout << "dEds = " << dEds << std::endl;
+  // std::cout << std::endl;
+  //
+  // std::vector<OneBody> dfds = rk.get_one_body_flow_eq();
+  // sort(dfds);
+  // std::cout << "dfds:" << std::endl;
+  // for (const auto &element : dfds) {
+  //   std::cout << element.s << "\t" << element.ss << "\t" << element.me << std::endl;
+  // }
   
 
   return 0;

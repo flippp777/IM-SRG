@@ -40,7 +40,9 @@ public:
     return num_states;
   }
 
-  void f0();
-  void Gamma0();
+  const void print_zero_body();
+  const void print_one_body();
+  const void print_two_body();
+
 };
 #endif // !HAMILTONIAN

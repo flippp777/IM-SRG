@@ -1,4 +1,5 @@
 #include "Hamiltonian.hpp"
+#include "TwoBody.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -21,9 +22,7 @@ Hamiltonian::Hamiltonian(std::string filename) {
   std::string line;
   int i = 0;
   while (std::getline(file, line)) {
-    std::vector<double> row;
     std::istringstream iss(line);
-    double num;
     if (i > 145) {
       TwoBody gamma;
       iss >> gamma.s1 >> gamma.s2 >> gamma.ss1 >> gamma.ss2 >> gamma.me;
@@ -87,8 +86,8 @@ Hamiltonian::Hamiltonian(std::string filename) {
 #pragma omp critical
         {
           f.push_back(fij);
-          if ( j!=i) {
-          f.push_back(fji);
+          if (j != i) {
+            f.push_back(fji);
           }
         }
       }
@@ -96,4 +95,38 @@ Hamiltonian::Hamiltonian(std::string filename) {
   }
   // sort like Gamma
   sort(f);
+
+  const int gamma_size = Gamma.size();
+  std::vector<TwoBody> gamma_full;
+  for (int i = 0;i<gamma_size;++i) {
+    std::vector<int> indices = {Gamma[i].s1, Gamma[i].s2, Gamma[i].ss1,
+                                Gamma[i].ss2};
+    int permutation = 0;
+    do {
+      gamma_full.push_back(TwoBody(indices[0], indices[1], indices[2], indices[3], Gamma[i].me * std::pow(-1, permutation)));
+      ++permutation;
+    } while (std::next_permutation(indices.begin(), indices.end()));
+  }
+  Gamma = gamma_full;
+}
+
+const void Hamiltonian::print_zero_body(){
+  std::cout << "E: " << E << std::endl;
+}
+
+const void Hamiltonian::print_one_body() {
+  std::cout << "f: " << std::endl;
+  for (const OneBody &ff : f) {
+    std::cout << ff.s << "\t" << ff.ss << "\t" << ff.me << std::endl;
+  }
+  std::cout << std::endl;
+}
+
+const void Hamiltonian::print_two_body() {
+  std::cout << "Gamma:" << std::endl;
+  for (const TwoBody &gg : Gamma) {
+    std::cout << gg.s1 << "\t" << gg.s2 << "\t" << gg.ss1 << "\t"
+    <<gg.ss2 << "\t" << gg.me << std::endl;
+  }
+  std::cout << std::endl;
 }
