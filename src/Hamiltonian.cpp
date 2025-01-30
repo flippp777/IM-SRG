@@ -52,46 +52,48 @@ Hamiltonian::Hamiltonian(std::string filename) {
   E = E0;
 
   // calculate and set one-body
-  std::vector<OneBody> f0;
 #pragma omp parallel for collapse(2)
   for (int i = 0; i < num_states; ++i) {
     for (int j = 0; j < num_states; ++j) {
       OneBody fij = OneBody(i, j, 0);
+      OneBody fji = OneBody(j, i, 0);
       for (int k = 0; k < Gamma.size(); ++k) {
         // <ia|H|ja>n_a
         if (Gamma[k].s1 == i && Gamma[k].ss1 == j && Gamma[k].s2 < 4 &&
             Gamma[k].ss2 == Gamma[k].s2) {
           fij.me += Gamma[k].me;
+          fji.me += Gamma[k].me;
         }
         // <ai|H|ja>n_a
         if (Gamma[k].s2 == i && Gamma[k].ss1 == j && Gamma[k].s1 < 4 &&
             Gamma[k].ss2 == Gamma[k].s1) {
           fij.me += -Gamma[k].me;
+          fji.me += -Gamma[k].me;
         }
         // <ia|H|aj>n_a
         if (Gamma[k].s1 == i && Gamma[k].ss2 == j && Gamma[k].s2 < 4 &&
             Gamma[k].ss1 == Gamma[k].s2) {
           fij.me += -Gamma[k].me;
+          fji.me += -Gamma[k].me;
         }
         // <ai|H|aj>n_a
         if (Gamma[k].s2 == i && Gamma[k].ss2 == j && Gamma[k].s1 < 4 &&
             Gamma[k].ss1 == Gamma[k].s1) {
           fij.me += Gamma[k].me;
+          fji.me += Gamma[k].me;
         }
       }
       if (fij.me != 0 && std::abs(fij.me) > 1e-9) {
-        f0.push_back(fij);
+#pragma omp critical
+        {
+          f.push_back(fij);
+          if ( j!=i) {
+          f.push_back(fji);
+          }
+        }
       }
     }
   }
-
   // sort like Gamma
-  std::sort(f0.begin(), f0.end(), [](OneBody a, OneBody b) {
-    if (a.s == b.s) {
-      return a.ss < b.ss;
-    } else {
-      return a.s < b.s;
-    }
-  });
-  f = f0;
+  sort(f);
 }
