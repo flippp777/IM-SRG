@@ -7,6 +7,7 @@
 RungeKutta::RungeKutta(Hamiltonian H, Generator eta) {
   set_zero_body_flow_eq(H, eta);
   set_one_body_flow_eq(H, eta);
+  set_two_body_flow_eq(H, eta);
 }
 
 void RungeKutta::set_zero_body_flow_eq(Hamiltonian H, Generator eta) {
@@ -154,9 +155,53 @@ void RungeKutta::set_one_body_flow_eq(Hamiltonian H, Generator eta) {
         }
       }
     }
-
 #pragma omp critical
     dfds.insert(dfds.end(), local_dfds.begin(), local_dfds.end());
+  }
+}
+
+void RungeKutta::set_two_body_flow_eq(Hamiltonian H, Generator eta) {
+  int num_states = H.get_num_states();
+
+  std::vector<OneBody> f = H.get_one_body();
+  std::vector<TwoBody> gamma = H.get_two_body();
+
+  std::vector<OneBody> eta1 = eta.get_one_body();
+  std::vector<TwoBody> eta2 = eta.get_two_body();
+
+  const int f_size = f.size();
+  const int eta1_size = eta1.size();
+  const int gamma_size = gamma.size();
+  const int eta2_size = eta2.size();
+
+#pragma omp parallel
+  {
+    std::vector<TwoBody> local_dgammads;
+    local_dgammads.reserve(gamma_size);
+    // sum with Gamma_abcd terms
+#pragma omp for
+    for (int i = 0; i < gamma_size; ++i) {
+      // terms in first sum with eta * Gamma
+      for (int j = 0; j < eta1_size; ++j) {
+        if (eta1[j].ss == gamma[i].s1) {
+          local_dgammads =
+              local_dgammads + TwoBody(eta1[j].s, gamma[i].s2, gamma[i].ss1,
+                                       gamma[i].ss2, eta1[j].me * gamma[i].me);
+          local_dgammads =
+              local_dgammads + TwoBody(gamma[i].s2, eta1[j].s, gamma[i].ss1,
+                                       gamma[i].ss2, -eta1[j].me * gamma[i].me);
+        } else if (eta1[j].s == gamma[i].ss1) {
+          local_dgammads =
+              local_dgammads + TwoBody(gamma[i].s1, gamma[i].s2, eta1[j].ss,
+                                       gamma[i].ss2, -eta1[j].me * gamma[i].me);
+          local_dgammads =
+              local_dgammads + TwoBody(gamma[i].s1, gamma[i].s2, gamma[i].ss2,
+                                       eta1[j].ss, eta1[j].me * gamma[i].me);
+        }
+      }
+    }
+    #pragma omp critical
+    dGammads.insert(dGammads.end(), local_dgammads.begin(), local_dgammads.end());
   }
 }
 
