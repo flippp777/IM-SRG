@@ -32,22 +32,16 @@ int main() {
   auto stop_eta = std::chrono::high_resolution_clock::now();
   print_duration("eta construnction: ", start_eta, stop_eta);
 
-  // std::vector<TwoBody> eta_2 = eta.get_two_body();
-  // std::cout << "eta_2body:" << std::endl;
-  // for (const TwoBody &eta : eta_2) {
-  //   std::cout << eta.s1 << "\t" << eta.s2 << "\t" << eta.ss1 << "\t" <<
-  //   eta.ss2 << "\t" << eta.me << std::endl;
-  // }
-  // std::cout << std::endl;
 
-  // RungeKutta rk = RungeKutta(H, eta);
-  //
+  auto start_rk = std::chrono::high_resolution_clock::now();
+  RungeKutta rk = RungeKutta(H, eta);
+  auto stop_rk = std::chrono::high_resolution_clock::now();
+  print_duration("flow eq. construnction: ", start_rk, stop_rk);
+  
+  double dEds = rk.get_zero_body_flow_eq();
+  std::cout << "dEds = " << dEds << std::endl;
+  std::cout << std::endl;
 
-  //
-  // double dEds = rk.get_zero_body_flow_eq();
-  // std::cout << "dEds = " << dEds << std::endl;
-  // std::cout << std::endl;
-  //
   // std::vector<OneBody> dfds = rk.get_one_body_flow_eq();
   // sort(dfds);
   // std::cout << "dfds:" << std::endl;

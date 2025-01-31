@@ -10,7 +10,6 @@ RungeKutta::RungeKutta(Hamiltonian H, Generator eta) {
 }
 
 void RungeKutta::set_zero_body_flow_eq(Hamiltonian H, Generator eta) {
-  double E = H.get_zero_body();
   std::vector<OneBody> f = H.get_one_body();
   std::vector<TwoBody> Gamma = H.get_two_body();
 
@@ -26,33 +25,31 @@ void RungeKutta::set_zero_body_flow_eq(Hamiltonian H, Generator eta) {
 
 #pragma omp parallel
   {
-#pragma omp for nowait reduction(+ : dEds)
-    for (int i = 1; i < eta_1body_size; ++i) {
+#pragma omp for reduction(+ : dEds)
+    for (int i = 0; i < eta_1body_size; ++i) {
       if (eta_1body[i].s < 4 && eta_1body[i].ss > 3) {
         for (const OneBody &ff : f) {
-          if (ff.s == eta_1body[i].s && ff.ss == eta_1body[i].ss) {
-            // n_a eta_ab f_ab - n_b (-eta_ab) f_ab
-            dEds += 2 * eta_1body[i].me * ff.me;
-
-            continue;
+          if (ff.s == eta_1body[i].ss && ff.ss == eta_1body[i].s) {
+            dEds += eta_1body[i].me * ff.me;
+          }
+        }
+      } else if (eta_1body[i].s > 3 && eta_1body[i].s < 4) {
+        for (const OneBody &ff : f) {
+          if (ff.s == eta_1body[i].ss && ff.ss == eta_1body[i].s) {
+            dEds += -eta_1body[i].me * ff.me;
           }
         }
       }
     }
-#pragma omp for nowait reduction(+ : dEds)
+#pragma omp for reduction(+ : dEds)
     for (int i = 0; i < eta_2body_size; ++i) {
       if (eta_2body[i].s1 < 4 && eta_2body[i].s2 < 4 && eta_2body[i].ss1 > 3 &&
           eta_2body[i].ss2 > 3) {
         for (const TwoBody &g : Gamma) {
-          if (g.s1 == eta_2body[i].s1 && g.s2 == eta_2body[i].s2 &&
-              g.ss1 == eta_2body[i].ss1 && g.ss2 == eta_2body[i].ss2) {
-            // 1/2 eta_abcd Gamma_cdab n_a n_b \bar{n}_c \bar{n}_d,
-            // only index switch beteen a <-> b and c <-> d, else 0
-            // 1/2 (eta_abcd Gamma_cdab - eta_bacd Gamma_cdba + eta_badc
-            // Gamma dcba - eta_abdc Gamma_dcab) = 2 eta_abcd Gamma_cdab
-            dEds += 2 * eta_2body[i].me * g.me;
+          if (g.s1 == eta_2body[i].ss1 && g.s2 == eta_2body[i].ss2 &&
+              g.ss1 == eta_2body[i].s1 && g.ss2 == eta_2body[i].s2) {
 
-            continue;
+            dEds += 1. / 2. * eta_2body[i].me * g.me;
           }
         }
       }
