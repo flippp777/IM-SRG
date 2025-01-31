@@ -38,3 +38,24 @@ void sort(std::vector<OneBody> &v) {
     }
   });
 }
+///
+///////////////////////////////////////////////
+// unordered_map implementation
+///////////////////////////////////////////////
+
+template <> struct std::hash<OneBodyKey> {
+  size_t operator()(const OneBodyKey &k) const {
+    size_t seed = 0;
+
+    // Robust hash combining
+    auto hash_combine = [](size_t &seed, auto val) {
+      std::hash<std::decay_t<decltype(val)>> hasher;
+      seed ^= hasher(val) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    };
+
+    hash_combine(seed, k.s);
+    hash_combine(seed, k.ss);
+
+    return seed;
+  }
+};
