@@ -62,29 +62,71 @@ void RungeKutta::set_one_body_flow_eq(Hamiltonian H, Generator eta) {
   int num_states = H.get_num_states();
 
   std::vector<OneBody> f = H.get_one_body();
-  std::vector<TwoBody> Gamma = H.get_two_body();
+  std::vector<TwoBody> gamma = H.get_two_body();
 
   std::vector<OneBody> eta1 = eta.get_one_body();
   std::vector<TwoBody> eta2 = eta.get_two_body();
 
   const int f_size = f.size();
   const int eta1_size = eta1.size();
+  const int gamma_size = gamma.size();
   const int eta2_size = eta2.size();
 
 #pragma omp parallel
   {
+    // first sum
     std::vector<OneBody> local_dfds;
-    #pragma omp for collapse(2)
+#pragma omp for collapse(2)
     for (int i = 0; i < f_size; ++i) {
       for (int j = 0; j < eta1_size; ++j) {
         // first sum
         if (eta1[j].ss == f[i].s) {
-          local_dfds = local_dfds + OneBody(eta1[j].s, f[i].ss, eta1[j].me * f[i].me);
-          local_dfds = local_dfds + OneBody(f[i].ss, eta1[j].s, eta1[j].me * f[i].me);
+          local_dfds =
+              local_dfds + OneBody(eta1[j].s, f[i].ss, eta1[j].me * f[i].me);
+          local_dfds =
+              local_dfds + OneBody(f[i].ss, eta1[j].s, eta1[j].me * f[i].me);
         }
       }
     }
-    #pragma omp critical
+
+// second sum
+#pragma omp for
+    for (int i = 0; i < gamma_size; ++i) {
+      if (gamma[i].s1 > 3 && gamma[i].ss1 < 4) {
+        for (int j = 0; j < eta1_size; ++j) {
+          if (eta1[j].s == gamma[i].ss1 && eta1[j].ss == gamma[i].s1) {
+            local_dfds = local_dfds + OneBody(gamma[i].s2, gamma[i].ss2,
+                                              eta1[j].me * gamma[i].me);
+          }
+        }
+      } else if (gamma[i].s1 < 4 && gamma[i].ss1 > 3) {
+        for (int j = 0; j < eta1_size; ++j) {
+          if (eta1[j].s == gamma[i].ss1 && eta1[j].ss == gamma[i].s1) {
+            local_dfds = local_dfds + OneBody(gamma[i].s2, gamma[i].ss2,
+                                              -eta1[j].me * gamma[i].me);
+          }
+        }
+      }
+    }
+    #pragma omp for
+    for (int i = 0; i < eta2_size; ++i) {
+      if (eta2[i].s1 > 3 && eta2[i].ss1 < 4) {
+        for (int j = 0; j < f_size; ++j) {
+          if (f[j].s == eta2[i].ss1 && f[j].ss == eta2[i].s1) {
+            local_dfds = local_dfds + OneBody(eta2[i].s2, eta2[i].ss2,
+                                              f[j].me * eta2[i].me);
+          }
+        }
+      } else if (eta2[i].s1 < 4 && eta2[i].ss1 > 3) {
+        for (int j = 0; j < f_size; ++j) {
+          if (f[j].s == eta2[i].ss1 && f[j].ss == eta2[i].s1) {
+            local_dfds = local_dfds + OneBody(eta2[i].s2, eta2[i].ss2,
+                                              -f[j].me * eta2[i].me);
+          }
+        }
+      }
+    }
+#pragma omp critical
     dfds = dfds + local_dfds;
   }
 }
