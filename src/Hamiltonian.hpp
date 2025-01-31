@@ -13,16 +13,16 @@ private:
 
   double E;
   std::vector<OneBody> f;
-  std::vector<TwoBody> Gamma;
+  std::vector<TwoBody> gamma;
 
 public:
   Hamiltonian(std::string filepath);
 
   const std::vector<TwoBody> &get_two_body() const {
-    return Gamma;
+    return gamma;
   }
   const void set_two_body(std::vector<TwoBody> new_Gamma) {
-    Gamma = new_Gamma;
+    gamma = new_Gamma;
   }
   const std::vector<OneBody> &get_one_body() const {
     return f;

@@ -24,18 +24,18 @@ Hamiltonian::Hamiltonian(std::string filename) {
   while (std::getline(file, line)) {
     std::istringstream iss(line);
     if (i > 145) {
-      TwoBody gamma;
-      iss >> gamma.s1 >> gamma.s2 >> gamma.ss1 >> gamma.ss2 >> gamma.me;
-      Gamma.push_back(gamma);
+      TwoBody gam;
+      iss >> gam.s1 >> gam.s2 >> gam.ss1 >> gam.ss2 >> gam.me;
+      gamma.push_back(gam);
     }
     i++;
   }
   file.close();
 
   // full gamma
-  const int gamma_init_size = Gamma.size();
+  const int gamma_init_size = gamma.size();
   std::vector<TwoBody> gamma_full;
-  for (const auto &g : Gamma) {
+  for (const auto &g : gamma) {
     if (g.s1 == g.ss1 && g.s2 == g.ss2) {
       // <ab|H|ab>
       gamma_full.push_back(TwoBody(g.s1, g.s2, g.ss1, g.ss2, g.me));
@@ -54,7 +54,6 @@ Hamiltonian::Hamiltonian(std::string filename) {
       gamma_full.push_back(TwoBody(g.s2, g.s1, g.ss2, g.ss1, g.me));
       // <ab|H|dc>
       gamma_full.push_back(TwoBody(g.s1, g.s2, g.ss2, g.ss1, -g.me));
-
       // <cd|H|ab>
       gamma_full.push_back(TwoBody(g.ss1, g.ss2, g.s1, g.s2, g.me));
       // <dc|H|ab>
@@ -65,29 +64,27 @@ Hamiltonian::Hamiltonian(std::string filename) {
       gamma_full.push_back(TwoBody(g.ss1, g.ss2, g.s2, g.s1, -g.me));
     }
   }
+  gamma = gamma_full;
 
-  Gamma = gamma_full;
-
-  double E0 = 0.0;
   std::vector<OneBody> f_new;
-  const int gamma_size = Gamma.size();
+  const int gamma_size = gamma.size();
 
 #pragma omp parallel
   {
-#pragma omp for reduction(+ : E0)
+#pragma omp for reduction(+ : E)
     for (int i = 0; i < gamma_size; ++i) {
-      if (Gamma[i].s1 < 4 && Gamma[i].s2 < 4 && Gamma[i].s1 == Gamma[i].ss1 &&
-          Gamma[i].s2 == Gamma[i].ss2) {
-        E0 += Gamma[i].me;
+      if (gamma[i].s1 < 4 && gamma[i].s2 < 4 && gamma[i].s1 == gamma[i].ss1 &&
+          gamma[i].s2 == gamma[i].ss2) {
+        E += gamma[i].me;
       }
     }
 
     // calculate and set one-body
 #pragma omp for
     for (int i = 0; i < gamma_size; ++i) {
-      if (Gamma[i].s2 < 4 && Gamma[i].ss2 < 4) {
+      if (gamma[i].s2 < 4 && gamma[i].ss2 < 4) {
 #pragma omp critical
-        f = f + OneBody(Gamma[i].s1, Gamma[i].ss1, Gamma[i].me);
+        f = f + OneBody(gamma[i].s1, gamma[i].ss1, gamma[i].me);
       }
     }
     // remove 0
@@ -99,7 +96,6 @@ Hamiltonian::Hamiltonian(std::string filename) {
       }
     }
   }
-  E = E0;
   f = f_new;
 }
 
@@ -117,7 +113,7 @@ const void Hamiltonian::print_one_body() {
 
 const void Hamiltonian::print_two_body() {
   std::cout << "Gamma:" << std::endl;
-  for (const TwoBody &gg : Gamma) {
+  for (const TwoBody &gg : gamma) {
     std::cout << gg.s1 << "\t" << gg.s2 << "\t" << gg.ss1 << "\t" << gg.ss2
               << "\t" << gg.me << std::endl;
   }
