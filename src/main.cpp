@@ -38,9 +38,9 @@ int main() {
   RungeKutta rk = RungeKutta(H, eta);
   auto stop_rk = std::chrono::high_resolution_clock::now();
   print_duration("flow eq. construnction: ", start_rk, stop_rk);
-  
 
-  // rk.print_zero_body();
+
+  rk.print_zero_body();
   // rk.print_one_body();
   
 
