@@ -1,5 +1,8 @@
 #include "Generator.hpp"
+#include "OneBody.hpp"
+#include "TwoBody.hpp"
 #include <cmath>
+#include <cstdio>
 #include <iostream>
 #include <vector>
 
@@ -11,7 +14,9 @@ Generator::Generator(Hamiltonian H) {
 
 #pragma omp parallel
   {
-// one-body part
+    // one-body part
+    std::vector<OneBody> local_eta_1body;
+
 #pragma omp for nowait
     for (int i = 0; i < f_size; ++i) {
       // f_ph
@@ -29,16 +34,16 @@ Generator::Generator(Hamiltonian H) {
         if (delta != 0) {
           double me = f[i].me / delta;
           if (std::abs(me) > 1e-9) {
-#pragma omp critical
-            eta_1body.push_back(OneBody(f[i].s, f[i].ss, f[i].me / delta));
-            // eta_1body.push_back(OneBody(f[i].ss, f[i].s, f[i].me / delta));
+            local_eta_1body.push_back(
+                OneBody(f[i].s, f[i].ss, f[i].me / delta));
+            // eta_1body.push_back(OneBody(f[i].ss, f[i].s, f[i].me /
+            // delta));
           }
         } else {
           std::cout << "delta_onebody = 0" << std::endl;
         }
         // - H.c. (f_hp)
-      } 
-      else if (f[i].s < 4 && f[i].ss > 3) {
+      } else if (f[i].s < 4 && f[i].ss > 3) {
         double delta = 0;
         for (int j = 0; j < f_size; ++j) {
           // f_hh
@@ -52,16 +57,21 @@ Generator::Generator(Hamiltonian H) {
         if (delta != 0) {
           double me = f[i].me / delta;
           if (std::abs(me) > 1e-9) {
-#pragma omp critical
-            eta_1body.push_back(OneBody(f[i].s, f[i].ss, f[i].me / delta));
+            local_eta_1body.push_back(
+                OneBody(f[i].s, f[i].ss, f[i].me / delta));
           }
         } else {
           std::cout << "delta_onebody = 0" << std::endl;
         }
       }
     }
+#pragma omp critical
+    eta_1body.insert(eta_1body.end(), local_eta_1body.begin(),
+                     local_eta_1body.end());
 
-// two-body part
+    // two-body part
+    std::vector<TwoBody> local_eta_2body;
+
 #pragma omp for
     for (int i = 0; i < gamma_size; ++i) {
       // Gamma_pp'hh'
@@ -86,13 +96,14 @@ Generator::Generator(Hamiltonian H) {
         if (delta != 0) {
           double me = Gamma[i].me / delta;
           if (std::abs(me) > 1e-9) {
-#pragma omp critical
-            eta_2body.push_back(TwoBody(Gamma[i].s1, Gamma[i].s2,
-                                        Gamma[i].ss1, Gamma[i].ss2, me));
-            // eta_2body.push_back(TwoBody(Gamma[i].ss2, Gamma[i].ss1,
+            local_eta_2body.push_back(TwoBody(Gamma[i].s1, Gamma[i].s2,
+                                              Gamma[i].ss1, Gamma[i].ss2, me));
+            // local_eta_2body.push_back(TwoBody(Gamma[i].ss2,
+            // Gamma[i].ss1,
             //                             Gamma[i].s2, Gamma[i].s1, me));
           }
         } else {
+#pragma omp critical
           std::cout << "delta_onebody = 0" << std::endl;
         }
       }
@@ -118,14 +129,16 @@ Generator::Generator(Hamiltonian H) {
         if (delta != 0) {
           double me = Gamma[i].me / delta;
           if (std::abs(me) > 1e-9) {
-#pragma omp critical
-            eta_2body.push_back(TwoBody(Gamma[i].s1, Gamma[i].s2,
-                                        Gamma[i].ss1, Gamma[i].ss2, me));
+            local_eta_2body.push_back(TwoBody(Gamma[i].s1, Gamma[i].s2,
+                                              Gamma[i].ss1, Gamma[i].ss2, me));
           }
         } else {
           std::cout << "delta_onebody = 0" << std::endl;
         }
       }
     }
+#pragma omp critical
+    eta_2body.insert(eta_2body.end(), local_eta_2body.begin(),
+                     local_eta_2body.end());
   }
 }
