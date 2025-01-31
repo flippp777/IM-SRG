@@ -31,6 +31,10 @@ public:
   const std::vector<TwoBody> &get_two_body_flow_eq() const {
     return dGammads;
   }
+
+  const void print_zero_body();
+  const void print_one_body();
+  const void print_two_body();
 };
 
 #endif // !RUNGEKUTTA

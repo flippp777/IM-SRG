@@ -19,37 +19,38 @@ void RungeKutta::set_zero_body_flow_eq(Hamiltonian H, Generator eta) {
   // E flow equation
   dEds = 0;
 
-  int eta_1body_size = eta_1body.size();
-
-  int eta_2body_size = eta_2body.size();
+  const int f_size = f.size();
+  const int eta_1body_size = eta_1body.size();
+  const int gamma_size = Gamma.size();
+  const int eta_2body_size = eta_2body.size();
 
 #pragma omp parallel
   {
 #pragma omp for reduction(+ : dEds)
-    for (int i = 0; i < eta_1body_size; ++i) {
-      if (eta_1body[i].s < 4 && eta_1body[i].ss > 3) {
-        for (const OneBody &ff : f) {
-          if (ff.s == eta_1body[i].ss && ff.ss == eta_1body[i].s) {
-            dEds += eta_1body[i].me * ff.me;
+    for (int i = 0; i < f_size; ++i) {
+      if (f[i].s > 3 && f[i].ss < 4) {
+        for (const OneBody &eta : eta_1body) {
+          if (eta.s == f[i].ss && eta.ss == f[i].s) {
+            dEds += f[i].me * eta.me;
           }
         }
-      } else if (eta_1body[i].s > 3 && eta_1body[i].s < 4) {
-        for (const OneBody &ff : f) {
-          if (ff.s == eta_1body[i].ss && ff.ss == eta_1body[i].s) {
-            dEds += -eta_1body[i].me * ff.me;
+      } else if (f[i].s < 4 && f[i].s > 3) {
+        for (const OneBody &eta : f) {
+          if (eta.s == f[i].ss && eta.ss == f[i].s) {
+            dEds += -f[i].me * eta.me;
           }
         }
       }
     }
 #pragma omp for reduction(+ : dEds)
-    for (int i = 0; i < eta_2body_size; ++i) {
-      if (eta_2body[i].s1 < 4 && eta_2body[i].s2 < 4 && eta_2body[i].ss1 > 3 &&
-          eta_2body[i].ss2 > 3) {
-        for (const TwoBody &g : Gamma) {
-          if (g.s1 == eta_2body[i].ss1 && g.s2 == eta_2body[i].ss2 &&
-              g.ss1 == eta_2body[i].s1 && g.ss2 == eta_2body[i].s2) {
+    for (int i = 0; i < gamma_size; ++i) {
+      if (Gamma[i].s1 > 3 && Gamma[i].s2 > 3 && Gamma[i].ss1 < 4 &&
+          Gamma[i].ss2 < 4) {
+        for (const TwoBody &eta : eta_2body) {
+          if (eta.s1 == Gamma[i].ss1 && eta.s2 == Gamma[i].ss2 &&
+              eta.ss1 == Gamma[i].s1 && eta.ss2 == Gamma[i].s2) {
 
-            dEds += 1. / 2. * eta_2body[i].me * g.me;
+            dEds += 0.5 * Gamma[i].me * eta.me;
           }
         }
       }
@@ -66,31 +67,45 @@ void RungeKutta::set_one_body_flow_eq(Hamiltonian H, Generator eta) {
   std::vector<OneBody> eta1 = eta.get_one_body();
   std::vector<TwoBody> eta2 = eta.get_two_body();
 
-  int eta1_size = eta1.size();
-  int eta2_size = eta2.size();
+  const int f_size = f.size();
+  const int eta1_size = eta1.size();
+  const int eta2_size = eta2.size();
 
-  for (int i = 0; i < eta1_size; ++i) {
-    for (const OneBody &ff : f) {
-      // first sum
-      if (eta1[i].ss == ff.s) {
-        dfds = dfds + OneBody(eta1[i].s, ff.ss, eta1[i].me * ff.me);
-      }
-      if (eta1[i].ss == ff.ss) {
-        dfds = dfds + OneBody(eta1[i].s, ff.s, eta1[i].me * ff.me);
-      }
-      if (eta1[i].s == ff.s) {
-        dfds = dfds + OneBody(eta1[i].ss, ff.ss, -eta1[i].me * ff.me);
-      }
-      if (eta1[i].s == ff.ss) {
-        dfds = dfds + OneBody(eta1[i].ss, ff.s, -eta1[i].me * ff.me);
+#pragma omp parallel
+  {
+    std::vector<OneBody> local_dfds;
+    #pragma omp for collapse(2)
+    for (int i = 0; i < f_size; ++i) {
+      for (int j = 0; j < eta1_size; ++j) {
+        // first sum
+        if (eta1[j].ss == f[i].s) {
+          local_dfds = local_dfds + OneBody(eta1[j].s, f[i].ss, eta1[j].me * f[i].me);
+          local_dfds = local_dfds + OneBody(f[i].ss, eta1[j].s, eta1[j].me * f[i].me);
+        }
       }
     }
-
-    // for (int i = 0; i < eta1_size; ++i) {
-    //   if (eta1[i].s < 4 && eta1[i].ss > 3) {
-    //     for (const Twobody &gamma : gamma) {
-    //     }
-    //   }
-    // }
+    #pragma omp critical
+    dfds = dfds + local_dfds;
   }
+}
+
+const void RungeKutta::print_zero_body() {
+  std::cout << "dEds: " << dEds << std::endl;
+}
+
+const void RungeKutta::print_one_body() {
+  std::cout << "dfds: " << std::endl;
+  for (const OneBody &df : dfds) {
+    std::cout << df.s << "\t" << df.ss << "\t" << df.me << std::endl;
+  }
+  std::cout << std::endl;
+}
+
+const void RungeKutta::print_two_body() {
+  std::cout << "Gamma:" << std::endl;
+  for (const TwoBody &dg : dGammads) {
+    std::cout << dg.s1 << "\t" << dg.s2 << "\t" << dg.ss1 << "\t" << dg.ss2
+              << "\t" << dg.me << std::endl;
+  }
+  std::cout << std::endl;
 }
