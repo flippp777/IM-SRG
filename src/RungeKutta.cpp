@@ -6,8 +6,8 @@
 
 RungeKutta::RungeKutta(Hamiltonian H, Generator eta) {
   set_zero_body_flow_eq(H, eta);
-  set_one_body_flow_eq(H, eta);
-  set_two_body_flow_eq(H, eta);
+  // set_one_body_flow_eq(H, eta);
+  // set_two_body_flow_eq(H, eta);
 }
 
 void RungeKutta::set_zero_body_flow_eq(Hamiltonian H, Generator eta) {
