@@ -8,6 +8,7 @@
 #include <chrono>
 #include <iostream>
 #include <fstream>
+#include <ostream>
 #include <vector>
 
 int main() {
@@ -38,16 +39,9 @@ int main() {
   auto stop_rk = std::chrono::high_resolution_clock::now();
   print_duration("flow eq. construnction: ", start_rk, stop_rk);
   
-  double dEds = rk.get_zero_body_flow_eq();
-  std::cout << "dEds = " << dEds << std::endl;
-  std::cout << std::endl;
 
-  // std::vector<OneBody> dfds = rk.get_one_body_flow_eq();
-  // sort(dfds);
-  // std::cout << "dfds:" << std::endl;
-  // for (const auto &element : dfds) {
-  //   std::cout << element.s << "\t" << element.ss << "\t" << element.me << std::endl;
-  // }
+  // rk.print_zero_body();
+  // rk.print_one_body();
   
 
   return 0;

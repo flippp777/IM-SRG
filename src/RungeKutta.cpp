@@ -76,6 +76,7 @@ void RungeKutta::set_one_body_flow_eq(Hamiltonian H, Generator eta) {
   {
     // first sum
     std::vector<OneBody> local_dfds;
+    local_dfds.reserve(eta1_size * f_size);
 #pragma omp for collapse(2)
     for (int i = 0; i < f_size; ++i) {
       for (int j = 0; j < eta1_size; ++j) {
@@ -108,13 +109,13 @@ void RungeKutta::set_one_body_flow_eq(Hamiltonian H, Generator eta) {
         }
       }
     }
-    #pragma omp for
+#pragma omp for
     for (int i = 0; i < eta2_size; ++i) {
       if (eta2[i].s1 > 3 && eta2[i].ss1 < 4) {
         for (int j = 0; j < f_size; ++j) {
           if (f[j].s == eta2[i].ss1 && f[j].ss == eta2[i].s1) {
-            local_dfds = local_dfds + OneBody(eta2[i].s2, eta2[i].ss2,
-                                              f[j].me * eta2[i].me);
+            local_dfds = local_dfds +
+                         OneBody(eta2[i].s2, eta2[i].ss2, f[j].me * eta2[i].me);
           }
         }
       } else if (eta2[i].s1 < 4 && eta2[i].ss1 > 3) {
@@ -126,8 +127,36 @@ void RungeKutta::set_one_body_flow_eq(Hamiltonian H, Generator eta) {
         }
       }
     }
+
+// third sum
+#pragma omp for
+    for (int i = 0; i < gamma_size; ++i) {
+      if (gamma[i].s1 < 4 && gamma[i].s2 < 4 && gamma[i].ss1 > 3) {
+        for (int j = 0; j < eta2_size; ++j) {
+          if (eta2[j].s1 == gamma[i].ss1 && eta2[j].ss1 == gamma[i].s1 &&
+              eta2[j].ss2 == gamma[i].s2) {
+            local_dfds = local_dfds + OneBody(eta2[j].s2, gamma[i].ss2,
+                                              0.5 * eta2[j].me * gamma[i].me);
+            local_dfds = local_dfds + OneBody(gamma[i].ss2, eta2[j].s2,
+                                              0.5 * eta2[j].me * gamma[i].me);
+          }
+        }
+      }
+      if (gamma[i].s1 > 3 && gamma[i].s2 > 3 && gamma[i].ss1 < 4) {
+        for (int j = 0; j < eta2_size; ++j) {
+          if (eta2[j].s1 == gamma[i].ss1 && eta2[j].ss1 == gamma[i].s1 &&
+              eta2[j].ss2 == gamma[i].s2) {
+            local_dfds = local_dfds + OneBody(eta2[j].s2, gamma[i].ss2,
+                                              -0.5 * eta2[j].me * gamma[i].me);
+            local_dfds = local_dfds + OneBody(gamma[i].ss2, eta2[j].s2,
+                                              -0.5 * eta2[j].me * gamma[i].me);
+          }
+        }
+      }
+    }
+
 #pragma omp critical
-    dfds = dfds + local_dfds;
+    dfds.insert(dfds.end(), local_dfds.begin(), local_dfds.end());
   }
 }
 
