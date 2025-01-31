@@ -2,6 +2,7 @@
 #include "Hamiltonian.hpp"
 #include "OneBody.hpp"
 #include "RungeKutta.hpp"
+#include "time.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -18,24 +19,8 @@ int main() {
 
   Hamiltonian H = Hamiltonian(filepath);
 
-  auto stop_constructors = std::chrono::high_resolution_clock::now();
-
-  auto duration_constructors =
-  std::chrono::duration_cast<std::chrono::milliseconds>(
-      stop_constructors - start);
-  std::cout << "Constructor H time: " <<
-  duration_constructors.count()
-            << "ms" << std::endl;
-  std::cout << std::endl;
-
-  std::vector<TwoBody> gamma = H.get_two_body();
-
-  // std::ofstream gamma_file;
-  // gamma_file.open("full_gamma.txt");
-  // for (const auto &gg : gamma) {
-  //   gamma_file << gg.s1 << "\t" << gg.s2 << "\t" << gg.ss1 << "\t" << gg.ss2 << "\t" << gg.me << "\n";
-  // }
-  // gamma_file.close();
+  auto stop = std::chrono::high_resolution_clock::now();
+  print_duration("H construnction: ", start,stop);
 
   // H.print_zero_body();
   // H.print_one_body();
@@ -43,7 +28,7 @@ int main() {
 
 
   // Generator eta = Generator(H);
-  //
+
   // std::vector<TwoBody> eta_2 = eta.get_two_body();
   // std::cout << "eta_2body:" << std::endl;
   // for (const TwoBody &eta : eta_2) {
