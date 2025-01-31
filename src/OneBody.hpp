@@ -13,6 +13,8 @@ public:
 
 std::vector<OneBody> operator+(const std::vector<OneBody> &v,
                                const OneBody &a);
+std::vector<OneBody> operator+(const std::vector<OneBody> &v1,
+                               const std::vector<OneBody> &v2);
 
 void sort(std::vector<OneBody> &v);
 
