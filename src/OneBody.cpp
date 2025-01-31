@@ -1,5 +1,6 @@
 #include "OneBody.hpp"
 #include <algorithm>
+#include <unordered_map>
 #include <vector>
 
 OneBody::OneBody() : s(), ss(), me() {}
@@ -43,19 +44,23 @@ void sort(std::vector<OneBody> &v) {
 // unordered_map implementation
 ///////////////////////////////////////////////
 
-template <> struct std::hash<OneBodyKey> {
-  size_t operator()(const OneBodyKey &k) const {
-    size_t seed = 0;
+std::unordered_map<OneBodyKey, double> vec_to_map(const std::vector<OneBody>& vec) {
+  std::unordered_map<OneBodyKey, double> map;
+  map.reserve(vec.size());
 
-    // Robust hash combining
-    auto hash_combine = [](size_t &seed, auto val) {
-      std::hash<std::decay_t<decltype(val)>> hasher;
-      seed ^= hasher(val) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-    };
-
-    hash_combine(seed, k.s);
-    hash_combine(seed, k.ss);
-
-    return seed;
+  for (const auto& el : vec) {
+    map[OneBodyKey(el.s, el.ss)] += el.me;
   }
-};
+  
+  return map;
+}
+
+std::vector<OneBody> map_to_vex(const std::unordered_map<OneBodyKey, double>& map) {
+  std::vector<OneBody> vec;
+
+  for (const auto& [key, me] : map) {
+    vec.push_back(OneBody(key.s, key.ss, me));
+  }
+
+  return vec;
+}

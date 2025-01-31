@@ -2,6 +2,7 @@
 #include "OneBody.hpp"
 #include "TwoBody.hpp"
 #include <iostream>
+#include <unordered_map>
 #include <vector>
 
 RungeKutta::RungeKutta(Hamiltonian H, Generator eta) {
@@ -12,25 +13,27 @@ RungeKutta::RungeKutta(Hamiltonian H, Generator eta) {
 
 void RungeKutta::set_zero_body_flow_eq(Hamiltonian H, Generator eta) {
   std::vector<OneBody> f = H.get_one_body();
-  std::vector<TwoBody> Gamma = H.get_two_body();
+  std::vector<TwoBody> gamma = H.get_two_body();
+  // std::unordered_map<TwoBodyKey, double> gamma_map = vec_to_map(gamma);
 
-  std::vector<OneBody> eta_1body = eta.get_one_body();
-  std::vector<TwoBody> eta_2body = eta.get_two_body();
+  std::vector<OneBody> eta1 = eta.get_one_body();
+  std::vector<TwoBody> eta2 = eta.get_two_body();
+  // std::unordered_map<TwoBodyKey, double> eta2_map = vec_to_map(eta2);
 
   // E flow equation
   dEds = 0;
 
   const int f_size = f.size();
-  const int eta_1body_size = eta_1body.size();
-  const int gamma_size = Gamma.size();
-  const int eta_2body_size = eta_2body.size();
+  const int eta1_size = eta1.size();
+  const int gamma_size = gamma.size();
+  const int eta2_size = eta2.size();
 
 #pragma omp parallel
   {
 #pragma omp for reduction(+ : dEds)
     for (int i = 0; i < f_size; ++i) {
       if (f[i].s > 3 && f[i].ss < 4) {
-        for (const OneBody &eta : eta_1body) {
+        for (const OneBody &eta : eta1) {
           if (eta.s == f[i].ss && eta.ss == f[i].s) {
             dEds += f[i].me * eta.me;
           }
@@ -43,19 +46,49 @@ void RungeKutta::set_zero_body_flow_eq(Hamiltonian H, Generator eta) {
         }
       }
     }
-#pragma omp for reduction(+ : dEds)
-    for (int i = 0; i < gamma_size; ++i) {
-      if (Gamma[i].s1 > 3 && Gamma[i].s2 > 3 && Gamma[i].ss1 < 4 &&
-          Gamma[i].ss2 < 4) {
-        for (const TwoBody &eta : eta_2body) {
-          if (eta.s1 == Gamma[i].ss1 && eta.s2 == Gamma[i].ss2 &&
-              eta.ss1 == Gamma[i].s1 && eta.ss2 == Gamma[i].s2) {
+// #pragma omp for reduction(+ : dEds)
+//     for (int i = 0; i < gamma_size; ++i) {
+//       if (gamma[i].s1 > 3 && gamma[i].s2 > 3 && gamma[i].ss1 < 4 &&
+//           gamma[i].ss2 < 4) {
+//
+//         // eta_abcd Gamma_cdab
+//         const TwoBodyKey eta2_key{gamma[i].ss1, gamma[i].ss2, gamma[i].s1,
+//                                   gamma[i].s2};
+//
+//         // Direct map lookup instead of linear search
+//         if (eta2_map.count(eta2_key)) {
+//           dEds += 0.5 * gamma[i].me * eta2_map.at(eta2_key);
+//         }
+//       }
+//     }
+// #pragma omp for reduction(+ : dEds)
+//     for (int i = 0; i < eta2_size; ++i) {
+//       if (eta2[i].s1 > 3 && eta2[i].s2 > 3 && eta2[i].ss1 < 4 &&
+//           eta2[i].ss2 < 4) {
+//
+//         // eta_abcd Gamma_cdab
+//         const TwoBodyKey gamma_key{eta2[i].ss1, eta2[i].ss2, eta2[i].s1,
+//                                   eta2[i].s2};
+//
+//         // Direct map lookup instead of linear search
+//         if (gamma_map.count(gamma_key)) {
+//           dEds += 0.5 * eta2[i].me * gamma_map.at(gamma_key);
+//         }
+//       }
+//     }
+    #pragma omp for reduction(+ : dEds)
+        for (int i = 0; i < gamma_size; ++i) {
+          if (gamma[i].s1 > 3 && gamma[i].s2 > 3 && gamma[i].ss1 < 4 &&
+              gamma[i].ss2 < 4) {
+            for (const TwoBody &eta : eta2) {
+              if (eta.s1 == gamma[i].ss1 && eta.s2 == gamma[i].ss2 &&
+                  eta.ss1 == gamma[i].s1 && eta.ss2 == gamma[i].s2) {
 
-            dEds += 0.5 * Gamma[i].me * eta.me;
+                dEds += 0.5 * gamma[i].me * eta.me;
+              }
+            }
           }
         }
-      }
-    }
   }
 }
 
@@ -72,6 +105,8 @@ void RungeKutta::set_one_body_flow_eq(Hamiltonian H, Generator eta) {
   const int eta1_size = eta1.size();
   const int gamma_size = gamma.size();
   const int eta2_size = eta2.size();
+
+  std::unordered_map<OneBodyKey, double> dfds_map;
 
 #pragma omp parallel
   {
@@ -165,44 +200,50 @@ void RungeKutta::set_two_body_flow_eq(Hamiltonian H, Generator eta) {
 
   std::vector<OneBody> f = H.get_one_body();
   std::vector<TwoBody> gamma = H.get_two_body();
+  std::unordered_map<TwoBodyKey, double> gamma_map;
 
   std::vector<OneBody> eta1 = eta.get_one_body();
   std::vector<TwoBody> eta2 = eta.get_two_body();
+  std::unordered_map<TwoBodyKey, double> eta2_map;
 
   const int f_size = f.size();
   const int eta1_size = eta1.size();
   const int gamma_size = gamma.size();
   const int eta2_size = eta2.size();
 
-#pragma omp parallel
-  {
-    std::vector<TwoBody> local_dgammads;
-    local_dgammads.reserve(gamma_size);
-    // sum with Gamma_abcd terms
-#pragma omp for
-    for (int i = 0; i < gamma_size; ++i) {
-      // terms in first sum with eta * Gamma
-      for (int j = 0; j < eta1_size; ++j) {
-        if (eta1[j].ss == gamma[i].s1) {
-          local_dgammads =
-              local_dgammads + TwoBody(eta1[j].s, gamma[i].s2, gamma[i].ss1,
-                                       gamma[i].ss2, eta1[j].me * gamma[i].me);
-          local_dgammads =
-              local_dgammads + TwoBody(gamma[i].s2, eta1[j].s, gamma[i].ss1,
-                                       gamma[i].ss2, -eta1[j].me * gamma[i].me);
-        } else if (eta1[j].s == gamma[i].ss1) {
-          local_dgammads =
-              local_dgammads + TwoBody(gamma[i].s1, gamma[i].s2, eta1[j].ss,
-                                       gamma[i].ss2, -eta1[j].me * gamma[i].me);
-          local_dgammads =
-              local_dgammads + TwoBody(gamma[i].s1, gamma[i].s2, gamma[i].ss2,
-                                       eta1[j].ss, eta1[j].me * gamma[i].me);
-        }
-      }
-    }
-    #pragma omp critical
-    dGammads.insert(dGammads.end(), local_dgammads.begin(), local_dgammads.end());
-  }
+  std::unordered_map<TwoBodyKey, double> global_dgammads_map;
+
+
+// #pragma omp parallel
+//   {
+//   std::unordered_map<TwoBodyKey, double> local_dgammads_map;
+//     local_dgammads_map.reserve(gamma_size);
+//     // sum with Gamma_abcd terms
+// #pragma omp for
+//     for (int i = 0; i < gamma_size; ++i) {
+//       // terms in first sum with eta 
+//       for (int j = 0; j < eta1_size; ++j) {
+//         if (eta1[j].ss == gamma[i].s1) {
+//           local_dgammads =
+//               local_dgammads + TwoBody(eta1[j].s, gamma[i].s2, gamma[i].ss1,
+//                                        gamma[i].ss2, eta1[j].me * gamma[i].me);
+//           local_dgammads =
+//               local_dgammads + TwoBody(gamma[i].s2, eta1[j].s, gamma[i].ss1,
+//                                        gamma[i].ss2, -eta1[j].me * gamma[i].me);
+//         } else if (eta1[j].s == gamma[i].ss1) {
+//           local_dgammads =
+//               local_dgammads + TwoBody(gamma[i].s1, gamma[i].s2, eta1[j].ss,
+//                                        gamma[i].ss2, -eta1[j].me * gamma[i].me);
+//           local_dgammads =
+//               local_dgammads + TwoBody(gamma[i].s1, gamma[i].s2, gamma[i].ss2,
+//                                        eta1[j].ss, eta1[j].me * gamma[i].me);
+//         }
+//       }
+//     }
+// #pragma omp critical
+//     dGammads.insert(dGammads.end(), local_dgammads.begin(),
+//                     local_dgammads.end());
+//   }
 }
 
 const void RungeKutta::print_zero_body() {

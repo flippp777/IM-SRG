@@ -2,6 +2,7 @@
 #define TWOBODY
 
 #include <functional>
+#include <unordered_map>
 #include <vector>
 
 class TwoBody {
@@ -37,6 +38,27 @@ struct TwoBodyKey {
   }
 };
 
-template <> struct std::hash<TwoBodyKey>;
+template <> struct std::hash<TwoBodyKey> {
+  size_t operator()(const TwoBodyKey &k) const {
+    size_t seed = 0;
+
+    // Robust hash combining
+    auto hash_combine = [](size_t &seed, auto val) {
+      std::hash<std::decay_t<decltype(val)>> hasher;
+      seed ^= hasher(val) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    };
+
+    hash_combine(seed, k.s1);
+    hash_combine(seed, k.s2);
+    hash_combine(seed, k.ss1);
+    hash_combine(seed, k.ss2);
+
+    return seed;
+  }
+};
+
+std::vector<TwoBody> map_to_vex(const std::unordered_map<TwoBodyKey, double>& map);
+
+std::unordered_map<TwoBodyKey, double> vec_to_map(const std::vector<TwoBody>& vec);
 
 #endif // !TWOBODY
