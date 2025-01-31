@@ -15,19 +15,22 @@ int main() {
                          "hint_He4_chi2bM3A_srg0800_eMax04_nMax02_lMax04_"
                          "hwHO020.me2m";
 
-  auto start = std::chrono::high_resolution_clock::now();
+  auto start_H = std::chrono::high_resolution_clock::now();
 
   Hamiltonian H = Hamiltonian(filepath);
 
-  auto stop = std::chrono::high_resolution_clock::now();
-  print_duration("H construnction: ", start,stop);
+  auto stop_H = std::chrono::high_resolution_clock::now();
+  print_duration("H construnction: ", start_H, stop_H);
 
   // H.print_zero_body();
   // H.print_one_body();
   // H.print_two_body();
 
 
-  // Generator eta = Generator(H);
+  auto start_eta = std::chrono::high_resolution_clock::now();
+  Generator eta = Generator(H);
+  auto stop_eta = std::chrono::high_resolution_clock::now();
+  print_duration("eta construnction: ", start_eta, stop_eta);
 
   // std::vector<TwoBody> eta_2 = eta.get_two_body();
   // std::cout << "eta_2body:" << std::endl;
