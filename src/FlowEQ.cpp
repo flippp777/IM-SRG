@@ -298,12 +298,10 @@ void FlowEQ::euler(const double s0, const double s, const double ds) {
         E += euler_step(E, dEds, ds);
         for (const auto &[key, me] : dfds_map) {
 #pragma omp task
-#pragma omp atomic
           f[key] += euler_step(f[key], me, ds);
         }
         for (const auto &[key, me] : dgds_map) {
 #pragma omp task
-#pragma omp atomic
           gamma[key] += euler_step(gamma[key], me, ds);
         }
       }
