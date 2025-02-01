@@ -113,22 +113,22 @@ void RungeKutta::set_one_body_flow_eq(Hamiltonian H, Generator eta) {
 #pragma omp parallel
   {
     // first sum
-    std::vector<OneBody> local_dfds;
-    // std::unordered_map<OneBodyKey, double> local_dfds;
+    // std::vector<OneBody> local_dfds;
+    std::unordered_map<OneBodyKey, double> local_dfds;
     local_dfds.reserve(eta1_size * f_size);
 #pragma omp for collapse(2)
     for (int i = 0; i < f_size; ++i) {
       for (int j = 0; j < eta1_size; ++j) {
         // first sum
         if (eta1[j].ss == f[i].s) {
-          local_dfds =
-              local_dfds + OneBody(eta1[j].s, f[i].ss, eta1[j].me *
-              f[i].me);
-          local_dfds =
-              local_dfds + OneBody(f[i].ss, eta1[j].s, eta1[j].me *
-              f[i].me);
-          // local_dfds[OneBodyKey(eta1[j].s, f[i].ss)] += eta1[j].me * f[i].me;
-          // local_dfds[{f[i].ss, eta1[j].s}] += eta1[j].me * f[i].me;
+          // local_dfds =
+          //     local_dfds + OneBody(eta1[j].s, f[i].ss, eta1[j].me *
+          //     f[i].me);
+          // local_dfds =
+          //     local_dfds + OneBody(f[i].ss, eta1[j].s, eta1[j].me *
+          //     f[i].me);
+          local_dfds[OneBodyKey(eta1[j].s, f[i].ss)] += eta1[j].me * f[i].me;
+          local_dfds[{f[i].ss, eta1[j].s}] += eta1[j].me * f[i].me;
         }
       }
     }
@@ -139,19 +139,19 @@ void RungeKutta::set_one_body_flow_eq(Hamiltonian H, Generator eta) {
       if (gamma[i].s1 > 3 && gamma[i].ss1 < 4) {
         for (int j = 0; j < eta1_size; ++j) {
           if (eta1[j].s == gamma[i].ss1 && eta1[j].ss == gamma[i].s1) {
-            local_dfds = local_dfds + OneBody(gamma[i].s2, gamma[i].ss2,
-                                             eta1[j].me * gamma[i].me);
-            // local_dfds[{gamma[i].s2, gamma[i].ss2}] += eta1[j].me * gamma[i].me;
+            // local_dfds = local_dfds + OneBody(gamma[i].s2, gamma[i].ss2,
+            //                                  eta1[j].me * gamma[i].me);
+            local_dfds[{gamma[i].s2, gamma[i].ss2}] += eta1[j].me * gamma[i].me;
           }
         }
       } else if (gamma[i].s1 < 4 && gamma[i].ss1 > 3) {
         for (int j = 0; j < eta1_size; ++j) {
           if (eta1[j].s == gamma[i].ss1 && eta1[j].ss == gamma[i].s1) {
-            local_dfds = local_dfds + OneBody(gamma[i].s2, gamma[i].ss2,
-                                              -eta1[j].me *
-                                              gamma[i].me);
-            // local_dfds[{gamma[i].s2, gamma[i].ss2}] +=
-            //     -eta1[j].me * gamma[i].me;
+            // local_dfds = local_dfds + OneBody(gamma[i].s2, gamma[i].ss2,
+            //                                   -eta1[j].me *
+            //                                   gamma[i].me);
+            local_dfds[{gamma[i].s2, gamma[i].ss2}] +=
+                -eta1[j].me * gamma[i].me;
           }
         }
       }
@@ -161,18 +161,18 @@ void RungeKutta::set_one_body_flow_eq(Hamiltonian H, Generator eta) {
       if (eta2[i].s1 > 3 && eta2[i].ss1 < 4) {
         for (int j = 0; j < f_size; ++j) {
           if (f[j].s == eta2[i].ss1 && f[j].ss == eta2[i].s1) {
-            local_dfds = local_dfds +
-                         OneBody(eta2[i].s2, eta2[i].ss2, f[j].me *
-                         eta2[i].me);
-            // local_dfds[{eta2[i].s2, eta2[i].ss2}] += f[j].me * eta2[i].me;
+            // local_dfds = local_dfds +
+            //              OneBody(eta2[i].s2, eta2[i].ss2, f[j].me *
+            //              eta2[i].me);
+            local_dfds[{eta2[i].s2, eta2[i].ss2}] += f[j].me * eta2[i].me;
           }
         }
       } else if (eta2[i].s1 < 4 && eta2[i].ss1 > 3) {
         for (int j = 0; j < f_size; ++j) {
           if (f[j].s == eta2[i].ss1 && f[j].ss == eta2[i].s1) {
-            local_dfds = local_dfds + OneBody(eta2[i].s2, eta2[i].ss2,
-                                              -f[j].me * eta2[i].me);
-            // local_dfds[{eta2[i].s2, eta2[i].ss2}] += -f[j].me * eta2[i].me;
+            // local_dfds = local_dfds + OneBody(eta2[i].s2, eta2[i].ss2,
+            //                                   -f[j].me * eta2[i].me);
+            local_dfds[{eta2[i].s2, eta2[i].ss2}] += -f[j].me * eta2[i].me;
           }
         }
       }
@@ -185,12 +185,12 @@ void RungeKutta::set_one_body_flow_eq(Hamiltonian H, Generator eta) {
         for (int j = 0; j < eta2_size; ++j) {
           if (eta2[j].s1 == gamma[i].ss1 && eta2[j].ss1 == gamma[i].s1 &&
               eta2[j].ss2 == gamma[i].s2) {
-            local_dfds = local_dfds + OneBody(eta2[j].s2, gamma[i].ss2,
-                                              0.5 * eta2[j].me * gamma[i].me);
-            local_dfds = local_dfds + OneBody(gamma[i].ss2, eta2[j].s2,
-                                              0.5 * eta2[j].me * gamma[i].me);
-            // local_dfds[{eta2[j].s2, gamma[i].ss2}] += 0.5 * eta2[j].me * gamma[i].me;
-            // local_dfds[{gamma[i].ss2, eta2[j].s2}] += 0.5 * eta2[j].me * gamma[i].me;
+            // local_dfds = local_dfds + OneBody(eta2[j].s2, gamma[i].ss2,
+            //                                   0.5 * eta2[j].me * gamma[i].me);
+            // local_dfds = local_dfds + OneBody(gamma[i].ss2, eta2[j].s2,
+            //                                   0.5 * eta2[j].me * gamma[i].me);
+            local_dfds[{eta2[j].s2, gamma[i].ss2}] += 0.5 * eta2[j].me * gamma[i].me;
+            local_dfds[{gamma[i].ss2, eta2[j].s2}] += 0.5 * eta2[j].me * gamma[i].me;
           }
         }
       }
@@ -198,21 +198,21 @@ void RungeKutta::set_one_body_flow_eq(Hamiltonian H, Generator eta) {
         for (int j = 0; j < eta2_size; ++j) {
           if (eta2[j].s1 == gamma[i].ss1 && eta2[j].ss1 == gamma[i].s1 &&
               eta2[j].ss2 == gamma[i].s2) {
-            local_dfds = local_dfds + OneBody(eta2[j].s2, gamma[i].ss2,
-                                              -0.5 * eta2[j].me * gamma[i].me);
-            local_dfds = local_dfds + OneBody(gamma[i].ss2, eta2[j].s2,
-                                              -0.5 * eta2[j].me * gamma[i].me);
-            // local_dfds[{eta2[j].s2, gamma[i].ss2}] += -0.5 * eta2[j].me * gamma[i].me;
-            // local_dfds[{gamma[i].ss2, eta2[j].s2}] += -0.5 * eta2[j].me * gamma[i].me;
+            // local_dfds = local_dfds + OneBody(eta2[j].s2, gamma[i].ss2,
+            //                                   -0.5 * eta2[j].me * gamma[i].me);
+            // local_dfds = local_dfds + OneBody(gamma[i].ss2, eta2[j].s2,
+            //                                   -0.5 * eta2[j].me * gamma[i].me);
+            local_dfds[{eta2[j].s2, gamma[i].ss2}] += -0.5 * eta2[j].me * gamma[i].me;
+            local_dfds[{gamma[i].ss2, eta2[j].s2}] += -0.5 * eta2[j].me * gamma[i].me;
           }
         }
       }
     }
 #pragma omp critical
-    dfds.push_back(local_dfds);
-    // for (const auto& [key, me] : local_dfds) {
-    //   dfds_map[key] += me;
-    // }
+    // dfds.insert(dfds.end(), local_dfds.begin(), local_dfds.end());
+    for (const auto& [key, me] : local_dfds) {
+      dfds_map[key] += me;
+    }
   }
   dfds = map_to_vec(dfds_map);
 }
