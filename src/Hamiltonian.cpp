@@ -10,6 +10,12 @@
 #include <sstream>
 #include <vector>
 
+Hamiltonian::Hamiltonian() : E(), f(), gamma() {}
+
+Hamiltonian::Hamiltonian(const double E, const std::vector<OneBody> f,
+                         const std::vector<TwoBody> gamma)
+    : E(E), f(f), gamma(gamma) {}
+
 Hamiltonian::Hamiltonian(std::string filename) {
   // Open file
   std::ifstream file(filename);
@@ -90,7 +96,7 @@ Hamiltonian::Hamiltonian(std::string filename) {
     // remove 0
 #pragma omp for
     for (int i = 0; i < f.size(); ++i) {
-      if (abs(f[i].me) > 10 - 9) {
+      if (std::abs(f[i].me) > 10 - 9) {
 #pragma omp critical
         f_new.push_back(f[i]);
       }

@@ -6,6 +6,8 @@
 #include <iostream>
 #include <vector>
 
+Generator::Generator() : eta_1body(), eta_2body() {}
+
 Generator::Generator(Hamiltonian H) {
   std::vector<OneBody> f = H.get_one_body();
   std::vector<TwoBody> Gamma = H.get_two_body();

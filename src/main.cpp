@@ -42,19 +42,19 @@ int main() {
   print_duration("eta construnction: ", start_eta, stop_eta);
 
 
-  auto start_rk = std::chrono::high_resolution_clock::now();
-  FlowEQ rk = FlowEQ(H, eta);
-  auto stop_rk = std::chrono::high_resolution_clock::now();
-  print_duration("flow eq. construnction: ", start_rk, stop_rk);
+  auto start_flow = std::chrono::high_resolution_clock::now();
+  FlowEQ flow = FlowEQ(H, eta);
+  auto stop_flow = std::chrono::high_resolution_clock::now();
+  print_duration("flow eq. construnction: ", start_flow, stop_flow);
 
 
   // rk.print_zero_body();
   // rk.print_one_body();
   
-  std::vector<OneBody> dfds = rk.get_one_body_flow_eq();
+  std::vector<OneBody> dfds = flow.get_one_body_flow_eq();
   std::cout << "dfds size: " << dfds.size() << std::endl;
 
-  std::vector<TwoBody> dgds = rk.get_two_body_flow_eq();
+  std::vector<TwoBody> dgds = flow.get_two_body_flow_eq();
   std::cout << "dgds size: " << dgds.size() << std::endl;
 
   

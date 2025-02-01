@@ -16,6 +16,8 @@ private:
   std::vector<TwoBody> gamma;
 
 public:
+  Hamiltonian();
+  Hamiltonian(const double E, const std::vector<OneBody> f, const std::vector<TwoBody> gamma);
   Hamiltonian(std::string filepath);
 
   const std::vector<TwoBody> &get_two_body() const {

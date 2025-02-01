@@ -9,6 +9,7 @@ private:
   std::vector<TwoBody> eta_2body;
 
 public:
+  Generator();
   Generator(Hamiltonian H);
   const std::vector<OneBody> &get_one_body() const { return eta_1body; }
   const void set_one_body(std::vector<OneBody> new_eta_1body) {
