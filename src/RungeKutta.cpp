@@ -113,7 +113,7 @@ void RungeKutta::set_one_body_flow_eq(Hamiltonian H, Generator eta) {
 #pragma omp parallel
   {
     // first sum
-    std::vecotr<OneBody> local_dfds
+    std::vector<OneBody> local_dfds;
     // std::unordered_map<OneBodyKey, double> local_dfds;
     local_dfds.reserve(eta1_size * f_size);
 #pragma omp for collapse(2)
@@ -209,9 +209,10 @@ void RungeKutta::set_one_body_flow_eq(Hamiltonian H, Generator eta) {
       }
     }
 #pragma omp critical
-    for (const auto& [key, me] : local_dfds) {
-      dfds_map[key] += me;
-    }
+    dfds.push_back(local_dfds);
+    // for (const auto& [key, me] : local_dfds) {
+    //   dfds_map[key] += me;
+    // }
   }
   dfds = map_to_vec(dfds_map);
 }
