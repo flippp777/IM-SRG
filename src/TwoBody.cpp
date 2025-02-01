@@ -42,7 +42,7 @@ std::unordered_map<TwoBodyKey, double> vec_to_map(const std::vector<TwoBody>& ve
   return map;
 }
 
-std::vector<TwoBody> map_to_vex(const std::unordered_map<TwoBodyKey, double>& map) {
+std::vector<TwoBody> map_to_vec(const std::unordered_map<TwoBodyKey, double>& map) {
   std::vector<TwoBody> vec;
   vec.reserve(map.size());
 
