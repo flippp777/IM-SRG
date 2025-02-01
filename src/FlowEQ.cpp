@@ -1,4 +1,4 @@
-#include "RungeKutta.hpp"
+#include "FlowEQ.hpp"
 #include "OneBody.hpp"
 #include "TwoBody.hpp"
 #include "TwoBodyQA.hpp"
@@ -6,13 +6,13 @@
 #include <unordered_map>
 #include <vector>
 
-RungeKutta::RungeKutta(Hamiltonian H, Generator eta) {
+FlowEQ::FlowEQ(Hamiltonian H, Generator eta) {
   set_zero_body_flow_eq(H, eta);
   set_one_body_flow_eq(H, eta);
   set_two_body_flow_eq(H, eta);
 }
 
-void RungeKutta::set_zero_body_flow_eq(Hamiltonian H, Generator eta) {
+void FlowEQ::set_zero_body_flow_eq(Hamiltonian H, Generator eta) {
   std::vector<OneBody> f = H.get_one_body();
   std::vector<TwoBody> gamma = H.get_two_body();
 
@@ -61,7 +61,7 @@ void RungeKutta::set_zero_body_flow_eq(Hamiltonian H, Generator eta) {
   }
 }
 
-void RungeKutta::set_one_body_flow_eq(Hamiltonian H, Generator eta) {
+void FlowEQ::set_one_body_flow_eq(Hamiltonian H, Generator eta) {
   int num_states = H.get_num_states();
 
   std::vector<OneBody> f = H.get_one_body();
@@ -161,7 +161,7 @@ void RungeKutta::set_one_body_flow_eq(Hamiltonian H, Generator eta) {
   dfds = map_to_vec(dfds_map);
 }
 
-void RungeKutta::set_two_body_flow_eq(Hamiltonian H, Generator eta) {
+void FlowEQ::set_two_body_flow_eq(Hamiltonian H, Generator eta) {
   int num_states = H.get_num_states();
 
   std::vector<OneBody> f = H.get_one_body();
@@ -277,11 +277,11 @@ void RungeKutta::set_two_body_flow_eq(Hamiltonian H, Generator eta) {
   dGammads = map_to_vec(global_dgammads_map);
 }
 
-const void RungeKutta::print_zero_body() {
+const void FlowEQ::print_zero_body() {
   std::cout << "dEds: " << dEds << std::endl;
 }
 
-const void RungeKutta::print_one_body() {
+const void FlowEQ::print_one_body() {
   std::cout << "dfds: " << std::endl;
   for (const OneBody &df : dfds) {
     std::cout << df.s << "\t" << df.ss << "\t" << df.me << std::endl;
@@ -289,8 +289,8 @@ const void RungeKutta::print_one_body() {
   std::cout << std::endl;
 }
 
-const void RungeKutta::print_two_body() {
-  std::cout << "Gamma:" << std::endl;
+const void FlowEQ::print_two_body() {
+  std::cout << "dGammads:" << std::endl;
   for (const TwoBody &dg : dGammads) {
     std::cout << dg.s1 << "\t" << dg.s2 << "\t" << dg.ss1 << "\t" << dg.ss2
               << "\t" << dg.me << std::endl;

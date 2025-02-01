@@ -1,7 +1,8 @@
 #include "Generator.hpp"
 #include "Hamiltonian.hpp"
 #include "OneBody.hpp"
-#include "RungeKutta.hpp"
+#include "FlowEQ.hpp"
+#include "TwoBody.hpp"
 #include "time.hpp"
 
 #include <algorithm>
@@ -28,6 +29,12 @@ int main() {
   // H.print_one_body();
   // H.print_two_body();
 
+  std::vector<OneBody> f = H.get_one_body();
+  std::cout << "f size: " << f.size() << std::endl;
+
+  std::vector<TwoBody> g = H.get_two_body();
+  std::cout << "gamma size: " << g.size() << std::endl;
+
 
   auto start_eta = std::chrono::high_resolution_clock::now();
   Generator eta = Generator(H);
@@ -36,13 +43,19 @@ int main() {
 
 
   auto start_rk = std::chrono::high_resolution_clock::now();
-  RungeKutta rk = RungeKutta(H, eta);
+  FlowEQ rk = FlowEQ(H, eta);
   auto stop_rk = std::chrono::high_resolution_clock::now();
   print_duration("flow eq. construnction: ", start_rk, stop_rk);
 
 
   // rk.print_zero_body();
   // rk.print_one_body();
+  
+  std::vector<OneBody> dfds = rk.get_one_body_flow_eq();
+  std::cout << "dfds size: " << dfds.size() << std::endl;
+
+  std::vector<TwoBody> dgds = rk.get_two_body_flow_eq();
+  std::cout << "dgds size: " << dgds.size() << std::endl;
 
   
 

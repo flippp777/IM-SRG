@@ -4,17 +4,17 @@
 
 #include <vector>
 
-#ifndef RUNGEKUTTA
-#define RUNGEKUTTA
+#ifndef FLOWEQ
+#define FLOWEQ
 
-class RungeKutta {
+class FlowEQ {
 private:
   double dEds;
   std::vector<OneBody> dfds;
   std::vector<TwoBody> dGammads;
 
 public:
-  RungeKutta(Hamiltonian H, Generator eta);
+  FlowEQ(Hamiltonian H, Generator eta);
 
   void set_zero_body_flow_eq(Hamiltonian H, Generator eta);
   void set_one_body_flow_eq(Hamiltonian H, Generator eta);
@@ -37,4 +37,4 @@ public:
   const void print_two_body();
 };
 
-#endif // !RUNGEKUTTA
+#endif // !FLOWEQ
