@@ -21,7 +21,9 @@ public:
 
   void set_flow_eq();
   
-  void runge_kutta(double s0, double s_max, double ds);
+  void euler(const double s0, const double s, const double ds);
+
+  void runge_kutta(double s0, double s, double ds);
 
   const Hamiltonian &get_hamiltonian() const {
     return H;

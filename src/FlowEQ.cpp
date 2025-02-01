@@ -1,4 +1,5 @@
 #include "FlowEQ.hpp"
+#include "Integrate.hpp"
 #include "OneBody.hpp"
 #include "TwoBody.hpp"
 #include "TwoBodyQA.hpp"
@@ -10,7 +11,6 @@
 FlowEQ::FlowEQ(const Hamiltonian H_in, const Generator eta_in) {
   H = H_in;
   eta = eta_in;
-  set_flow_eq();
 }
 
 void FlowEQ::set_flow_eq() {
@@ -260,6 +260,68 @@ void FlowEQ::set_flow_eq() {
   }
   dfds = map_to_vec(dfds_map);
   dgammads = map_to_vec(dgammads_map);
+}
+
+/////////////////////////// Evolution
+void FlowEQ::euler(const double s0, const double s, const double ds) {
+  omp_set_nested(1);
+
+  int n = (int)((s - s0) / ds);
+  std::cout << "n = " << n << std::endl;
+
+  std::unordered_map<OneBodyKey, double> f, dfds_map;
+  std::unordered_map<TwoBodyKey, double> gamma, dgds_map;
+
+  for (int i = 0; i <= n; ++i) {
+    set_flow_eq();
+    double E = H.get_zero_body();
+    std::cout << "E = " << E << ";\t" << "s = " << s0 + i * ds << std::endl;
+#pragma omp parallel shared(f, dfds_map, gamma, dgds_map)
+    {
+#pragma omp sections
+      {
+#pragma omp section
+        f = vec_to_map(H.get_one_body());
+#pragma omp section
+        gamma = vec_to_map(H.get_two_body());
+#pragma omp section
+        dfds_map = vec_to_map(dfds);
+#pragma omp section
+        dgds_map = vec_to_map(dgammads);
+      }
+
+#pragma omp barrier
+
+#pragma omp single
+      {
+#pragma omp task
+        E += euler_step(E, dEds, ds);
+        for (const auto &[key, me] : dfds_map) {
+#pragma omp task
+#pragma omp atomic
+          f[key] += euler_step(f[key], me, ds);
+        }
+        for (const auto &[key, me] : dgds_map) {
+#pragma omp task
+#pragma omp atomic
+          gamma[key] += euler_step(gamma[key], me, ds);
+        }
+      }
+#pragma omp barrier
+
+#pragma omp single
+      H.set_zero_body(E);
+#pragma omp sections
+      {
+#pragma omp section
+        H.set_one_body(map_to_vec(f));
+#pragma omp section
+        H.set_two_body(map_to_vec(gamma));
+      }
+#pragma omp single
+      eta = Generator(H);
+    }
+  }
 }
 
 const void FlowEQ::print_zero_body() {
