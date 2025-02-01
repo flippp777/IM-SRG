@@ -54,6 +54,6 @@ template <> struct std::hash<OneBodyKey> {
   }
 };
 std::unordered_map<OneBodyKey, double> vec_to_map(const std::vector<OneBody>& vec);
-std::vector<OneBody> map_to_vex(const std::unordered_map<OneBodyKey, double>& map);
+std::vector<OneBody> map_to_vec(const std::unordered_map<OneBodyKey, double>& map);
 
 #endif // !ONEBODY
