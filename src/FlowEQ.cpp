@@ -14,6 +14,10 @@ FlowEQ::FlowEQ(const Hamiltonian H_in, const Generator eta_in) {
 }
 
 void FlowEQ::set_flow_eq() {
+  dEds = 0;
+  dfds.clear();
+  dgammads.clear();
+
   const std::vector<OneBody> f = H.get_one_body();
   const std::vector<TwoBody> gamma = H.get_two_body();
   TwoBodyQA gamma_qa = TwoBodyQA(gamma);
@@ -28,6 +32,8 @@ void FlowEQ::set_flow_eq() {
   const int eta2_size = eta_2body.size();
 
   std::unordered_map<OneBodyKey, double> dfds_map;
+  std::vector<std::unordered_map<OneBodyKey, double>> thread_dfds(
+      omp_get_max_threads());
   std::unordered_map<TwoBodyKey, double> dgammads_map;
   std::vector<std::unordered_map<TwoBodyKey, double>> thread_dgammads(
       omp_get_max_threads());
@@ -66,8 +72,9 @@ void FlowEQ::set_flow_eq() {
     }
     ///////////////////////////////////////////////// dfds
     // first sum
-    std::unordered_map<OneBodyKey, double> local_dfds;
-    local_dfds.reserve(eta1_size * f_size);
+    int tid = omp_get_thread_num();
+    std::unordered_map<OneBodyKey, double> &local_dfds = thread_dfds[tid];
+
 #pragma omp for collapse(2)
     for (int i = 0; i < f_size; ++i) {
       for (int j = 0; j < eta1_size; ++j) {
@@ -147,12 +154,7 @@ void FlowEQ::set_flow_eq() {
         }
       }
     }
-    for (const auto &[key, me] : local_dfds) {
-#pragma omp critical
-      dfds_map[key] += me;
-    }
     ///////////////////////////// dGammads
-    int tid = omp_get_thread_num();
     std::unordered_map<TwoBodyKey, double> &local_dgammads =
         thread_dgammads[tid];
 
@@ -253,6 +255,11 @@ void FlowEQ::set_flow_eq() {
     //       global_dgammads_map[key] += me;
     //     }
   }
+  for (const auto &local_map : thread_dfds) {
+    for (const auto &[key, me] : local_map) {
+      dfds_map[key] += me;
+    }
+  }
   for (const auto &local_map : thread_dgammads) {
     for (const auto &[key, me] : local_map) {
       dgammads_map[key] += me;
@@ -273,8 +280,10 @@ void FlowEQ::euler(const double s0, const double s, const double ds) {
   for (int i = 0; i <= n; ++i) {
     set_flow_eq();
     double E = H.get_zero_body();
-    std::cout << "E = " << E << ";\t" << "s = " << s0 + i * ds << std::endl;
-#pragma omp parallel 
+    std::cout << "E = " << E << ",\t" << "dEds = " << dEds << ";\t"
+              << "s = " << s0 + i * ds << std::endl;
+
+#pragma omp parallel
     {
 #pragma omp sections
       {
@@ -288,21 +297,30 @@ void FlowEQ::euler(const double s0, const double s, const double ds) {
         dgds_map = vec_to_map(dgammads);
       }
 
+#pragma omp single
+      E += euler_step(E, dEds, ds);
+
 #pragma omp barrier
 
 #pragma omp single
-      {
-#pragma omp task
-        E += euler_step(E, dEds, ds);
-        for (const auto &[key, me] : dfds_map) {
+      for (const auto &[key, me] : dfds_map) {
+        if (f.count(key) != 0) {
 #pragma omp task
           f[key] += euler_step(f[key], me, ds);
-        }
-        for (const auto &[key, me] : dgds_map) {
-#pragma omp task
-          gamma[key] += euler_step(gamma[key], me, ds);
+        } else {
+          f.insert({key, euler_step(0, me, ds)});
         }
       }
+#pragma omp single
+      for (const auto &[key, me] : dgds_map) {
+        if (gamma.count(key) != 0) {
+#pragma omp task
+          gamma[key] += euler_step(gamma[key], me, ds);
+        } else {
+          gamma.insert({key, euler_step(0, me, ds)});
+        }
+      }
+
 #pragma omp barrier
 
 #pragma omp single
