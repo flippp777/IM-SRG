@@ -32,6 +32,8 @@ public:
   void set_generators();
   void set_flow_eq();
 
+  void euler(const double s0, const double s, const double ds);
+
   const std::vector<TwoBody> &get_two_body() const {
     return gamma;
   }

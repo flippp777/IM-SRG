@@ -33,7 +33,7 @@ int main() {
   // rk.print_one_body();
 
   // auto start_flow = std::chrono::high_resolution_clock::now();
-  // flow.euler(0, 0.1, 0.1);
+  // H.euler(0, 0.1, 0.1);
   // auto stop_flow = std::chrono::high_resolution_clock::now();
   // print_duration("flow time: ", start_flow, stop_flow);
 
