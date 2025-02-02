@@ -18,13 +18,19 @@ int main() {
                          "hint_He4_chi2bM3A_srg0800_eMax04_nMax02_lMax04_"
                          "hwHO020.me2m";
 
+  auto start_H = std::chrono::high_resolution_clock::now();
   Hamiltonian H = Hamiltonian(filepath);
-
+  auto stop_H = std::chrono::high_resolution_clock::now();
+  print_duration("H construction: ", start_H, stop_H);
+  
   // H.print_zero_body();
   // H.print_one_body();
   // H.print_two_body();
 
+  auto start_eta = std::chrono::high_resolution_clock::now();
   Generator eta = Generator(H);
+  auto stop_eta = std::chrono::high_resolution_clock::now();
+  print_duration("eta construction: ", start_eta, stop_eta);
 
   FlowEQ flow = FlowEQ(H, eta);
 

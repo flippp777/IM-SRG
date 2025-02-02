@@ -5,12 +5,13 @@
 
 class Generator {
 private:
+  const Hamiltonian *H;
   std::vector<OneBody> eta_1body;
   std::vector<TwoBody> eta_2body;
 
 public:
   Generator();
-  Generator(Hamiltonian H);
+  Generator(const Hamiltonian &H);
   const std::vector<OneBody> &get_one_body() const { return eta_1body; }
   const void set_one_body(std::vector<OneBody> new_eta_1body) {
     eta_1body = new_eta_1body;
