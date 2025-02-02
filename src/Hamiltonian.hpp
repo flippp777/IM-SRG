@@ -15,10 +15,15 @@ private:
   std::vector<OneBody> f;
   std::vector<TwoBody> gamma;
 
+  std::vector<OneBody> eta_1body;
+  std::vector<TwoBody> eta_2body;
+
 public:
   Hamiltonian();
   Hamiltonian(const double E, const std::vector<OneBody> f, const std::vector<TwoBody> gamma);
   Hamiltonian(std::string filepath);
+
+  void set_generators();
 
   const std::vector<TwoBody> &get_two_body() const {
     return gamma;

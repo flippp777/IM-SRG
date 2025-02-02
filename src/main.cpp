@@ -1,17 +1,9 @@
 #include "FlowEQ.hpp"
 #include "Generator.hpp"
 #include "Hamiltonian.hpp"
-#include "OneBody.hpp"
-#include "TwoBody.hpp"
 #include "time.hpp"
 
-#include <algorithm>
 #include <chrono>
-#include <fstream>
-#include <iostream>
-#include <ostream>
-#include <unordered_map>
-#include <vector>
 
 int main() {
   std::string filepath = "matrix_elements/"
@@ -28,14 +20,14 @@ int main() {
   // H.print_two_body();
 
   auto start_eta = std::chrono::high_resolution_clock::now();
-  Generator eta = Generator(H);
+  H.set_generators();
   auto stop_eta = std::chrono::high_resolution_clock::now();
   print_duration("eta construction: ", start_eta, stop_eta);
 
-  auto start_flow_eq = std::chrono::high_resolution_clock::now();
-  FlowEQ flow = FlowEQ(H);
-  auto stop_flow_eq = std::chrono::high_resolution_clock::now();
-  print_duration("flow eq. construction: ", start_flow_eq, stop_flow_eq);
+  // auto start_flow_eq = std::chrono::high_resolution_clock::now();
+  // FlowEQ flow = FlowEQ(H);
+  // auto stop_flow_eq = std::chrono::high_resolution_clock::now();
+  // print_duration("flow eq. construction: ", start_flow_eq, stop_flow_eq);
 
   // rk.print_zero_body();
   // rk.print_one_body();
