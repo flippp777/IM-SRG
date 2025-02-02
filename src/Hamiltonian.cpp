@@ -25,6 +25,7 @@ Hamiltonian::Hamiltonian(std::string filename) {
   }
 
   // save two-body matrix elemetns in Gamma
+  gamma.reserve(1000000);
   std::string line;
   int i = 0;
   while (std::getline(file, line)) {
@@ -41,6 +42,7 @@ Hamiltonian::Hamiltonian(std::string filename) {
   // full gamma
   const int gamma_init_size = gamma.size();
   std::vector<TwoBody> gamma_full;
+  gamma_full.reserve(7500000);
   for (const auto &g : gamma) {
     if (g.s1 == g.ss1 && g.s2 == g.ss2) {
       // <ab|H|ab>
