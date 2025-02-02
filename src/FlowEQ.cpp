@@ -264,8 +264,6 @@ void FlowEQ::set_flow_eq() {
 
 /////////////////////////// Evolution
 void FlowEQ::euler(const double s0, const double s, const double ds) {
-  omp_set_nested(1);
-
   int n = (int)((s - s0) / ds);
   std::cout << "n = " << n << std::endl;
 
@@ -276,7 +274,7 @@ void FlowEQ::euler(const double s0, const double s, const double ds) {
     set_flow_eq();
     double E = H.get_zero_body();
     std::cout << "E = " << E << ";\t" << "s = " << s0 + i * ds << std::endl;
-#pragma omp parallel shared(f, dfds_map, gamma, dgds_map)
+#pragma omp parallel 
     {
 #pragma omp sections
       {
