@@ -18,12 +18,19 @@ private:
   std::vector<OneBody> eta_1body;
   std::vector<TwoBody> eta_2body;
 
+  double dEds;
+  std::vector<OneBody> dfds_vec;
+  std::vector<TwoBody> dgammads_vec;
+  std::unordered_map<OneBodyKey, double> dfds_map;
+  std::unordered_map<TwoBodyKey, double> dgammads_map;
+
 public:
   Hamiltonian();
   Hamiltonian(const double E, const std::vector<OneBody> f, const std::vector<TwoBody> gamma);
   Hamiltonian(std::string filepath);
 
   void set_generators();
+  void set_flow_eq();
 
   const std::vector<TwoBody> &get_two_body() const {
     return gamma;
