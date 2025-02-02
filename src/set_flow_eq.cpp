@@ -1,6 +1,7 @@
 #include "Hamiltonian.hpp"
 #include "TwoBodyQA.hpp"
 #include <omp.h>
+#include <unordered_map>
 
 void Hamiltonian::set_flow_eq() {
   dEds = 0;
@@ -9,6 +10,17 @@ void Hamiltonian::set_flow_eq() {
 
   TwoBodyQA gamma_qa = TwoBodyQA(gamma);
   TwoBodyQA eta2_qa = TwoBodyQA(eta_2body);
+
+  std::unordered_map<OneBodyKey, double> f_map;
+  f_map.reserve(f.size());
+  for (const auto &ff : f) {
+    f_map[OneBodyKey(ff.s, ff.ss)] = ff.me;
+  }
+  std::unordered_map<OneBodyKey, double> eta1_map;
+  eta1_map.reserve(eta_1body.size());
+  for (const auto &e : eta_1body) {
+    eta1_map[OneBodyKey(e.s, e.ss)] = e.me;
+  }
 
   const int f_size = f.size();
   const int eta1_size = eta_1body.size();
@@ -19,6 +31,10 @@ void Hamiltonian::set_flow_eq() {
       omp_get_max_threads());
   std::vector<std::unordered_map<TwoBodyKey, double>> thread_dgammads(
       omp_get_max_threads());
+  for (int i = 0; i < omp_get_max_threads(); i++) {
+    thread_dfds[i].reserve(500);
+    thread_dgammads[i].reserve(500);
+  }
 
 #pragma omp parallel
   {
@@ -26,30 +42,20 @@ void Hamiltonian::set_flow_eq() {
 #pragma omp for reduction(+ : dEds)
     for (int i = 0; i < f_size; ++i) {
       if (f[i].s > 3 && f[i].ss < 4) {
-        for (const OneBody &eta : eta_1body) {
-          if (eta.s == f[i].ss && eta.ss == f[i].s) {
-            dEds += f[i].me * eta.me;
-          }
-        }
+        dEds += f[i].me * eta1_map[OneBodyKey(f[i].ss, f[i].s)];
       } else if (f[i].s < 4 && f[i].s > 3) {
-        for (const OneBody &eta : eta_1body) {
-          if (eta.s == f[i].ss && eta.ss == f[i].s) {
-            dEds += -f[i].me * eta.me;
-          }
-        }
+        dEds += -f[i].me * eta1_map[OneBodyKey(f[i].ss, f[i].s)];
       }
     }
 #pragma omp for reduction(+ : dEds)
-    for (int i = 0; i < gamma_size; ++i) {
-      if (gamma[i].s1 > 3 && gamma[i].s2 > 3 && gamma[i].ss1 < 4 &&
-          gamma[i].ss2 < 4) {
-        for (const TwoBody &eta : eta_2body) {
-          if (eta.s1 == gamma[i].ss1 && eta.s2 == gamma[i].ss2 &&
-              eta.ss1 == gamma[i].s1 && eta.ss2 == gamma[i].s2) {
-
-            dEds += 0.5 * gamma[i].me * eta.me;
-          }
-        }
+    for (int i = 0; i < eta2_size; ++i) {
+      if (eta_2body[i].s1 < 4 && eta_2body[i].s2 < 4 && eta_2body[i].ss1 > 3 &&
+          eta_2body[i].ss2 > 3 &&
+          gamma_qa.gamma_map.find({eta_2body[i].ss1, eta_2body[i].ss2,
+                                   eta_2body[i].s1, eta_2body[i].s2}) != 0) {
+        dEds += 0.5 * eta_2body[i].me *
+                (*gamma_qa.gamma_map[{eta_2body[i].ss1, eta_2body[i].ss2,
+                                      eta_2body[i].s1, eta_2body[i].s2}]);
       }
     }
     ///////////////////////////////////////////////// dfds
@@ -62,77 +68,58 @@ void Hamiltonian::set_flow_eq() {
       for (int j = 0; j < eta1_size; ++j) {
         // first sum
         if (eta_1body[j].ss == f[i].s) {
-          local_dfds[OneBodyKey(eta_1body[j].s, f[i].ss)] +=
-              eta_1body[j].me * f[i].me;
+          local_dfds[{eta_1body[j].s, f[i].ss}] += eta_1body[j].me * f[i].me;
           local_dfds[{f[i].ss, eta_1body[j].s}] += eta_1body[j].me * f[i].me;
         }
       }
     }
 // second sum
 #pragma omp for
-    for (int i = 0; i < gamma_size; ++i) {
-      if (gamma[i].s1 > 3 && gamma[i].ss1 < 4) {
-        for (int j = 0; j < eta1_size; ++j) {
-          if (eta_1body[j].s == gamma[i].ss1 &&
-              eta_1body[j].ss == gamma[i].s1) {
-            local_dfds[{gamma[i].s2, gamma[i].ss2}] +=
-                eta_1body[j].me * gamma[i].me;
-          }
+    for (int i = 0; i < eta1_size; ++i) {
+      if (eta_1body[i].s < 4 && eta_1body[i].ss > 3) {
+        for (const auto &g :
+             gamma_qa.check_s1ss1(eta_1body[i].ss, eta_1body[i].s)) {
+          local_dfds[{g->s2, g->ss2}] += eta_1body[i].me * g->me;
         }
-      } else if (gamma[i].s1 < 4 && gamma[i].ss1 > 3) {
-        for (int j = 0; j < eta1_size; ++j) {
-          if (eta_1body[j].s == gamma[i].ss1 &&
-              eta_1body[j].ss == gamma[i].s1) {
-            local_dfds[{gamma[i].s2, gamma[i].ss2}] +=
-                -eta_1body[j].me * gamma[i].me;
-          }
+      } else if (eta_1body[i].s > 3 && eta_1body[i].ss < 4) {
+        for (const auto &g :
+             gamma_qa.check_s1ss1(eta_1body[i].ss, eta_1body[i].s)) {
+          local_dfds[{g->s2, g->ss2}] += -eta_1body[i].me * g->me;
         }
       }
     }
 #pragma omp for
-    for (int i = 0; i < eta2_size; ++i) {
-      if (eta_2body[i].s1 > 3 && eta_2body[i].ss1 < 4) {
-        for (int j = 0; j < f_size; ++j) {
-          if (f[j].s == eta_2body[i].ss1 && f[j].ss == eta_2body[i].s1) {
-            local_dfds[{eta_2body[i].s2, eta_2body[i].ss2}] +=
-                f[j].me * eta_2body[i].me;
-          }
+    for (int i = 0; i < f_size; ++i) {
+      if (f[i].s < 4 && f[i].ss > 3) {
+        for (const auto &e : eta2_qa.check_s1ss1(f[i].ss, f[i].s)) {
+          local_dfds[{e->s2, e->ss2}] += -f[i].me * e->me;
         }
-      } else if (eta_2body[i].s1 < 4 && eta_2body[i].ss1 > 3) {
-        for (int j = 0; j < f_size; ++j) {
-          if (f[j].s == eta_2body[i].ss1 && f[j].ss == eta_2body[i].s1) {
-            local_dfds[{eta_2body[i].s2, eta_2body[i].ss2}] +=
-                -f[j].me * eta_2body[i].me;
-          }
+      } else if (f[i].s > 3 && f[i].ss < 4) {
+        for (const auto &e : gamma_qa.check_s1ss1(f[i].ss, f[i].s)) {
+          local_dfds[{e->s2, e->ss2}] += f[i].me * e->me;
         }
       }
     }
 
 // third sum
 #pragma omp for
-    for (int i = 0; i < gamma_size; ++i) {
-      if (gamma[i].s1 < 4 && gamma[i].s2 < 4 && gamma[i].ss1 > 3) {
-        for (int j = 0; j < eta2_size; ++j) {
-          if (eta_2body[j].s1 == gamma[i].ss1 &&
-              eta_2body[j].ss1 == gamma[i].s1 &&
-              eta_2body[j].ss2 == gamma[i].s2) {
-            local_dfds[{eta_2body[j].s2, gamma[i].ss2}] +=
-                0.5 * eta_2body[j].me * gamma[i].me;
-            local_dfds[{gamma[i].ss2, eta_2body[j].s2}] +=
-                0.5 * eta_2body[j].me * gamma[i].me;
-          }
+    for (int i = 0; i < eta2_size; ++i) {
+      if (eta_2body[i].ss1 < 4 && eta_2body[i].ss2 < 4 && eta_2body[i].s1 > 3) {
+        for (const auto &g : gamma_qa.check_s1s2ss1(
+                 eta_2body[i].ss1, eta_2body[i].ss2, eta_2body[i].s1)) {
+          local_dfds[{eta_2body[i].s2, g->ss2}] +=
+              0.5 * eta_2body[i].me * g->me;
+          local_dfds[{g->ss2, eta_2body[i].s2}] +=
+              0.5 * eta_2body[i].me * g->me;
         }
-      }
-      if (gamma[i].s1 > 3 && gamma[i].s2 > 3 && gamma[i].ss1 < 4) {
-        for (int j = 0; j < eta2_size; ++j) {
-          if (eta_2body[j].s1 == gamma[i].ss1 &&
-              eta_2body[j].ss1 == gamma[i].s1 &&
-              eta_2body[j].ss2 == gamma[i].s2) {
-            local_dfds[{eta_2body[j].s2, gamma[i].ss2}] +=
-                -0.5 * eta_2body[j].me * gamma[i].me;
-            local_dfds[{gamma[i].ss2, eta_2body[j].s2}] +=
-                -0.5 * eta_2body[j].me * gamma[i].me;
-          }
+      } else if (eta_2body[i].ss1 > 3 && eta_2body[i].ss2 > 3 &&
+                 eta_2body[i].s1 < 4) {
+        for (const auto &g : gamma_qa.check_s1s2ss1(
+                 eta_2body[i].ss1, eta_2body[i].ss2, eta_2body[i].s1)) {
+          local_dfds[{eta_2body[i].s2, g->ss2}] +=
+              -0.5 * eta_2body[i].me * g->me;
+          local_dfds[{g->ss2, eta_2body[i].s2}] +=
+              -0.5 * eta_2body[i].me * g->me;
         }
       }
     }
