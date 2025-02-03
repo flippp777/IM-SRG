@@ -32,8 +32,8 @@ void Hamiltonian::set_flow_eq() {
   std::vector<std::unordered_map<TwoBodyKey, double>> thread_dgammads(
       omp_get_max_threads());
   for (int i = 0; i < omp_get_max_threads(); i++) {
-    thread_dfds[i].reserve(500);
-    thread_dgammads[i].reserve(500);
+    thread_dfds[i].reserve(5000);
+    thread_dgammads[i].reserve(5000);
   }
 
 #pragma omp parallel
@@ -50,12 +50,10 @@ void Hamiltonian::set_flow_eq() {
 #pragma omp for reduction(+ : dEds)
     for (int i = 0; i < eta2_size; ++i) {
       if (eta_2body[i].s1 < 4 && eta_2body[i].s2 < 4 && eta_2body[i].ss1 > 3 &&
-          eta_2body[i].ss2 > 3 &&
-          gamma_qa.gamma_map.find({eta_2body[i].ss1, eta_2body[i].ss2,
-                                   eta_2body[i].s1, eta_2body[i].s2}) != 0) {
+          eta_2body[i].ss2 > 3) {
         dEds += 0.5 * eta_2body[i].me *
-                (*gamma_qa.gamma_map[{eta_2body[i].ss1, eta_2body[i].ss2,
-                                      eta_2body[i].s1, eta_2body[i].s2}]);
+                *gamma_qa.check_s1s2ss1ss2(eta_2body[i].ss1, eta_2body[i].ss2,
+                                          eta_2body[i].s1, eta_2body[i].s2);
       }
     }
     ///////////////////////////////////////////////// dfds
