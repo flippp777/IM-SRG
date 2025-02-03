@@ -105,5 +105,10 @@ public:
   const void print_one_body();
   const void print_two_body();
 
+  const void print_one_body_generator();
+  const void print_two_body_generator();
+
+  const void print_one_body_flow_eq();
+  const void print_two_body_flow_eq();
 };
 #endif // !HAMILTONIAN

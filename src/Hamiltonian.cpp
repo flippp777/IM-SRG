@@ -127,3 +127,37 @@ const void Hamiltonian::print_two_body() {
   }
   std::cout << std::endl;
 }
+
+const void Hamiltonian::print_one_body_generator() {
+  std::cout << "f: " << std::endl;
+  for (const OneBody &eta1 : eta_1body) {
+    std::cout << eta1.s << "\t" << eta1.ss << "\t" << eta1.me << std::endl;
+  }
+  std::cout << std::endl;
+}
+
+const void Hamiltonian::print_two_body_generator() {
+  std::cout << "Gamma:" << std::endl;
+  for (const TwoBody &eta2 : eta_2body) {
+    std::cout << eta2.s1 << "\t" << eta2.s2 << "\t" << eta2.ss1 << "\t" << eta2.ss2
+              << "\t" << eta2.me << std::endl;
+  }
+  std::cout << std::endl;
+}
+
+const void Hamiltonian::print_one_body_flow_eq() {
+  std::cout << "f: " << std::endl;
+  for (const OneBody &df : dfds_vec) {
+    std::cout << df.s << "\t" << df.ss << "\t" << df.me << std::endl;
+  }
+  std::cout << std::endl;
+}
+
+const void Hamiltonian::print_two_body_flow_eq() {
+  std::cout << "Gamma:" << std::endl;
+  for (const TwoBody &dg : dgammads_vec) {
+    std::cout << dg.s1 << "\t" << dg.s2 << "\t" << dg.ss1 << "\t" << dg.ss2
+              << "\t" << dg.me << std::endl;
+  }
+  std::cout << std::endl;
+}
