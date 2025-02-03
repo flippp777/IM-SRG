@@ -1,5 +1,3 @@
-#include "FlowEQ.hpp"
-#include "Generator.hpp"
 #include "Hamiltonian.hpp"
 #include "time.hpp"
 
@@ -24,18 +22,18 @@ int main() {
   auto stop_eta = std::chrono::high_resolution_clock::now();
   print_duration("eta construction: ", start_eta, stop_eta);
 
-  auto start_flow_eq = std::chrono::high_resolution_clock::now();
-  H.set_flow_eq();
-  auto stop_flow_eq = std::chrono::high_resolution_clock::now();
-  print_duration("flow eq. construction: ", start_flow_eq, stop_flow_eq);
+  // auto start_flow_eq = std::chrono::high_resolution_clock::now();
+  // H.set_flow_eq();
+  // auto stop_flow_eq = std::chrono::high_resolution_clock::now();
+  // print_duration("flow eq. construction: ", start_flow_eq, stop_flow_eq);
 
   // rk.print_zero_body();
   // rk.print_one_body();
 
-  // auto start_flow = std::chrono::high_resolution_clock::now();
-  // H.euler(0, 0.1, 0.1);
-  // auto stop_flow = std::chrono::high_resolution_clock::now();
-  // print_duration("flow time: ", start_flow, stop_flow);
+  auto start_flow = std::chrono::high_resolution_clock::now();
+  H.euler(0, 0.1, 0.1);
+  auto stop_flow = std::chrono::high_resolution_clock::now();
+  print_duration("flow time: ", start_flow, stop_flow);
 
   return 0;
 }
