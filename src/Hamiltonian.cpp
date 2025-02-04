@@ -2,6 +2,7 @@
 #include "OneBody.hpp"
 #include "TwoBody.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <iostream>
@@ -24,13 +25,13 @@ Hamiltonian::Hamiltonian(std::string filename) {
     return;
   }
 
-  // save two-body matrix elemetns in Gamma
-  gamma.reserve(1000000);
+  // save two-body matrix elemetns in gamma
+  gamma.reserve(7300920);
   std::string line;
   int i = 0;
   while (std::getline(file, line)) {
     std::istringstream iss(line);
-    if (i > 145) {
+    if (i > 144) {
       TwoBody gam;
       iss >> gam.s1 >> gam.s2 >> gam.ss1 >> gam.ss2 >> gam.me;
       gamma.push_back(gam);
@@ -83,22 +84,22 @@ Hamiltonian::Hamiltonian(std::string filename) {
     for (int i = 0; i < gamma_size; ++i) {
       if (gamma[i].s1 < 4 && gamma[i].s2 < 4 && gamma[i].s1 == gamma[i].ss1 &&
           gamma[i].s2 == gamma[i].ss2) {
-        E += gamma[i].me;
+        E += 0.5 * gamma[i].me;
       }
     }
 
     // calculate and set one-body
 #pragma omp for
     for (int i = 0; i < gamma_size; ++i) {
-      if (gamma[i].s2 < 4 && gamma[i].ss2 < 4) {
+      if (gamma[i].s2 < 4 && gamma[i].s2 == gamma[i].ss2) {
 #pragma omp critical
         f = f + OneBody(gamma[i].s1, gamma[i].ss1, gamma[i].me);
       }
     }
-    // remove 0
+    // remove values close to 0
 #pragma omp for
     for (int i = 0; i < f.size(); ++i) {
-      if (std::abs(f[i].me) > 10 - 9) {
+      if (std::abs(f[i].me) > 1e-9) {
 #pragma omp critical
         f_new.push_back(f[i]);
       }
@@ -116,15 +117,17 @@ const void Hamiltonian::print_one_body() {
   for (const OneBody &ff : f) {
     std::cout << ff.s << "\t" << ff.ss << "\t" << ff.me << std::endl;
   }
+  std::cout << "f size: " << f.size() << std::endl;
   std::cout << std::endl;
 }
 
 const void Hamiltonian::print_two_body() {
-  std::cout << "Gamma:" << std::endl;
+  std::cout << "gamma:" << std::endl;
   for (const TwoBody &gg : gamma) {
     std::cout << gg.s1 << "\t" << gg.s2 << "\t" << gg.ss1 << "\t" << gg.ss2
               << "\t" << gg.me << std::endl;
   }
+  std::cout << "gamma size: " << gamma.size() << std::endl;
   std::cout << std::endl;
 }
 
@@ -139,8 +142,8 @@ const void Hamiltonian::print_one_body_generator() {
 const void Hamiltonian::print_two_body_generator() {
   std::cout << "Gamma:" << std::endl;
   for (const TwoBody &eta2 : eta_2body) {
-    std::cout << eta2.s1 << "\t" << eta2.s2 << "\t" << eta2.ss1 << "\t" << eta2.ss2
-              << "\t" << eta2.me << std::endl;
+    std::cout << eta2.s1 << "\t" << eta2.s2 << "\t" << eta2.ss1 << "\t"
+              << eta2.ss2 << "\t" << eta2.me << std::endl;
   }
   std::cout << std::endl;
 }
