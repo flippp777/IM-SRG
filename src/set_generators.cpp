@@ -1,7 +1,7 @@
 #include "Hamiltonian.hpp"
 #include <iostream>
 
-void  Hamiltonian::set_generators() {
+void Hamiltonian::set_generators() {
 
   int f_size = f.size();
   int gamma_size = gamma.size();
@@ -18,10 +18,10 @@ void  Hamiltonian::set_generators() {
         double delta = 0;
         for (int j = 0; j < f_size; ++j) {
           // f_pp
-          if (f[j].s == f[i].s && f[j].ss == f[j].s) {
+          if (f[j].s == f[i].s && f[j].ss == f[i].s) {
             delta += f[j].me;
             // f_hh
-          } else if (f[j].s == f[i].ss && f[j].ss == f[j].s) {
+          } else if (f[j].s == f[i].ss && f[j].ss == f[i].ss) {
             delta += -f[j].me;
           }
         }
@@ -41,7 +41,7 @@ void  Hamiltonian::set_generators() {
         double delta = 0;
         for (int j = 0; j < f_size; ++j) {
           // f_hh
-          if (f[j].s == f[i].s && f[j].ss == f[j].s) {
+          if (f[j].s == f[i].s && f[j].ss == f[i].s) {
             delta += -f[j].me;
             // f_pp
           } else if (f[j].s == f[i].ss && f[j].ss == f[j].s) {
@@ -100,10 +100,9 @@ void  Hamiltonian::set_generators() {
 #pragma omp critical
           std::cout << "delta_onebody = 0" << std::endl;
         }
-      }
-      // Gamma_hh'pp'
-      if (gamma[i].s1 < 4 && gamma[i].s2 < 4 && gamma[i].ss1 > 3 &&
-          gamma[i].ss2 > 3) {
+        // - H.c. (Gamma_hh'pp')
+      } else if (gamma[i].s1 < 4 && gamma[i].s2 < 4 && gamma[i].ss1 > 3 &&
+                 gamma[i].ss2 > 3) {
         double delta = 0;
         for (const OneBody &f : f) {
           // f_hh

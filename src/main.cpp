@@ -2,6 +2,8 @@
 #include "time.hpp"
 
 #include <chrono>
+#include <iostream>
+#include <vector>
 
 int main() {
   std::string filepath = "matrix_elements/"
@@ -12,6 +14,12 @@ int main() {
   Hamiltonian H = Hamiltonian(filepath);
   auto stop_H = std::chrono::high_resolution_clock::now();
   print_duration("H construction: ", start_H, stop_H);
+
+  // std::vector<OneBody> f = H.get_one_body();
+  // sort(f);
+  // for (const auto &ff : f){
+  //   std::cout << ff.s  << "\t" << ff.ss << "\t" << ff.me <<std::endl;
+  // }
   
   // H.print_zero_body();
   // H.print_one_body();
@@ -31,7 +39,7 @@ int main() {
   // rk.print_one_body();
 
   auto start_flow = std::chrono::high_resolution_clock::now();
-  H.euler(0, 0.1, 0.1);
+  H.euler(0, 0, 0.1);
   auto stop_flow = std::chrono::high_resolution_clock::now();
   print_duration("flow time: ", start_flow, stop_flow);
 

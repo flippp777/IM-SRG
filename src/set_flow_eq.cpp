@@ -1,5 +1,6 @@
 #include "Hamiltonian.hpp"
 #include "TwoBodyQA.hpp"
+#include <iostream>
 #include <omp.h>
 #include <unordered_map>
 
@@ -20,6 +21,11 @@ void Hamiltonian::set_flow_eq() {
   eta1_map.reserve(eta_1body.size());
   for (const auto &e : eta_1body) {
     eta1_map[OneBodyKey(e.s, e.ss)] = e.me;
+  }
+  std::unordered_map<TwoBodyKey, double> gam;
+  gam.reserve(gamma.size());
+  for (const auto &g : gamma) {
+    gam[TwoBodyKey(g.s1, g.s2, g.ss1, g.ss2)] = g.me;
   }
 
   const int f_size = f.size();
@@ -51,9 +57,7 @@ void Hamiltonian::set_flow_eq() {
     for (int i = 0; i < eta2_size; ++i) {
       if (eta_2body[i].s1 < 4 && eta_2body[i].s2 < 4 && eta_2body[i].ss1 > 3 &&
           eta_2body[i].ss2 > 3) {
-        dEds += 0.5 * eta_2body[i].me *
-                *gamma_qa.check_s1s2ss1ss2(eta_2body[i].ss1, eta_2body[i].ss2,
-                                          eta_2body[i].s1, eta_2body[i].s2);
+        dEds += 0.5 * eta_2body[i].me * gam[{eta_2body[i].ss1, eta_2body[i].ss2, eta_2body[i].s1, eta_2body[i].s2}];
       }
     }
     ///////////////////////////////////////////////// dfds
