@@ -10,6 +10,7 @@ OneBody::OneBody(int s, int ss, double me) : s(s), ss(ss), me(me) {}
 std::vector<OneBody> operator+(const std::vector<OneBody> &v,
                                const OneBody &a) {
   std::vector<OneBody> new_vec = v;
+
   for (int i = 0; i < new_vec.size(); ++i) {
     if (new_vec[i].s == a.s && new_vec[i].ss == a.ss) {
       new_vec[i].me = new_vec[i].me + a.me;
@@ -44,21 +45,23 @@ void sort(std::vector<OneBody> &v) {
 // unordered_map implementation
 ///////////////////////////////////////////////
 
-std::unordered_map<OneBodyKey, double> vec_to_map(const std::vector<OneBody>& vec) {
+std::unordered_map<OneBodyKey, double>
+vec_to_map(const std::vector<OneBody> &vec) {
   std::unordered_map<OneBodyKey, double> map;
   map.reserve(vec.size());
 
-  for (const auto& el : vec) {
+  for (const auto &el : vec) {
     map[OneBodyKey(el.s, el.ss)] += el.me;
   }
-  
+
   return map;
 }
 
-std::vector<OneBody> map_to_vec(const std::unordered_map<OneBodyKey, double>& map) {
+std::vector<OneBody>
+map_to_vec(const std::unordered_map<OneBodyKey, double> &map) {
   std::vector<OneBody> vec;
 
-  for (const auto& [key, me] : map) {
+  for (const auto &[key, me] : map) {
     vec.push_back(OneBody(key.s, key.ss, me));
   }
 

@@ -1,16 +1,7 @@
-#include "FlowEQ.hpp"
-#include "Generator.hpp"
 #include "Hamiltonian.hpp"
-#include "OneBody.hpp"
-#include "TwoBody.hpp"
-#include "time.hpp"
 
-#include <algorithm>
 #include <chrono>
-#include <fstream>
 #include <iostream>
-#include <ostream>
-#include <unordered_map>
 #include <vector>
 
 int main() {
@@ -20,21 +11,25 @@ int main() {
 
   Hamiltonian H = Hamiltonian(filepath);
 
+  std::vector<int> vec;
+  // std::vector<OneBody> f = H.get_one_body();
+  // sort(f);
+  // for (const auto &ff : f){
+  //   std::cout << ff.s  << "\t" << ff.ss << "\t" << ff.me <<std::endl;
+  // }
+  
   // H.print_zero_body();
   // H.print_one_body();
   // H.print_two_body();
 
-  Generator eta = Generator(H);
+  H.set_generators();
 
-  FlowEQ flow = FlowEQ(H, eta);
+  H.set_flow_eq();
 
-  // rk.print_zero_body();
-  // rk.print_one_body();
-
-  auto start_flow = std::chrono::high_resolution_clock::now();
-  flow.euler(0, 0.1, 0.001);
-  auto stop_flow = std::chrono::high_resolution_clock::now();
-  print_duration("flow time: ", start_flow, stop_flow);
+  // auto start_flow = std::chrono::high_resolution_clock::now();
+  // H.euler(0, 0, 0.1);
+  // auto stop_flow = std::chrono::high_resolution_clock::now();
+  // print_duration("flow time: ", start_flow, stop_flow);
 
   return 0;
 }
