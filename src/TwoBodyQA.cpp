@@ -1,15 +1,16 @@
 #include "TwoBodyQA.hpp"
+#include "TwoBody.hpp"
 #include <cstdio>
+#include <iostream>
 
 TwoBodyQA::TwoBodyQA()
-    : gamma(), gamma_map(), index_s1(), index_ss1(), index_s1s2(),
+    : map(), index_s1(), index_ss1(), index_s1s2(),
       index_ss1ss2(), index_s1ss1() {}
 
 TwoBodyQA::TwoBodyQA(const TwoBody element) { insert(element); }
 
 TwoBodyQA::TwoBodyQA(const std::vector<TwoBody> vec) {
-  gamma.reserve(vec.size());
-  gamma_map.reserve(vec.size());
+  map.reserve(vec.size());
   for (const auto &element : vec) {
     insert(element);
   }
@@ -17,9 +18,8 @@ TwoBodyQA::TwoBodyQA(const std::vector<TwoBody> vec) {
 
 void TwoBodyQA::insert(TwoBody element) {
   TwoBody *ptr = &element;
-  gamma.push_back(ptr);
-  gamma_map[TwoBodyKey(element.s1, element.s2, element.ss1, element.ss2)] =
-      &element.me;
+  map[TwoBodyKey(element.s1, element.s2, element.ss1, element.ss2)] =
+      ptr;
 
   index_s1[element.s1].push_back(ptr);
   index_ss1[element.ss1].push_back(ptr);
@@ -51,16 +51,4 @@ std::vector<TwoBody *> TwoBodyQA::check_s1ss1(const int s1, const int ss1) {
 std::vector<TwoBody *> TwoBodyQA::check_s1s2ss1(const int s1, const int s2,
                                                 const int ss1) {
   return index_s1s2ss1[s1][s2][ss1];
-}
-double * TwoBodyQA::check_s1s2ss1ss2(const int s1, const int s2, const int ss1,
-                                   const int ss2) {
-  if (gamma_map.count({s1, s2, ss1, ss2}) == 1) {
-    return gamma_map[{s1, s2, ss1, ss2}];
-  } else if (gamma_map.count({s1, s2, ss1, ss2}) == 0) {
-    printf("set_flow_eq: No gamma");
-    return 0;
-  } else {
-    printf("set_flow_eq: More than one Gamma");
-    return 0;
-  }
 }
