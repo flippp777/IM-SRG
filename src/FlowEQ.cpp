@@ -273,7 +273,7 @@ void FlowEQ::euler(const double s0, const double s, const double ds) {
   for (int i = 0; i <= n; ++i) {
     set_flow_eq();
     double E = H.get_zero_body();
-    std::cout << "E = " << E << ";\t" << "s = " << s0 + i * ds << std::endl;
+    std::cout << "E = " << E << ",\t" << "dEds = " << dEds << ";\t" << "s = " << s0 + i * ds << std::endl;
 #pragma omp parallel 
     {
 #pragma omp sections
@@ -317,6 +317,9 @@ void FlowEQ::euler(const double s0, const double s, const double ds) {
 #pragma omp single
       eta = Generator(H);
     }
+    dEds = 0;
+    dfds.clear();
+    dgammads.clear();
   }
 }
 
