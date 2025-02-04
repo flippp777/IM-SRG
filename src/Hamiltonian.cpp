@@ -2,12 +2,12 @@
 #include "OneBody.hpp"
 #include "TwoBody.hpp"
 
-#include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <fstream>
 #include <iostream>
-#include <omp.h>
 #include <ostream>
+#include <ratio>
 #include <sstream>
 #include <vector>
 
@@ -18,12 +18,16 @@ Hamiltonian::Hamiltonian(const double E, const std::vector<OneBody> f,
     : E(E), f(f), gamma(gamma) {}
 
 Hamiltonian::Hamiltonian(std::string filename) {
+  std::cout << "Constructing Hamiltonian";
+  auto start = std::chrono::high_resolution_clock::now();
+
   // Open file
   std::ifstream file(filename);
   if (!file) {
     std::cerr << "error: could not open file" << std::endl;
     return;
   }
+  std::cout << "." << std::flush;
 
   // save two-body matrix elemetns in gamma
   gamma.reserve(7300920);
@@ -39,6 +43,8 @@ Hamiltonian::Hamiltonian(std::string filename) {
     i++;
   }
   file.close();
+
+  std::cout << "." << std::flush;
 
   // full gamma
   const int gamma_init_size = gamma.size();
@@ -75,6 +81,8 @@ Hamiltonian::Hamiltonian(std::string filename) {
   }
   gamma = gamma_full;
 
+  std::cout << "." << std::flush;
+
   std::vector<OneBody> f_new;
   const int gamma_size = gamma.size();
 
@@ -106,6 +114,9 @@ Hamiltonian::Hamiltonian(std::string filename) {
     }
   }
   f = f_new;
+  auto stop = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double, std::milli> ms_double = stop - start;
+  std::cout << "\t" << " done ("<< ms_double.count() << "ms)" << std::endl;;
 }
 
 const void Hamiltonian::print_zero_body() {

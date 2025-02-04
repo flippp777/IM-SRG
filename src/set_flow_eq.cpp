@@ -1,32 +1,46 @@
 #include "Hamiltonian.hpp"
 #include "TwoBodyQA.hpp"
+#include <chrono>
 #include <iostream>
 #include <omp.h>
+#include <ostream>
 #include <unordered_map>
 
 void Hamiltonian::set_flow_eq() {
+  std::cout << "Constructing flow equations" << std::endl;
+  auto start = std::chrono::high_resolution_clock::now();
+
+  std::cout << "\t" << "Clearing old flow eqs" << std::flush;
   dEds = 0;
   dfds_vec.clear();
   dgammads_vec.clear();
 
-  TwoBodyQA gamma_qa = TwoBodyQA(gamma);
-  TwoBodyQA eta2_qa = TwoBodyQA(eta_2body);
+  auto stop_clear = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double, std::milli> ms_double = stop_clear - start;
+  std::cout << "..." << "\t" << " done (" << ms_double.count() << "ms)"
+            << std::endl;
+
+  std::cout << "\t" << "Creating maps" << std::flush;
+
+  TwoBodyQA gamma_qa = TwoBodyQA(gamma, 1);
+  std::cout << "." << std::flush;
+  TwoBodyQA eta2_qa = TwoBodyQA(eta_2body, 1);
 
   std::unordered_map<OneBodyKey, double> f_map;
   f_map.reserve(f.size());
   for (const auto &ff : f) {
     f_map[OneBodyKey(ff.s, ff.ss)] = ff.me;
   }
+
+  std::cout << "." << std::flush;
+
   std::unordered_map<OneBodyKey, double> eta1_map;
   eta1_map.reserve(eta_1body.size());
   for (const auto &e : eta_1body) {
     eta1_map[OneBodyKey(e.s, e.ss)] = e.me;
   }
-  std::unordered_map<TwoBodyKey, double> gam;
-  gam.reserve(gamma.size());
-  for (const auto &g : gamma) {
-    gam[TwoBodyKey(g.s1, g.s2, g.ss1, g.ss2)] = g.me;
-  }
+
+  std::cout << "." << std::flush;
 
   const int f_size = f.size();
   const int eta1_size = eta_1body.size();
@@ -41,6 +55,15 @@ void Hamiltonian::set_flow_eq() {
     thread_dfds[i].reserve(5000);
     thread_dgammads[i].reserve(5000);
   }
+  auto stop_maps = std::chrono::high_resolution_clock::now();
+  ms_double = stop_maps - stop_clear;
+  std::cout << "\t\t" << " done (" << ms_double.count() << "ms)" << std::endl;
+
+  std::cout << "\t" << "Constructing new flow eqs" << std::flush;
+
+  // for later use
+  std::chrono::time_point<std::chrono::high_resolution_clock> stop_dfds;
+  std::chrono::time_point<std::chrono::high_resolution_clock> stop_dEds;
 
 #pragma omp parallel
   {
@@ -53,13 +76,19 @@ void Hamiltonian::set_flow_eq() {
         dEds += -f[i].me * eta1_map[OneBodyKey(f[i].ss, f[i].s)];
       }
     }
-#pragma omp for reduction(+ : dEds)
+#pragma omp for reduction(+ : dEds) nowait
     for (int i = 0; i < eta2_size; ++i) {
       if (eta_2body[i].s1 < 4 && eta_2body[i].s2 < 4 && eta_2body[i].ss1 > 3 &&
           eta_2body[i].ss2 > 3) {
-        dEds += 0.5 * eta_2body[i].me * gam[{eta_2body[i].ss1, eta_2body[i].ss2, eta_2body[i].s1, eta_2body[i].s2}];
+        dEds += 0.5 * eta_2body[i].me *
+                gamma_qa
+                    .map[{eta_2body[i].ss1, eta_2body[i].ss2, eta_2body[i].s1,
+                          eta_2body[i].s2}]
+                    ->me;
       }
     }
+#pragma omp single
+    std::cout << "." << std::flush;
     ///////////////////////////////////////////////// dfds
     // first sum
     int tid = omp_get_thread_num();
@@ -90,6 +119,8 @@ void Hamiltonian::set_flow_eq() {
         }
       }
     }
+#pragma omp single
+    std::cout << "." << std::flush;
 #pragma omp for
     for (int i = 0; i < f_size; ++i) {
       if (f[i].s < 4 && f[i].ss > 3) {
@@ -103,6 +134,8 @@ void Hamiltonian::set_flow_eq() {
       }
     }
 
+#pragma omp single
+    std::cout << "." << std::flush;
 // third sum
 #pragma omp for
     for (int i = 0; i < eta2_size; ++i) {
@@ -146,6 +179,8 @@ void Hamiltonian::set_flow_eq() {
             eta_1body[i].me * g->me;
       }
     }
+#pragma omp single
+    std::cout << "." << std::flush;
 // eta2 terms
 #pragma omp for
     for (int i = 0; i < f_size; ++i) {
@@ -222,14 +257,31 @@ void Hamiltonian::set_flow_eq() {
       }
     }
   }
+  auto stop_dgds = std::chrono::high_resolution_clock::now();
+  ms_double = stop_dgds - stop_maps;
+  std::cout << "\t" << " done (" << ms_double.count() << "ms)" << std::endl;
+
+  std::cout << "\t" << "Combining thread maps" << std::flush;
+  std::cout << "." << std::flush;
+
   for (const auto &local_map : thread_dfds) {
     for (const auto &[key, me] : local_map) {
       dfds_map[key] += me;
     }
   }
+  std::cout << "." << std::flush;
   for (const auto &local_map : thread_dgammads) {
     for (const auto &[key, me] : local_map) {
       dgammads_map[key] += me;
     }
   }
+  std::cout << "." << std::flush;
+  auto stop_comb = std::chrono::high_resolution_clock::now();
+  ms_double = stop_comb - stop_dgds;
+  std::cout << "\t" << " done (" << ms_double.count() << "ms)" << std::endl;
+
+  ms_double = stop_comb - start;
+  std::cout << "\t" << "|-> done(" << ms_double.count() << "ms)" << std::endl;
+
+  std::cout << "E = " << E << ",\t" << "dEds = " << dEds << ";\t" << std::endl;
 }

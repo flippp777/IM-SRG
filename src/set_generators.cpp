@@ -1,11 +1,15 @@
 #include "Hamiltonian.hpp"
+#include <chrono>
 #include <iostream>
 
 void Hamiltonian::set_generators() {
+  std::cout << "Constructing generators";
+  auto start = std::chrono::high_resolution_clock::now();
 
   int f_size = f.size();
   int gamma_size = gamma.size();
 
+    std::cout << "." << std::flush;
 #pragma omp parallel
   {
     // one-body part
@@ -28,8 +32,8 @@ void Hamiltonian::set_generators() {
         if (delta != 0) {
           double me = f[i].me / delta;
           if (std::abs(me) > 1e-9) {
-            local_eta_1body.push_back(
-                OneBody(f[i].s, f[i].ss, f[i].me / delta));
+            local_eta_1body.push_back(OneBody(f[i].s, f[i].ss, me));
+            local_eta_1body.push_back(OneBody(f[i].ss, f[i].s, -me));
             // eta_1body.push_back(OneBody(f[i].ss, f[i].s, f[i].me /
             // delta));
           }
@@ -37,28 +41,30 @@ void Hamiltonian::set_generators() {
           std::cout << "delta_onebody = 0" << std::endl;
         }
         // - H.c. (f_hp)
-      } else if (f[i].s < 4 && f[i].ss > 3) {
-        double delta = 0;
-        for (int j = 0; j < f_size; ++j) {
-          // f_hh
-          if (f[j].s == f[i].s && f[j].ss == f[i].s) {
-            delta += -f[j].me;
-            // f_pp
-          } else if (f[j].s == f[i].ss && f[j].ss == f[j].s) {
-            delta += f[j].me;
-          }
-        }
-        if (delta != 0) {
-          double me = f[i].me / delta;
-          if (std::abs(me) > 1e-9) {
-            local_eta_1body.push_back(
-                OneBody(f[i].s, f[i].ss, f[i].me / delta));
-          }
-        } else {
-          std::cout << "delta_onebody = 0" << std::endl;
-        }
+        // } else if (f[i].s < 4 && f[i].ss > 3) {
+        //   double delta = 0;
+        //   for (int j = 0; j < f_size; ++j) {
+        //     // f_hh
+        //     if (f[j].s == f[i].s && f[j].ss == f[i].s) {
+        //       delta += -f[j].me;
+        //       // f_pp
+        //     } else if (f[j].s == f[i].ss && f[j].ss == f[j].s) {
+        //       delta += f[j].me;
+        //     }
+        //   }
+        //   if (delta != 0) {
+        //     double me = f[i].me / delta;
+        //     if (std::abs(me) > 1e-9) {
+        //       local_eta_1body.push_back(
+        //           OneBody(f[i].s, f[i].ss, f[i].me / delta));
+        //     }
+        //   } else {
+        //     std::cout << "delta_onebody = 0" << std::endl;
+        //   }
       }
     }
+#pragma omp single
+    std::cout << "." << std::flush;
 #pragma omp critical
     eta_1body.insert(eta_1body.end(), local_eta_1body.begin(),
                      local_eta_1body.end());
@@ -92,46 +98,53 @@ void Hamiltonian::set_generators() {
           if (std::abs(me) > 1e-9) {
             local_eta_2body.push_back(TwoBody(gamma[i].s1, gamma[i].s2,
                                               gamma[i].ss1, gamma[i].ss2, me));
-            // local_eta_2body.push_back(TwoBody(Gamma[i].ss2,
-            // Gamma[i].ss1,
-            //                             Gamma[i].s2, Gamma[i].s1, me));
+            local_eta_2body.push_back(TwoBody(gamma[i].ss2, gamma[i].ss1,
+                                              gamma[i].s2, gamma[i].s1, -me));
           }
         } else {
 #pragma omp critical
           std::cout << "delta_onebody = 0" << std::endl;
         }
         // - H.c. (Gamma_hh'pp')
-      } else if (gamma[i].s1 < 4 && gamma[i].s2 < 4 && gamma[i].ss1 > 3 &&
-                 gamma[i].ss2 > 3) {
-        double delta = 0;
-        for (const OneBody &f : f) {
-          // f_hh
-          if (f.s == gamma[i].s1 && f.s == f.ss) {
-            delta += -f.me;
-            // f_h'h'
-          } else if (f.s == gamma[i].s2 && f.s == f.ss) {
-            delta += -f.me;
-            // f_pp
-          } else if (f.s == gamma[i].ss1 && f.s == f.ss) {
-            delta += f.me;
-            // f_p'p'
-          } else if (f.s == gamma[i].ss2 && f.s == f.ss) {
-            delta += f.me;
-          }
-        }
-        if (delta != 0) {
-          double me = gamma[i].me / delta;
-          if (std::abs(me) > 1e-9) {
-            local_eta_2body.push_back(TwoBody(gamma[i].s1, gamma[i].s2,
-                                              gamma[i].ss1, gamma[i].ss2, me));
-          }
-        } else {
-          std::cout << "delta_onebody = 0" << std::endl;
-        }
+        // } else if (gamma[i].s1 < 4 && gamma[i].s2 < 4 && gamma[i].ss1 >
+        // 3 &&
+        //            gamma[i].ss2 > 3) {
+        //   double delta = 0;
+        //   for (const OneBody &f : f) {
+        //     // f_hh
+        //     if (f.s == gamma[i].s1 && f.s == f.ss) {
+        //       delta += -f.me;
+        //       // f_h'h'
+        //     } else if (f.s == gamma[i].s2 && f.s == f.ss) {
+        //       delta += -f.me;
+        //       // f_pp
+        //     } else if (f.s == gamma[i].ss1 && f.s == f.ss) {
+        //       delta += f.me;
+        //       // f_p'p'
+        //     } else if (f.s == gamma[i].ss2 && f.s == f.ss) {
+        //       delta += f.me;
+        //     }
+        //   }
+        //   if (delta != 0) {
+        //     double me = gamma[i].me / delta;
+        //     if (std::abs(me) > 1e-9) {
+        //       local_eta_2body.push_back(TwoBody(gamma[i].s1,
+        //       gamma[i].s2,
+        //                                         gamma[i].ss1,
+        //                                         gamma[i].ss2, me));
+        //     }
+        //   } else {
+        //     std::cout << "delta_onebody = 0" << std::endl;
+        //   }
       }
     }
+#pragma omp single
+    std::cout << "." << std::flush;
 #pragma omp critical
     eta_2body.insert(eta_2body.end(), local_eta_2body.begin(),
                      local_eta_2body.end());
   }
+  auto stop = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double, std::milli> ms_double = stop - start;
+  std::cout << "\t" << " done ("<< ms_double.count() << "ms)" << std::endl;;
 }
