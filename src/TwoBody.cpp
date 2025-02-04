@@ -11,6 +11,7 @@ TwoBody::TwoBody(int s1, int s2, int ss1, int ss2, double me)
 std::vector<TwoBody> operator+(const std::vector<TwoBody> &v,
                                const TwoBody &a) {
   std::vector<TwoBody> new_vec = v;
+
   for (int i = 0; i < new_vec.size(); ++i) {
     if (new_vec[i].s1 == a.s1 && new_vec[i].s2 == a.s2 &&
         new_vec[i].ss1 == a.ss1 && new_vec[i].ss2 == a.ss2) {
