@@ -1,7 +1,6 @@
 #include "TwoBodyQA.hpp"
 #include "TwoBody.hpp"
 #include <cstdio>
-#include <iostream>
 #include <omp.h>
 #include <vector>
 

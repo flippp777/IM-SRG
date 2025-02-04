@@ -1,6 +1,9 @@
 #include "Hamiltonian.hpp"
-#include "Integrate.hpp"
 #include <iostream>
+
+double euler_step(double x, const double dxds, const double ds) {
+  return ds * dxds;
+}
 
 void Hamiltonian::euler(const double s0, const double s, const double ds) {
   int n = (int)((s - s0) / ds);

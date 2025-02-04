@@ -1,5 +1,4 @@
 #include "Hamiltonian.hpp"
-#include "time.hpp"
 
 #include <chrono>
 #include <iostream>
