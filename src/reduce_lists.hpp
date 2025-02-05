@@ -1,0 +1,14 @@
+#ifndef REDUCELIST
+#define REDUCELIST 
+#include "OneBody.hpp"
+#include "TwoBody.hpp"
+#include <unordered_map>
+#include <vector>
+
+std::unordered_map<OneBodyKey, double> reduce_map(std::vector<std::unordered_map<OneBodyKey, double>> &vec);
+std::unordered_map<TwoBodyKey, double> reduce_map(std::vector<std::unordered_map<TwoBodyKey, double>> &vec);
+
+std::vector<OneBody> sum_equal_elements(std::vector<OneBody> &vec);
+std::vector<TwoBody> sum_equal_elements(std::vector<TwoBody> &vec);
+
+#endif // !REDUCELIST
