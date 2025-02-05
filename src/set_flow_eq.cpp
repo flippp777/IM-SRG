@@ -1,6 +1,7 @@
 #include "Hamiltonian.hpp"
 #include "TwoBodyQA.hpp"
 #include "omp.h"
+#include "reduce_map.hpp"
 #include <chrono>
 #include <iostream>
 #include <omp.h>
@@ -118,8 +119,6 @@ void Hamiltonian::set_flow_eq() {
         }
       }
     }
-#pragma omp single
-    std::cout << "." << std::flush;
 #pragma omp for
     for (int i = 0; i < f_size; ++i) {
       if (f[i].s < 4 && f[i].ss > 3) {
@@ -282,6 +281,10 @@ void Hamiltonian::set_flow_eq() {
 //       }
 //     }
 //   }
+  dfds_map = reduce_map(thread_dfds);
+  std::cout << "." << std::flush;
+  dgammads_map = reduce_map(thread_dgammads);
+
   std::cout << "." << std::flush;
   auto stop_comb = std::chrono::high_resolution_clock::now();
   ms_double = stop_comb - stop_dgds;
