@@ -33,7 +33,8 @@ void Hamiltonian::euler(const double s0, const double s, const double ds) {
   std::cout << "----------------   " << "Step 0" << "   ---------------"
             << std::endl;
   set_generators();
-  set_flow_eq();
+  // set_flow_eq();
+  flow_eq_gsl(0.0, NULL, NULL, NULL);
 
   std::ostringstream name1;
   name1 << "im_srg_euler_f_s" << s0 << ".txt";
