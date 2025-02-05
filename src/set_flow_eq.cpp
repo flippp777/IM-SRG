@@ -1,5 +1,6 @@
 #include "Hamiltonian.hpp"
 #include "TwoBodyQA.hpp"
+#include "omp.h"
 #include <chrono>
 #include <iostream>
 #include <omp.h>
@@ -47,11 +48,12 @@ void Hamiltonian::set_flow_eq() {
   const int gamma_size = gamma.size();
   const int eta2_size = eta_2body.size();
 
+  int max_threads = omp_get_max_threads();
   std::vector<std::unordered_map<OneBodyKey, double>> thread_dfds(
-      omp_get_max_threads());
+      max_threads);
   std::vector<std::unordered_map<TwoBodyKey, double>> thread_dgammads(
-      omp_get_max_threads());
-  for (int i = 0; i < omp_get_max_threads(); i++) {
+      max_threads);
+  for (int i = 0; i < max_threads; i++) {
     thread_dfds[i].reserve(5000);
     thread_dgammads[i].reserve(5000);
   }
@@ -61,9 +63,6 @@ void Hamiltonian::set_flow_eq() {
 
   std::cout << "\t" << "Constructing new flow eqs" << std::flush;
 
-  // for later use
-  std::chrono::time_point<std::chrono::high_resolution_clock> stop_dfds;
-  std::chrono::time_point<std::chrono::high_resolution_clock> stop_dEds;
 
 #pragma omp parallel
   {
@@ -263,18 +262,26 @@ void Hamiltonian::set_flow_eq() {
 
   std::cout << "\t" << "Combining thread maps" << std::flush;
   std::cout << "." << std::flush;
-
-  for (const auto &local_map : thread_dfds) {
-    for (const auto &[key, me] : local_map) {
-      dfds_map[key] += me;
-    }
-  }
-  std::cout << "." << std::flush;
-  for (const auto &local_map : thread_dgammads) {
-    for (const auto &[key, me] : local_map) {
-      dgammads_map[key] += me;
-    }
-  }
+// #pragma omp parallel sections
+//   {
+// #pragma omp section
+//     {
+//       for (const auto &local_map : thread_dfds) {
+//         for (const auto &[key, me] : local_map) {
+//           dfds_map[key] += me;
+//         }
+//       }
+//     }
+// #pragma omp section
+//     {
+//       std::cout << "." << std::flush;
+//       for (const auto &local_map : thread_dgammads) {
+//         for (const auto &[key, me] : local_map) {
+//           dgammads_map[key] += me;
+//         }
+//       }
+//     }
+//   }
   std::cout << "." << std::flush;
   auto stop_comb = std::chrono::high_resolution_clock::now();
   ms_double = stop_comb - stop_dgds;
@@ -282,6 +289,4 @@ void Hamiltonian::set_flow_eq() {
 
   ms_double = stop_comb - start;
   std::cout << "\t" << "|-> done(" << ms_double.count() << "ms)" << std::endl;
-
-  std::cout << "E = " << E << ",\t" << "dEds = " << dEds << ";\t" << std::endl;
 }

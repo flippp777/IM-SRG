@@ -11,7 +11,6 @@ int main() {
 
   Hamiltonian H = Hamiltonian(filepath);
 
-  std::vector<int> vec;
   // std::vector<OneBody> f = H.get_one_body();
   // sort(f);
   // for (const auto &ff : f){
@@ -22,14 +21,11 @@ int main() {
   // H.print_one_body();
   // H.print_two_body();
 
-  H.set_generators();
+  // H.set_generators();
 
-  H.set_flow_eq();
+  // H.set_flow_eq();
 
-  // auto start_flow = std::chrono::high_resolution_clock::now();
-  // H.euler(0, 0, 0.1);
-  // auto stop_flow = std::chrono::high_resolution_clock::now();
-  // print_duration("flow time: ", start_flow, stop_flow);
+  H.euler(0.001, 1, 0.003);
 
   return 0;
 }

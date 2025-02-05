@@ -1,5 +1,7 @@
 #include "Hamiltonian.hpp"
+#include <chrono>
 #include <iostream>
+#include <ratio>
 
 double euler_step(double x, const double dxds, const double ds) {
   return ds * dxds;
@@ -7,18 +9,42 @@ double euler_step(double x, const double dxds, const double ds) {
 
 void Hamiltonian::euler(const double s0, const double s, const double ds) {
   int n = (int)((s - s0) / ds);
-  std::cout << "n = " << n << std::endl;
+  std::cout << "##########   " << "s0 = " << s0 << "  <->  " << "s = " << s
+            << "  <->  " << "ds = " << ds << "  <->  " << n << " steps"
+            << "   ##########" << std::endl;
+  std::cout << std::endl;
 
+  auto start_step = std::chrono::high_resolution_clock::now();
+
+  auto start = std::chrono::high_resolution_clock::now();
+  std::cout << "Creating f and gamma maps" << std::flush;
+  std::cout << "." << std::flush;
   std::unordered_map<OneBodyKey, double> f_map = vec_to_map(f);
+  std::cout << "." << std::flush;
   std::unordered_map<TwoBodyKey, double> gamma_map = vec_to_map(gamma);
+  std::cout << "." << std::flush;
+  auto stop_map = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double, std::milli> ms_double = stop_map - start;
+  std::cout << " done (" << ms_double.count() << "ms)" << std::endl;
+
+  std::cout << "----------------   " << "Step 0" << "   ---------------"
+            << std::endl;
+  set_generators();
+  set_flow_eq();
+  std::cout << "E = " << E << ",\t" << "dEds = " << dEds << ";\t"
+            << "s = " << s0 << std::endl;
 
   for (int i = 0; i <= n; ++i) {
-    set_flow_eq();
-    std::cout << "E = " << E << ",\t" << "dEds = " << dEds << ";\t"
-              << "s = " << s0 + i * ds << std::endl;
+    std::cout << "Calculating Euler steps" << std::endl;
 
+    std::cout << "\t" << "Euler step for E";
+    auto start_eE = std::chrono::high_resolution_clock::now();
     E += euler_step(E, dEds, ds);
+    auto stop_eE = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> ms_double = stop_eE - start_eE;
+    std::cout << "... done (" << ms_double.count() << "ms)" << std::endl;
 
+    std::cout << "\t" << "Euler step for f";
     for (const auto &[key, me] : dfds_map) {
       if (f_map.count(key) != 0) {
         f_map[key] += euler_step(f_map[key], me, ds);
@@ -26,7 +52,11 @@ void Hamiltonian::euler(const double s0, const double s, const double ds) {
         f_map.insert({key, euler_step(0, me, ds)});
       }
     }
+    auto stop_ef = std::chrono::high_resolution_clock::now();
+    ms_double = stop_ef - start_eE;
+    std::cout << "... done (" << ms_double.count() << "ms)" << std::endl;
 
+    std::cout << "\t" << "Euler step for G";
     for (const auto &[key, me] : dgammads_map) {
       if (gamma_map.count(key) != 0) {
         gamma_map[key] += euler_step(gamma_map[key], me, ds);
@@ -34,7 +64,45 @@ void Hamiltonian::euler(const double s0, const double s, const double ds) {
         gamma_map.insert({key, euler_step(0, me, ds)});
       }
     }
+    auto stop_eG = std::chrono::high_resolution_clock::now();
+    ms_double = stop_eG - stop_ef;
+    std::cout << "... done (" << ms_double.count() << "ms)" << std::endl;
+
+    std::cout << "\t" << "f in vector";
     f = map_to_vec(f_map);
+    auto stop_f = std::chrono::high_resolution_clock::now();
+    ms_double = stop_f - stop_eG;
+    std::cout << "... done (" << ms_double.count() << "ms)" << std::endl;
+
+    std::cout << "\t" << "G in vector";
     gamma = map_to_vec(gamma_map);
+    auto stop_G = std::chrono::high_resolution_clock::now();
+    ms_double = stop_G - stop_f;
+    std::cout << "... done (" << ms_double.count() << "ms)" << std::endl;
+
+    ms_double = stop_G - start_eE;
+    std::cout << "\t" << "|-> done(" << ms_double.count() << "ms)" << std::endl;
+
+    std::cout << "E = " << E << ",\t" << "dEds = " << dEds << ";\t"
+              << "s = " << (i + 1) * ds << std::endl;
+
+    if (i != 0) {
+      ms_double = stop_G - start_step;
+      std::cout << "Step time: " << ms_double.count()* 1/1000 << "s" << std::endl;
+    } else {
+      ms_double = stop_G - start;
+      std::cout << "Step time: " << ms_double.count()* 1/1000 << "s" << std::endl;
+    }
+    std::cout << std::endl;
+
+    std::cout << "----------------   " << "Step " << i + 1
+              << "   ---------------" << std::endl;
+    start_step = std::chrono::high_resolution_clock::now();
+    set_generators();
+    set_flow_eq();
   }
+  std::cout << std::endl;
+  auto stop = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double, std::milli> s_double = stop - start;
+  std::cout << "Flow time: " << ms_double.count() * 1/1000 << "s" << std::endl;
 }
