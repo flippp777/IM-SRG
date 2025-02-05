@@ -34,7 +34,7 @@ public:
   void set_generators();
   void set_flow_eq();
 
-  int set_flow_eq_gsl(double s, const double y[],
+  int flow_eq_gsl(double s, const double y[],
                                     double dydt[], void *params);
 
   void euler(const double s0, const double s, const double ds);

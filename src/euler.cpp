@@ -35,11 +35,11 @@ void Hamiltonian::euler(const double s0, const double s, const double ds) {
   set_generators();
   set_flow_eq();
 
-  std::ostringstream name;
-  name << "im_srg_euler_f_s" << s0 << ".txt";
-  std::ofstream f_file(name.str());
+  std::ostringstream name1;
+  name1 << "im_srg_euler_f_s" << s0 << ".txt";
+  std::ofstream f_file1(name1.str());
   for (const auto &ff : f) {
-    f_file << ff.s << "\t" << ff.ss << "\t" << ff.me << std::endl;
+    f_file1 << ff.s << "\t" << ff.ss << "\t" << ff.me << std::endl;
   }
 
   std::cout << "E = " << E << ",\t" << "dEds = " << dEds << ";\t"
@@ -56,7 +56,8 @@ void Hamiltonian::euler(const double s0, const double s, const double ds) {
     auto stop_eE = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> ms_double =
         stop_eE - start_eE;
-    std::cout << "... done (" << ms_double.count() << "ms)" << std::endl;
+    std::cout << "..." << "\t" << "\t" << " done (" << ms_double.count()
+              << "ms)" << std::endl;
 
     std::cout << "\t" << "Euler step for f";
     for (const auto &[key, me] : dfds_map) {
@@ -68,7 +69,10 @@ void Hamiltonian::euler(const double s0, const double s, const double ds) {
     }
     auto stop_ef = std::chrono::high_resolution_clock::now();
     ms_double = stop_ef - start_eE;
-    std::cout << "... done (" << ms_double.count() << "ms)" << std::endl;
+    std::cout << "..." << "\t"
+              << "\t"
+                 " done ("
+              << ms_double.count() << "ms)" << std::endl;
 
     std::cout << "\t" << "Euler step for G";
     for (const auto &[key, me] : dgammads_map) {
@@ -80,19 +84,22 @@ void Hamiltonian::euler(const double s0, const double s, const double ds) {
     }
     auto stop_eG = std::chrono::high_resolution_clock::now();
     ms_double = stop_eG - stop_ef;
-    std::cout << "... done (" << ms_double.count() << "ms)" << std::endl;
+    std::cout << "..." << "\t" << "\t" << " done (" << ms_double.count()
+              << "ms)" << std::endl;
 
     std::cout << "\t" << "f in vector";
     f = map_to_vec(f_map);
     auto stop_f = std::chrono::high_resolution_clock::now();
     ms_double = stop_f - stop_eG;
-    std::cout << "... done (" << ms_double.count() << "ms)" << std::endl;
+    std::cout << "..." << "\t" << "\t" << "\t" << " done ("
+              << ms_double.count() << "ms)" << std::endl;
 
     std::cout << "\t" << "G in vector";
     gamma = map_to_vec(gamma_map);
     auto stop_G = std::chrono::high_resolution_clock::now();
     ms_double = stop_G - stop_f;
-    std::cout << "... done (" << ms_double.count() << "ms)" << std::endl;
+    std::cout << "..." << "\t" << "\t" << "\t" << " done ("
+              << ms_double.count() << "ms)" << std::endl;
 
     ms_double = stop_G - start_eE;
     std::cout << "\t" << "|-> done(" << ms_double.count() << "ms)"
@@ -119,24 +126,24 @@ void Hamiltonian::euler(const double s0, const double s, const double ds) {
     set_flow_eq();
 
     E_file << (i + 1) * ds << "\t" << E << "\t" << dEds << std::endl;
-    if (i == 5 || i == 11 || i == 20) {
-      name.clear();
-      name << "im_srg_euler_f_s" << (i + 1) * ds << ".txt";
-      std::ofstream f_file(name.str());
-      for (const auto &ff : f) {
-        f_file << ff.s << "\t" << ff.ss << "\t" << ff.me << std::endl;
-      }
-    }
+    // if (i == 5 || i == 11 || i == 20) {
+    //   std::ostringstream name2;
+    //   name2 << "im_srg_euler_f_s" << (i + 1) * ds << ".txt";
+    //   std::ofstream f_file(name1.str());
+    //   for (const auto &ff : f) {
+    //     f_file << ff.s << "\t" << ff.ss << "\t" << ff.me << std::endl;
+    //   }
+    // }
   }
   std::cout << std::endl;
   auto stop = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double, std::milli> s_double = stop - start;
   std::cout << "Flow time: " << ms_double.count() * 1 / 1000 << "s"
             << std::endl;
-      name.clear();
-      name << "im_srg_euler_f_s" << s << ".txt";
-      std::ostringstream ff_file(name.str());
-      for (const auto &ff : f) {
-        f_file << ff.s << "\t" << ff.ss << "\t" << ff.me << std::endl;
-      }
+  std::ostringstream name3;
+  name3 << "im_srg_euler_f_s" << s << ".txt";
+  std::ostringstream ff_file(name3.str());
+  for (const auto &ff : f) {
+    ff_file << ff.s << "\t" << ff.ss << "\t" << ff.me << std::endl;
+  }
 }
