@@ -261,29 +261,29 @@ void Hamiltonian::set_flow_eq() {
 
   std::cout << "\t" << "Combining thread maps" << std::flush;
   std::cout << "." << std::flush;
-// #pragma omp parallel sections
-//   {
-// #pragma omp section
-//     {
-//       for (const auto &local_map : thread_dfds) {
-//         for (const auto &[key, me] : local_map) {
-//           dfds_map[key] += me;
-//         }
-//       }
-//     }
-// #pragma omp section
-//     {
-//       std::cout << "." << std::flush;
-//       for (const auto &local_map : thread_dgammads) {
-//         for (const auto &[key, me] : local_map) {
-//           dgammads_map[key] += me;
-//         }
-//       }
-//     }
-//   }
-  dfds_map = reduce_map(thread_dfds);
-  std::cout << "." << std::flush;
-  dgammads_map = reduce_map(thread_dgammads);
+#pragma omp parallel sections
+  {
+#pragma omp section
+    {
+      for (const auto &local_map : thread_dfds) {
+        for (const auto &[key, me] : local_map) {
+          dfds_map[key] += me;
+        }
+      }
+    }
+#pragma omp section
+    {
+      std::cout << "." << std::flush;
+      for (const auto &local_map : thread_dgammads) {
+        for (const auto &[key, me] : local_map) {
+          dgammads_map[key] += me;
+        }
+      }
+    }
+  }
+  // dfds_map = reduce_map(thread_dfds);
+  // std::cout << "." << std::flush;
+  // dgammads_map = reduce_map(thread_dgammads);
 
   std::cout << "." << std::flush;
   auto stop_comb = std::chrono::high_resolution_clock::now();
