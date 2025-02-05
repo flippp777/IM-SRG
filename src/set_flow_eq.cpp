@@ -1,7 +1,7 @@
 #include "Hamiltonian.hpp"
 #include "TwoBodyQA.hpp"
 #include "omp.h"
-#include "reduce_map.hpp"
+#include "reduce_lists.hpp"
 #include <chrono>
 #include <iostream>
 #include <omp.h>

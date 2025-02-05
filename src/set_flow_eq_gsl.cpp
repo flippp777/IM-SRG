@@ -2,8 +2,13 @@
 #include "OneBody.hpp"
 #include "TwoBody.hpp"
 #include "TwoBodyQA.hpp"
+#include "reduce_lists.hpp"
 #include <chrono>
 #include <iostream>
+#include <stdio.h>
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_odeiv2.h>
 #include <omp.h>
 
 int Hamiltonian::flow_eq_gsl(double s, const double y[], double dydt[],
@@ -41,10 +46,6 @@ int Hamiltonian::flow_eq_gsl(double s, const double y[], double dydt[],
   int max_threads = omp_get_max_threads();
   std::vector<std::vector<OneBody>> thread_dfds(max_threads);
   std::vector<std::vector<TwoBody>> thread_dgammads(max_threads);
-  for (int i = 0; i < max_threads; i++) {
-    thread_dfds[i].reserve(f_size * 10);
-    thread_dgammads[i].reserve(gamma_size);
-  }
 
   auto stop_maps = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double, std::milli> ms_double = stop_maps - start;
@@ -83,6 +84,7 @@ int Hamiltonian::flow_eq_gsl(double s, const double y[], double dydt[],
     // first sum
     int tid = omp_get_thread_num();
     std::vector<OneBody> &local_dfds = thread_dfds[tid];
+    local_dfds.reserve(f_size);
 
 #pragma omp for collapse(2)
     for (int i = 0; i < f_size; ++i) {
@@ -157,6 +159,7 @@ int Hamiltonian::flow_eq_gsl(double s, const double y[], double dydt[],
 
     ///////////////////////////// dGammads
     std::vector<TwoBody> &local_dgammads = thread_dgammads[tid];
+    local_dgammads.reserve(gamma_size);
 
 // first sum
 // gamma terms
@@ -186,12 +189,16 @@ int Hamiltonian::flow_eq_gsl(double s, const double y[], double dydt[],
 #pragma omp for
     for (int i = 0; i < f_size; ++i) {
       for (const auto &e : eta2_qa.check_s1(f[i].ss)) {
-        local_dgammads.push_back(TwoBody(f[i].s, e->s2, e->ss1, e->ss2, -f[i].me * e->me));
-        local_dgammads.push_back(TwoBody(e->s2, f[i].s, e->ss1, e->ss2, f[i].me * e->me));
+        local_dgammads.push_back(
+            TwoBody(f[i].s, e->s2, e->ss1, e->ss2, -f[i].me * e->me));
+        local_dgammads.push_back(
+            TwoBody(e->s2, f[i].s, e->ss1, e->ss2, f[i].me * e->me));
       }
       for (const auto &e : eta2_qa.check_ss1(f[i].s)) {
-        local_dgammads.push_back(TwoBody(e->s1, e->s2, f[i].ss, e->ss2, f[i].me * e->me));
-        local_dgammads.push_back(TwoBody(e->s1, e->s2, e->ss2, f[i].ss, -f[i].me * e->me));
+        local_dgammads.push_back(
+            TwoBody(e->s1, e->s2, f[i].ss, e->ss2, f[i].me * e->me));
+        local_dgammads.push_back(
+            TwoBody(e->s1, e->s2, e->ss2, f[i].ss, -f[i].me * e->me));
       }
     }
 
@@ -203,28 +210,30 @@ int Hamiltonian::flow_eq_gsl(double s, const double y[], double dydt[],
       if (eta_2body[i].ss1 < 4 && eta_2body[i].ss2 < 4) {
         for (const auto &g :
              gamma_qa.check_s1s2(eta_2body[i].ss1, eta_2body[i].ss2)) {
-          local_dgammads.push_back(TwoBody(eta_2body[i].s1, eta_2body[i].s2, g->ss1,
-                          g->ss2, -0.5 * eta_2body[i].me * g->me));
+          local_dgammads.push_back(
+              TwoBody(eta_2body[i].s1, eta_2body[i].s2, g->ss1, g->ss2,
+                      -0.5 * eta_2body[i].me * g->me));
         }
       } else if (eta_2body[i].s1 < 4 && eta_2body[i].s2 < 4) {
         for (const auto &g :
              gamma_qa.check_ss1ss2(eta_2body[i].s1, eta_2body[i].s2)) {
           local_dgammads.push_back(TwoBody(g->s1, g->s2, eta_2body[i].ss1,
-                          eta_2body[i].ss2,
-              0.5 * eta_2body[i].me * g->me));
+                                           eta_2body[i].ss2,
+                                           0.5 * eta_2body[i].me * g->me));
         }
       } else if (eta_2body[i].ss1 > 3 && eta_2body[i].ss2 > 3) {
         for (const auto &g :
              gamma_qa.check_s1s2(eta_2body[i].ss1, eta_2body[i].ss2)) {
-          local_dgammads.push_back(TwoBody(eta_2body[i].s1, eta_2body[i].s2, g->ss1,
-                          g->ss2, 0.5 * eta_2body[i].me * g->me));
+          local_dgammads.push_back(TwoBody(eta_2body[i].s1,
+                                           eta_2body[i].s2, g->ss1, g->ss2,
+                                           0.5 * eta_2body[i].me * g->me));
         }
       } else if (eta_2body[i].s1 > 3 && eta_2body[i].s2 > 3) {
         for (const auto &g :
              gamma_qa.check_ss1ss2(eta_2body[i].s1, eta_2body[i].s2)) {
-          local_dgammads.push_back(TwoBody(g->s1, g->s2, eta_2body[i].ss1,
-                          eta_2body[i].ss2,
-              -0.5 * eta_2body[i].me * g->me));
+          local_dgammads.push_back(
+              TwoBody(g->s1, g->s2, eta_2body[i].ss1, eta_2body[i].ss2,
+                      -0.5 * eta_2body[i].me * g->me));
         }
 
         // 3. sum
@@ -232,34 +241,42 @@ int Hamiltonian::flow_eq_gsl(double s, const double y[], double dydt[],
         for (const auto &g :
              gamma_qa.check_s1ss1(eta_2body[i].ss1, eta_2body[i].s1)) {
           // 1
-             local_dgammads.push_back(TwoBody(g->s2, eta_2body[i].s2, g->ss2,
-                          eta_2body[i].ss2, -eta_2body[i].me * g->me));
+          local_dgammads.push_back(TwoBody(g->s2, eta_2body[i].s2, g->ss2,
+                                           eta_2body[i].ss2,
+                                           -eta_2body[i].me * g->me));
           // -P_12
-             local_dgammads.push_back(TwoBody(eta_2body[i].s2, g->s2, g->ss2,
-                          eta_2body[i].ss2, eta_2body[i].me * g->me));
+          local_dgammads.push_back(TwoBody(eta_2body[i].s2, g->s2, g->ss2,
+                                           eta_2body[i].ss2,
+                                           eta_2body[i].me * g->me));
           // -P_34
-          local_dgammads.push_back(TwoBody(g->s2, eta_2body[i].s2, eta_2body[i].ss2,
-                          g->ss2, eta_2body[i].me * g->me));
+          local_dgammads.push_back(TwoBody(g->s2, eta_2body[i].s2,
+                                           eta_2body[i].ss2, g->ss2,
+                                           eta_2body[i].me * g->me));
           // P_12 P_34
-          local_dgammads.push_back(TwoBody(eta_2body[i].s2, g->s2, eta_2body[i].ss2,
-                          g->ss2, -eta_2body[i].me * g->me));
+          local_dgammads.push_back(TwoBody(eta_2body[i].s2, g->s2,
+                                           eta_2body[i].ss2, g->ss2,
+                                           -eta_2body[i].me * g->me));
         }
 
       } else if (eta_2body[i].ss1 > 3 && eta_2body[i].s1 < 4) {
         for (const auto &g :
              gamma_qa.check_s1ss1(eta_2body[i].ss1, eta_2body[i].s1)) {
           // 1
-             local_dgammads.push_back(TwoBody(g->s2, eta_2body[i].s2, g->ss2,
-                          eta_2body[i].ss2, eta_2body[i].me * g->me));
+          local_dgammads.push_back(TwoBody(g->s2, eta_2body[i].s2, g->ss2,
+                                           eta_2body[i].ss2,
+                                           eta_2body[i].me * g->me));
           // -P_12
-             local_dgammads.push_back(TwoBody(eta_2body[i].s2, g->s2, g->ss2,
-                          eta_2body[i].ss2, -eta_2body[i].me * g->me));
+          local_dgammads.push_back(TwoBody(eta_2body[i].s2, g->s2, g->ss2,
+                                           eta_2body[i].ss2,
+                                           -eta_2body[i].me * g->me));
           // -P_34
-          local_dgammads.push_back(TwoBody(g->s2, eta_2body[i].s2, eta_2body[i].ss2,
-                          g->ss2, -eta_2body[i].me * g->me));
+          local_dgammads.push_back(TwoBody(g->s2, eta_2body[i].s2,
+                                           eta_2body[i].ss2, g->ss2,
+                                           -eta_2body[i].me * g->me));
           // P_12 P_34
-          local_dgammads.push_back(TwoBody(eta_2body[i].s2, g->s2, eta_2body[i].ss2,
-                          g->ss2, eta_2body[i].me * g->me));
+          local_dgammads.push_back(TwoBody(eta_2body[i].s2, g->s2,
+                                           eta_2body[i].ss2, g->ss2,
+                                           eta_2body[i].me * g->me));
         }
       }
     }
@@ -278,26 +295,31 @@ int Hamiltonian::flow_eq_gsl(double s, const double y[], double dydt[],
 #pragma omp section
     {
       for (const auto &local_map : thread_dfds) {
-        for (const auto &[key, me] : local_map) {
-          dfds_map[key] += me;
-        }
+        dfds_vec.insert(dfds_vec.end(), local_map.begin(), local_map.end());
       }
+      dfds_vec = sum_equal_elements(dfds_vec);
     }
 
 #pragma omp section
     {
       std::cout << "." << std::flush;
       for (const auto &local_map : thread_dgammads) {
-        for (const auto &[key, me] : local_map) {
-          dgammads_map[key] += me;
-        }
+        dgammads_vec.insert(dgammads_vec.end(), local_map.begin(), local_map.end());
       }
+      dgammads_vec = sum_equal_elements(dgammads_vec);
     }
   }
-
-  // dfds_map = reduce_map(thread_dfds);
-  // std::cout << "." << std::flush;
-  // dgammads_map = reduce_map(thread_dgammads);
+  
+  size_t dfds_size = dfds_vec.size();
+  size_t dgammads_size = dgammads_vec.size();
+  #pragma omp parallel for 
+  for (size_t i = 0; i < dfds_size + dgammads_size; i++) {
+    if (i>dfds_size) {
+      dydt[i]=dgammads_vec[i].me;
+    }
+  }
+  dfds_map = vec_to_map(dfds_vec);
+  dgammads_map = vec_to_map(dgammads_vec);
 
   std::cout << "." << std::flush;
   auto stop_comb = std::chrono::high_resolution_clock::now();
@@ -308,4 +330,5 @@ int Hamiltonian::flow_eq_gsl(double s, const double y[], double dydt[],
   ms_double = stop_comb - start;
   std::cout << "\t" << "|-> done(" << ms_double.count() << "ms)"
             << std::endl;
+  return GSL_SUCCESS;
 }
