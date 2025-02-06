@@ -108,7 +108,7 @@ std::vector<OneBody> reduce_vec(std::vector<std::vector<OneBody>> &vecs) {
 }
 
 std::vector<TwoBody> sum_equal_elements(std::vector<TwoBody> &vec) {
-  sort(vec);
+  // sort(vec);
   int vec_size = vec.size();
   std::vector<TwoBody> new_vec;
   new_vec.reserve(vec_size);
