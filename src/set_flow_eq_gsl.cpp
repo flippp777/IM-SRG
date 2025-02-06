@@ -304,7 +304,6 @@ int Hamiltonian::flow_eq_gsl(double s, const double y[], double dydt[],
 //     }
 //   }
   
-  std::cout << thread_dfds.size() << " " << thread_dgammads.size() << std::endl;
   dfds_vec = reduce_vec(thread_dfds);
       std::cout << "." << std::flush;
   dgammads_vec = reduce_vec(thread_dgammads);
