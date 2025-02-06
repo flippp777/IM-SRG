@@ -42,7 +42,7 @@ void sort(std::vector<TwoBody> &v) {
     } else if (a.s1 == b.s1) {
       return a.s2 < b.s2;
     } else {
-      return a.s1 < b.s2;
+      return a.s1 < b.s1;
     }
   });
 }
