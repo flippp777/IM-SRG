@@ -10,6 +10,7 @@ public:
 
   OneBody();
   OneBody(int s, int ss, double me);
+
 };
 
 std::vector<OneBody> operator+(const std::vector<OneBody> &v,

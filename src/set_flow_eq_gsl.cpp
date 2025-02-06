@@ -4,12 +4,12 @@
 #include "TwoBodyQA.hpp"
 #include "reduce_lists.hpp"
 #include <chrono>
-#include <iostream>
-#include <stdio.h>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv2.h>
+#include <iostream>
 #include <omp.h>
+#include <stdio.h>
 
 int Hamiltonian::flow_eq_gsl(double s, const double y[], double dydt[],
                              void *params) {
@@ -22,26 +22,14 @@ int Hamiltonian::flow_eq_gsl(double s, const double y[], double dydt[],
   std::cout << "." << std::flush;
   TwoBodyQA eta2_qa = TwoBodyQA(eta_2body, 1);
 
-  std::unordered_map<OneBodyKey, double> f_map;
-  f_map.reserve(f.size());
-  for (const auto &ff : f) {
-    f_map[OneBodyKey(ff.s, ff.ss)] = ff.me;
-  }
-
-  std::cout << "." << std::flush;
-
-  std::unordered_map<OneBodyKey, double> eta1_map;
-  eta1_map.reserve(eta_1body.size());
-  for (const auto &e : eta_1body) {
-    eta1_map[OneBodyKey(e.s, e.ss)] = e.me;
-  }
-
   std::cout << "." << std::flush;
 
   const int f_size = f.size();
   const int eta1_size = eta_1body.size();
   const int gamma_size = gamma.size();
   const int eta2_size = eta_2body.size();
+
+  std::cout << "." << std::flush;
 
   int max_threads = omp_get_max_threads();
   std::vector<std::vector<OneBody>> thread_dfds(max_threads);
@@ -59,10 +47,14 @@ int Hamiltonian::flow_eq_gsl(double s, const double y[], double dydt[],
 //////////////////////////////// dEds
 #pragma omp for reduction(+ : dEds)
     for (int i = 0; i < f_size; ++i) {
-      if (f[i].s > 3 && f[i].ss < 4) {
-        dEds += f[i].me * eta1_map[OneBodyKey(f[i].ss, f[i].s)];
-      } else if (f[i].s < 4 && f[i].s > 3) {
-        dEds += -f[i].me * eta1_map[OneBodyKey(f[i].ss, f[i].s)];
+      for (int j = 0; j < eta1_size; ++j) {
+        if (f[i].s == eta_1body[j].ss && f[i].ss == eta_1body[j].s &&
+            f[i].s > 3 && f[i].ss < 4) {
+          dEds += f[i].me * eta_1body[j].me;
+        } else if (f[i].s == eta_1body[j].ss &&
+                   f[i].ss == eta_1body[j].s && f[i].s < 4 && f[i].s > 3) {
+          dEds += -f[i].me * eta_1body[j].me;
+        }
       }
     }
 
@@ -290,36 +282,40 @@ int Hamiltonian::flow_eq_gsl(double s, const double y[], double dydt[],
   std::cout << "\t" << "Combining thread vectors" << std::flush;
   std::cout << "." << std::flush;
 
-#pragma omp parallel sections
-  {
-#pragma omp section
-    {
-      for (const auto &local_map : thread_dfds) {
-        dfds_vec.insert(dfds_vec.end(), local_map.begin(), local_map.end());
-      }
-      dfds_vec = sum_equal_elements(dfds_vec);
-    }
-
-#pragma omp section
-    {
-      std::cout << "." << std::flush;
-      for (const auto &local_map : thread_dgammads) {
-        dgammads_vec.insert(dgammads_vec.end(), local_map.begin(), local_map.end());
-      }
-      dgammads_vec = sum_equal_elements(dgammads_vec);
-    }
-  }
+// #pragma omp parallel sections
+//   {
+// #pragma omp section
+//     {
+//       for (const auto &local_map : thread_dfds) {
+//         dfds_vec.insert(dfds_vec.end(), local_map.begin(),
+//                         local_map.end());
+//       }
+//       dfds_vec = sum_equal_elements(dfds_vec);
+//     }
+//
+// #pragma omp section
+//     {
+//       std::cout << "." << std::flush;
+//       for (const auto &local_map : thread_dgammads) {
+//         dgammads_vec.insert(dgammads_vec.end(), local_map.begin(),
+//                             local_map.end());
+//       }
+//       dgammads_vec = sum_equal_elements(dgammads_vec);
+//     }
+//   }
   
+  dfds_vec = reduce_vec(thread_dfds);
+  dgammads_vec = reduce_vec(thread_dgammads);
+  
+
   size_t dfds_size = dfds_vec.size();
   size_t dgammads_size = dgammads_vec.size();
-  #pragma omp parallel for 
+#pragma omp parallel for
   for (size_t i = 0; i < dfds_size + dgammads_size; i++) {
-    if (i>dfds_size) {
-      dydt[i]=dgammads_vec[i].me;
+    if (i > dfds_size) {
+      dydt[i] = dgammads_vec[i].me;
     }
   }
-  dfds_map = vec_to_map(dfds_vec);
-  dgammads_map = vec_to_map(dgammads_vec);
 
   std::cout << "." << std::flush;
   auto stop_comb = std::chrono::high_resolution_clock::now();

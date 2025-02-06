@@ -85,6 +85,34 @@ std::vector<OneBody> sum_equal_elements(std::vector<OneBody> &vec) {
   return new_vec;
 }
 
+std::vector<OneBody> reduce_vec(std::vector<std::vector<OneBody>> &vecs) {
+
+  while (vecs.size() > 1) {
+    std::vector<std::vector<OneBody>> new_vecs(
+        (int)vecs.size() / 2);
+
+#pragma omp parallel num_threads((int)vecs.size() / 2)
+    {
+      std::vector<OneBody> local_vec;
+
+#pragma omp for nowait
+      for (int i = 0; i < vecs.size() / 2; ++i) {
+        local_vec = vecs[i *2 ];
+        local_vec.insert(local_vec.end(), vecs[2*i+1].begin(), vecs[2*i].end());
+        local_vec = sum_equal_elements(local_vec);
+      }
+      new_vecs[omp_get_thread_num()] = local_vec;
+    }
+
+    if (vecs.size() % 2 == 1) {
+      new_vecs.push_back(std::move(vecs.back()));
+    }
+
+    vecs = std::move(new_vecs);
+  }
+  return vecs[0];
+}
+
 std::vector<TwoBody> sum_equal_elements(std::vector<TwoBody> &vec) {
   sort(vec);
   int vec_size = vec.size();
@@ -102,4 +130,32 @@ std::vector<TwoBody> sum_equal_elements(std::vector<TwoBody> &vec) {
         TwoBody(vec[i].s1, vec[i].s2, vec[i].ss1, vec[i].ss2, sum));
   }
   return new_vec;
+}
+
+std::vector<TwoBody> reduce_vec(std::vector<std::vector<TwoBody>> &vecs) {
+
+  while (vecs.size() > 1) {
+    std::vector<std::vector<TwoBody>> new_vecs(
+        (int)vecs.size() / 2);
+
+#pragma omp parallel num_threads((int)vecs.size() / 2)
+    {
+      std::vector<TwoBody> local_vec;
+
+#pragma omp for nowait
+      for (int i = 0; i < vecs.size() / 2; ++i) {
+        local_vec = vecs[i *2 ];
+        local_vec.insert(local_vec.end(), vecs[2*i+1].begin(), vecs[2*i].end());
+        local_vec = sum_equal_elements(local_vec);
+      }
+      new_vecs[omp_get_thread_num()] = local_vec;
+    }
+
+    if (vecs.size() % 2 == 1) {
+      new_vecs.push_back(std::move(vecs.back()));
+    }
+
+    vecs = std::move(new_vecs);
+  }
+  return vecs[0];
 }
