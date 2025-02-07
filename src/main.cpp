@@ -9,6 +9,7 @@
 #include <iostream>
 #include <ratio>
 #include <vector>
+#include <print>
 
 int
 main ()
@@ -18,12 +19,15 @@ main ()
                          "hwHO020.me2m";
 
   Hamiltonian H = Hamiltonian (filepath);
-  H.set_full_vector();
   
-  im_srg_ode(0.0, NULL, NULL, &H);
+  H.set_num_states(20);
 
-  double dEds = H.get_zero_body_flow_eq();
-  std::cout << dEds << std::endl;
+
+  H.set_full_vector();
+
+  
+  H.runge_kutta_gsl(0, 0.001);
+
 
 
   return 0;

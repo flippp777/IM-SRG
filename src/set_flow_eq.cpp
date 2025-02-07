@@ -19,7 +19,6 @@ Hamiltonian::set_flow_eq ()
   dfds_map.clear ();
   dgammads_vec.clear ();
   dgammads_map.clear ();
-  dyds.clear ();
 
   auto stop_clear = std::chrono::high_resolution_clock::now ();
   std::chrono::duration<double, std::milli> ms_double = stop_clear - start;
@@ -77,11 +76,11 @@ Hamiltonian::set_flow_eq ()
 #pragma omp for reduction(+ : dEds)
     for (int i = 0; i < f_size; ++i)
       {
-        if (f[i].s > 3 && f[i].ss < 4)
+        if (f[i].s > 3 && f[i].ss < 4 && eta1_map.find({f[i].ss, f[i].s}) != eta1_map.end())
           {
             dEds += f[i].me * eta1_map[OneBodyKey (f[i].ss, f[i].s)];
           }
-        else if (f[i].s < 4 && f[i].s > 3)
+        else if (f[i].s < 4 && f[i].s > 3 && eta1_map.find({f[i].ss, f[i].s}) != eta1_map.end())
           {
             dEds += -f[i].me * eta1_map[OneBodyKey (f[i].ss, f[i].s)];
           }
@@ -92,11 +91,16 @@ Hamiltonian::set_flow_eq ()
         if (eta_2body[i].s1 < 4 && eta_2body[i].s2 < 4 && eta_2body[i].ss1 > 3
             && eta_2body[i].ss2 > 3)
           {
-            dEds += 0.5 * eta_2body[i].me
-                    * gamma_qa
-                          .map[{ eta_2body[i].ss1, eta_2body[i].ss2,
-                                 eta_2body[i].s1, eta_2body[i].s2 }]
-                          ->me;
+            if (gamma_qa.map.find ({ eta_2body[i].ss1, eta_2body[i].ss2,
+                                     eta_2body[i].s1, eta_2body[i].s2 })
+                != gamma_qa.map.end ())
+              {
+                dEds += 0.5 * eta_2body[i].me
+                        * gamma_qa
+                              .map[{ eta_2body[i].ss1, eta_2body[i].ss2,
+                                     eta_2body[i].s1, eta_2body[i].s2 }]
+                              ->me;
+              }
           }
       }
 #pragma omp single

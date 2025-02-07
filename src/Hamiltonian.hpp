@@ -27,13 +27,15 @@ private:
   std::unordered_map<TwoBodyKey, double> dgammads_map;
 
   std::vector<double> y;
-  std::vector<double> dyds;
 
 public:
   Hamiltonian ();
   Hamiltonian (const double E, const std::vector<OneBody> f,
                const std::vector<TwoBody> gamma);
   Hamiltonian (std::string filepath);
+  const void set_num_states(int new_num){
+    num_states = new_num;
+  }
 
   const void set_full_vector ();
   const void set_generators ();
@@ -41,6 +43,12 @@ public:
   int alt_flow_eq ();
 
   void euler (const double s0, const double s, const double ds);
+
+  const void set_elements (const double y[]);
+
+  std::vector<double> get_full_eqs ();
+
+  void runge_kutta_gsl (double s0, const double s);
 
   const void
   set_zero_body (double new_E)
@@ -86,7 +94,6 @@ public:
   {
     return y;
   }
-
 
   const void
   set_one_body_generator (std::vector<OneBody> new_eta)

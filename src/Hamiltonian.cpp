@@ -141,6 +141,8 @@ Hamiltonian::Hamiltonian (std::string filename)
 const void
 Hamiltonian::set_full_vector ()
 {
+  std::cout << "Creating the full vector" << std::flush;
+
   std::unordered_map<OneBodyKey, double> f_map;
   for (const auto &el : f)
     {
@@ -152,41 +154,158 @@ Hamiltonian::set_full_vector ()
       gamma_map[{ el.s1, el.s2, el.ss1, el.ss2 }] = el.me;
     }
 
-  std::vector<double> f_map_full (140 * 140, 0.0);
-  std::vector<double> gamma_map_full (140 * 140 * 140 * 140, 0.0);
+  std::vector<double> f_full (num_states * num_states, 0.0);
+  std::vector<double> gamma_full (num_states * num_states * num_states * num_states, 0.0);
 
-#pragma omp parallel for collapse(2)
-  for (int i = 0; i < 140; ++i)
-    for (int j = 0; j < 140; ++j)
-      f_map_full[i * 140 + j] = f_map.count ({ i, j }) ? f_map[{ i, j }] : 0;
+#pragma omp parallel
+  {
+#pragma omp for collapse(2) nowait
+    for (int i = 0; i < num_states; ++i)
+      for (int j = 0; j < num_states; ++j)
+        f_full[i * num_states + j] = f_map.count ({ i, j }) ? f_map[{ i, j }] : 0;
 
-#pragma omp parallel for collapse(4)
-  for (int i = 0; i < 140; ++i)
-    for (int j = 0; j < 140; ++j)
-      for (int k = 0; k < 140; ++k)
-        for (int l = 0; l < 140; ++l)
-          gamma_map_full[i * 140 * 140 * 140 + j * 140 * 140 + k * 140 + l]
-              = gamma_map.count ({ i, j, k, l }) ? gamma_map[{ i, j, k, l }]
-                                                 : 0;
+#pragma omp for collapse(4) nowait
+    for (int i = 0; i < num_states; ++i)
+      for (int j = 0; j < num_states; ++j)
+        for (int k = 0; k < num_states; ++k)
+          for (int l = 0; l < num_states; ++l)
+            gamma_full[i * num_states * num_states * num_states + j * num_states * num_states + k * num_states + l]
+                = gamma_map.count ({ i, j, k, l }) ? gamma_map[{ i, j, k, l }]
+                                                   : 0;
 
-  y.resize (1 + 140 * 140 + 140 * 140 * 140 * 140);
+#pragma omp barrier
+#pragma omp single
+    {
+      y.resize (1 + num_states * num_states + num_states * num_states * num_states * num_states);
+      y[0] = E;
+    }
 
-  y[0] = E;
+#pragma omp for collapse(2) nowait
+    for (int i = 0; i < num_states; ++i)
+      for (int j = 0; j < num_states; ++j)
+        y[1 + i * num_states + j] = f_full[i * num_states + j];
 
-#pragma omp parallel for collapse(2)
-  for (int i = 0; i < 140; ++i)
-    for (int j = 0; j < 140; ++j)
-      y[1 + i * 140 + j] = f_map_full[i * 140 + j];
+#pragma omp for collapse(4) nowait
+    for (int i = 0; i < num_states; ++i)
+      for (int j = 0; j < num_states; ++j)
+        for (int k = 0; k < num_states; ++k)
+          for (int l = 0; l < num_states; ++l)
+            y[1 + num_states * num_states
+              + (i * num_states * num_states * num_states + j * num_states * num_states + k * num_states + l)]
+                = gamma_full[i * num_states * num_states * num_states + j * num_states * num_states + k * num_states
+                             + l];
+  }
+  printf ("... done\n");
+}
 
-#pragma omp parallel for collapse(4)
-  for (int i = 0; i < 140; ++i)
-    for (int j = 0; j < 140; ++j)
-      for (int k = 0; k < 140; ++k)
-        for (int l = 0; l < 140; ++l)
-          y[1 + 140 * 140
-            + (i * 140 * 140 * 140 + j * 140 * 140 + k * 140 + l)]
-              = gamma_map_full[i * 140 * 140 * 140 + j * 140 * 140 + k * 140
-                               + l];
+const void
+Hamiltonian::set_elements (const double y[])
+{
+  std::cout << "Setting Elements" << std::flush;
+
+  f.clear ();
+  f.shrink_to_fit ();
+  gamma.clear ();
+
+  f.reserve (num_states * num_states);
+  gamma.reserve (20000000);
+
+  E = y[0];
+
+#pragma omp parallel
+  {
+#pragma omp for collapse(2) nowait
+    for (int i = 0; i < num_states; ++i)
+      {
+        for (int j = 0; j < num_states; ++j)
+          {
+            if (y[1 + i * num_states + j] != 0)
+              {
+#pragma omp critical
+                f.push_back (OneBody (i, j, y[1 + i * num_states + j]));
+              }
+          }
+      }
+#pragma omp for collapse(4) nowait
+    for (int i = 0; i < num_states; ++i)
+      {
+        for (int j = 0; j < num_states; ++j)
+          {
+            for (int k = 0; k < num_states; ++k)
+              {
+                for (int l = 0; l < num_states; ++l)
+                  {
+                    if (y[1 + num_states * num_states
+                          + (i * num_states * num_states * num_states + j * num_states * num_states + k * num_states
+                             + l)]
+                        != 0)
+                      {
+#pragma omp critical
+                        gamma.push_back (
+                            TwoBody (i, j, k, l,
+                                     y[1 + num_states * num_states
+                                       + (i * num_states * num_states * num_states + j * num_states * num_states
+                                          + k * num_states + l)]));
+                      }
+                  }
+              }
+          }
+      }
+  }
+  std::cout << "... done" << std::endl;
+}
+
+std::vector<double>
+Hamiltonian::get_full_eqs ()
+{
+  std::vector<double> dyds;
+  std::vector<double> dfds_full;
+  std::vector<double> dgammads_full;
+
+  dfds_full.resize (num_states * num_states, 0.0);
+  dgammads_full.resize (num_states * num_states * num_states * num_states, 0.0);
+
+#pragma omp parallel
+  {
+#pragma omp for collapse(2) nowait
+    for (int i = 0; i < num_states; ++i)
+      for (int j = 0; j < num_states; ++j)
+        dfds_full[i * num_states + j]
+            = dfds_map.count ({ i, j }) ? dfds_map[{ i, j }] : 0;
+
+#pragma omp for collapse(4) nowait
+    for (int i = 0; i < num_states; ++i)
+      for (int j = 0; j < num_states; ++j)
+        for (int k = 0; k < num_states; ++k)
+          for (int l = 0; l < num_states; ++l)
+            dgammads_full[i * num_states * num_states * num_states + j * num_states * num_states + k * num_states + l]
+                = dgammads_map.count ({ i, j, k, l })
+                      ? dgammads_map[{ i, j, k, l }]
+                      : 0;
+
+#pragma omp singe
+    {
+      dyds.resize (1 + num_states * num_states + num_states * num_states * num_states * num_states);
+      dyds[0] = E;
+    }
+#pragma omp barrier
+
+#pragma omp for collapse(2) nowait
+    for (int i = 0; i < num_states; ++i)
+      for (int j = 0; j < num_states; ++j)
+        dyds[1 + i * num_states + j] = dfds_full[i * num_states + j];
+
+#pragma omp for collapse(4) nowait
+    for (int i = 0; i < num_states; ++i)
+      for (int j = 0; j < num_states; ++j)
+        for (int k = 0; k < num_states; ++k)
+          for (int l = 0; l < num_states; ++l)
+            dyds[1 + num_states * num_states
+                 + (i * num_states * num_states * num_states + j * num_states * num_states + k * num_states + l)]
+                = dgammads_full[i * num_states * num_states * num_states + j * num_states * num_states + k * num_states
+                                + l];
+  }
+  return dyds;
 }
 
 const void
