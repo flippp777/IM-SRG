@@ -1,7 +1,6 @@
 #include "Hamiltonian.hpp"
 #include "TwoBodyQA.hpp"
 #include "omp.h"
-#include "reduce_lists.hpp"
 #include <chrono>
 #include <iostream>
 #include <omp.h>
@@ -20,6 +19,7 @@ Hamiltonian::set_flow_eq ()
   dfds_map.clear ();
   dgammads_vec.clear ();
   dgammads_map.clear ();
+  dyds.clear ();
 
   auto stop_clear = std::chrono::high_resolution_clock::now ();
   std::chrono::duration<double, std::milli> ms_double = stop_clear - start;

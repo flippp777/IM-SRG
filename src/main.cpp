@@ -1,5 +1,5 @@
 #include "Hamiltonian.hpp"
-
+#include "im_srg_ode.hpp"
 #include "OneBody.hpp"
 #include "TwoBody.hpp"
 #include "reduce_lists.hpp"
@@ -18,30 +18,13 @@ main ()
                          "hwHO020.me2m";
 
   Hamiltonian H = Hamiltonian (filepath);
-
-  auto start = std::chrono::high_resolution_clock::now();
   H.set_full_vector();
-  auto stop = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<double, std::milli> dur = stop-start;
-  std::cout << dur.count() << std::endl;
+  
+  im_srg_ode(0.0, NULL, NULL, &H);
 
-  // std::vector<OneBody> f = H.get_one_body();
-  // sort(f);
-  // for (const auto &ff : f){
-  //   std::cout << ff.s  << "\t" << ff.ss << "\t" << ff.me <<std::endl;
-  // }
+  double dEds = H.get_zero_body_flow_eq();
+  std::cout << dEds << std::endl;
 
-  // H.print_zero_body();
-  // H.print_one_body();
-  // H.print_two_body();
-
-  // H.set_generators();
-
-  // H.set_flow_eq();
-  // int status = H.flow_eq_gsl (0., NULL, NULL, NULL);
-  // std::cout << status << std::endl;
-
-  // H.euler(0.0001, 0.0060, 0.0003);
 
   return 0;
 }
