@@ -360,10 +360,6 @@ Hamiltonian::flow_eq_gsl ()
         }
       dfds_vec = sum_equal_elements (dfds_vec);
       dfds_map.reserve(dfds_vec.size());
-      for (const auto &el : dfds_vec )
-      {
-        dfds_map[{el.s, el.ss}] = el.me;
-      }
     // }
     dgammads_vec.reserve (dgammads_size);
 // #pragma omp section
@@ -379,11 +375,6 @@ Hamiltonian::flow_eq_gsl ()
                                local_map.end ());
         }
       dgammads_vec = sum_equal_elements (dgammads_vec);
-      dgammads_map.reserve(dgammads_vec.size());
-      for (const auto &el : dgammads_vec)
-      {
-        dgammads_map[{el.s1, el.s2, el.ss1, el.ss2}] = el.me;
-      }
     // }
   // }
 
