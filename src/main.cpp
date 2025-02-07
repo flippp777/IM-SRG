@@ -20,7 +20,7 @@ main ()
 
   Hamiltonian H = Hamiltonian (filepath);
   
-  H.set_num_states(20);
+  H.set_num_states(140);
 
 
   H.set_full_vector();

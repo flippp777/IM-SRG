@@ -1,16 +1,12 @@
 #include "Hamiltonian.hpp"
 #include "TwoBodyQA.hpp"
 #include "omp.h"
-#include <chrono>
-#include <iostream>
 #include <omp.h>
-#include <ostream>
 #include <unordered_map>
 
 void const
 Hamiltonian::set_flow_eq ()
 {
-  std::cout << "\t" << "Clearing old flow eqs" << std::flush;
   dEds = 0;
   dfds_vec.clear ();
   dfds_map.clear ();
