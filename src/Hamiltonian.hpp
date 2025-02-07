@@ -35,15 +35,16 @@ public:
                const std::vector<TwoBody> gamma);
   Hamiltonian (std::string filepath);
 
-  void set_generators ();
-  void set_flow_eq ();
+  const void set_full_vector();
+  const void set_generators ();
+  const void set_flow_eq ();
 
   void euler (const double s0, const double s, const double ds);
 
   int flow_eq_gsl ();
 
-  // static int flow_eq_gsl_wrapper (double s, const double y[], double dydt[],
-  //                                 void *params);
+  static int flow_eq_for_gsl (double s, const double y[], double dydt[],
+                                  void *params);
 
   void runge_kutta_gsl (const double s0, const double s, const double ds);
 
@@ -53,7 +54,7 @@ public:
     E = new_E;
   }
   const double &
-  get_zero_body () const
+  get_zero_body ()
   {
     return E;
   }
@@ -63,7 +64,7 @@ public:
     f = new_f;
   }
   const std::vector<OneBody> &
-  get_one_body () const
+  get_one_body () 
   {
     return f;
   }
@@ -73,12 +74,12 @@ public:
     gamma = new_Gamma;
   }
   const std::vector<TwoBody> &
-  get_two_body () const
+  get_two_body ()
   {
     return gamma;
   }
   const int &
-  get_num_states () const
+  get_num_states ()
   {
     return num_states;
   }
@@ -89,7 +90,7 @@ public:
     eta_1body = new_eta;
   }
   const std::vector<OneBody> &
-  get_one_body_generator () const
+  get_one_body_generator ()
   {
     return eta_1body;
   }
@@ -99,7 +100,7 @@ public:
     eta_2body = new_eta;
   }
   const std::vector<TwoBody> &
-  get_two_body_generator () const
+  get_two_body_generator ()
   {
     return eta_2body;
   }
@@ -110,7 +111,7 @@ public:
     dEds = new_dEds;
   }
   const double &
-  get_zero_body_flow_eq () const
+  get_zero_body_flow_eq ()
   {
     return dEds;
   }
@@ -120,7 +121,7 @@ public:
     dfds_vec = new_dfds_vec;
   }
   const std::vector<OneBody> &
-  get_one_body_flow_eq_vec () const
+  get_one_body_flow_eq_vec () 
   {
     return dfds_vec;
   }
@@ -131,7 +132,7 @@ public:
     dfds_map = new_dfds_map;
   }
   const std::unordered_map<OneBodyKey, double> &
-  get_one_body_flow_eq_map () const
+  get_one_body_flow_eq_map ()
   {
     return dfds_map;
   }
