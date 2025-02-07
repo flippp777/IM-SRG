@@ -10,9 +10,6 @@
 void const
 Hamiltonian::set_flow_eq ()
 {
-  std::cout << "Constructing flow equations" << std::endl;
-  auto start = std::chrono::high_resolution_clock::now ();
-
   std::cout << "\t" << "Clearing old flow eqs" << std::flush;
   dEds = 0;
   dfds_vec.clear ();
@@ -20,15 +17,8 @@ Hamiltonian::set_flow_eq ()
   dgammads_vec.clear ();
   dgammads_map.clear ();
 
-  auto stop_clear = std::chrono::high_resolution_clock::now ();
-  std::chrono::duration<double, std::milli> ms_double = stop_clear - start;
-  std::cout << "..." << "\t" << " done (" << ms_double.count () << "ms)"
-            << std::endl;
-
-  std::cout << "\t" << "Creating maps" << std::flush;
 
   TwoBodyQA gamma_qa = TwoBodyQA (gamma, 1);
-  std::cout << "." << std::flush;
   TwoBodyQA eta2_qa = TwoBodyQA (eta_2body, 1);
 
   std::unordered_map<OneBodyKey, double> f_map;
@@ -38,7 +28,6 @@ Hamiltonian::set_flow_eq ()
       f_map[OneBodyKey (ff.s, ff.ss)] = ff.me;
     }
 
-  std::cout << "." << std::flush;
 
   std::unordered_map<OneBodyKey, double> eta1_map;
   eta1_map.reserve (eta_1body.size ());
@@ -47,7 +36,6 @@ Hamiltonian::set_flow_eq ()
       eta1_map[OneBodyKey (e.s, e.ss)] = e.me;
     }
 
-  std::cout << "." << std::flush;
 
   const int f_size = f.size ();
   const int eta1_size = eta_1body.size ();
@@ -64,11 +52,7 @@ Hamiltonian::set_flow_eq ()
       thread_dfds[i].reserve (5000);
       thread_dgammads[i].reserve (5000);
     }
-  auto stop_maps = std::chrono::high_resolution_clock::now ();
-  ms_double = stop_maps - stop_clear;
-  std::cout << "\t\t" << " done (" << ms_double.count () << "ms)" << std::endl;
 
-  std::cout << "\t" << "Constructing new flow eqs" << std::flush;
 
 #pragma omp parallel
   {
@@ -103,8 +87,6 @@ Hamiltonian::set_flow_eq ()
               }
           }
       }
-#pragma omp single
-    std::cout << "." << std::flush;
     ///////////////////////////////////////////////// dfds
     // first sum
     int tid = omp_get_thread_num ();
@@ -165,8 +147,6 @@ Hamiltonian::set_flow_eq ()
           }
       }
 
-#pragma omp single
-    std::cout << "." << std::flush;
 // third sum
 #pragma omp for
     for (int i = 0; i < eta2_size; ++i)
@@ -220,8 +200,6 @@ Hamiltonian::set_flow_eq ()
                 += eta_1body[i].me * g->me;
           }
       }
-#pragma omp single
-    std::cout << "." << std::flush;
 // eta2 terms
 #pragma omp for
     for (int i = 0; i < f_size; ++i)
@@ -335,12 +313,6 @@ Hamiltonian::set_flow_eq ()
           }
       }
   }
-  auto stop_dgds = std::chrono::high_resolution_clock::now ();
-  ms_double = stop_dgds - stop_maps;
-  std::cout << "\t" << " done (" << ms_double.count () << "ms)" << std::endl;
-
-  std::cout << "\t" << "Combining thread maps" << std::flush;
-  std::cout << "." << std::flush;
 #pragma omp parallel sections
   {
 #pragma omp section
@@ -355,7 +327,6 @@ Hamiltonian::set_flow_eq ()
     }
 #pragma omp section
     {
-      std::cout << "." << std::flush;
       for (const auto &local_map : thread_dgammads)
         {
           for (const auto &[key, me] : local_map)
@@ -368,12 +339,4 @@ Hamiltonian::set_flow_eq ()
   // dfds_map = reduce_map(thread_dfds);
   // std::cout << "." << std::flush;
   // dgammads_map = reduce_map(thread_dgammads);
-
-  std::cout << "." << std::flush;
-  auto stop_comb = std::chrono::high_resolution_clock::now ();
-  ms_double = stop_comb - stop_dgds;
-  std::cout << "\t" << " done (" << ms_double.count () << "ms)" << std::endl;
-
-  ms_double = stop_comb - start;
-  std::cout << "\t" << "|-> done(" << ms_double.count () << "ms)" << std::endl;
 }
