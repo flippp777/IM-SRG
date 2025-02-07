@@ -40,6 +40,7 @@ public:
   const void set_full_vector ();
   const void set_generators ();
   const void set_flow_eq ();
+  const void set_flow_eq_print ();
   int alt_flow_eq ();
 
   void euler (const double s0, const double s, const double ds);

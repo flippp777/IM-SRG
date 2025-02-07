@@ -201,8 +201,6 @@ Hamiltonian::set_full_vector ()
 const void
 Hamiltonian::set_elements (const double y[])
 {
-  std::cout << "Setting Elements" << std::flush;
-
   f.clear ();
   f.shrink_to_fit ();
   gamma.clear ();
@@ -252,7 +250,6 @@ Hamiltonian::set_elements (const double y[])
           }
       }
   }
-  std::cout << "... done" << std::endl;
 }
 
 std::vector<double>
