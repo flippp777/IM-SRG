@@ -41,12 +41,9 @@ public:
 
   void euler (const double s0, const double s, const double ds);
 
-  int flow_eq_gsl ();
+  int alt_flow_eq ();
 
-  static int flow_eq_for_gsl (double s, const double y[], double dydt[],
-                                  void *params);
-
-  void runge_kutta_gsl (const double s0, const double s, const double ds);
+  void flow_eq_gsl ();
 
   const void
   set_zero_body (double new_E)

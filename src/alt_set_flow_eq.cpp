@@ -13,7 +13,7 @@
 #include <vector>
 
 int
-Hamiltonian::flow_eq_gsl ()
+Hamiltonian::alt_flow_eq ()
 {
   dEds = 0;
   dfds_vec.clear ();
