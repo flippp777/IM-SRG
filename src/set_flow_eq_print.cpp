@@ -8,7 +8,7 @@
 #include <unordered_map>
 
 void const
-Hamiltonian::set_flow_eq ()
+Hamiltonian::set_flow_eq_print ()
 {
   std::cout << "Constructing flow equations" << std::endl;
   auto start = std::chrono::high_resolution_clock::now ();

@@ -7,13 +7,10 @@ Hamiltonian::set_generators ()
 {
   eta_1body.clear ();
   eta_2body.clear ();
-  std::cout << "Constructing generators";
-  auto start = std::chrono::high_resolution_clock::now ();
 
   int f_size = f.size ();
   int gamma_size = gamma.size ();
 
-  std::cout << "." << std::flush;
 #pragma omp parallel
   {
     // one-body part
@@ -77,8 +74,6 @@ Hamiltonian::set_generators ()
             //   }
           }
       }
-#pragma omp single
-    std::cout << "." << std::flush;
 #pragma omp critical
     eta_1body.insert (eta_1body.end (), local_eta_1body.begin (),
                       local_eta_1body.end ());
@@ -168,14 +163,8 @@ Hamiltonian::set_generators ()
             //   }
           }
       }
-#pragma omp single
-    std::cout << "." << std::flush;
 #pragma omp critical
     eta_2body.insert (eta_2body.end (), local_eta_2body.begin (),
                       local_eta_2body.end ());
   }
-  auto stop = std::chrono::high_resolution_clock::now ();
-  std::chrono::duration<double, std::milli> ms_double = stop - start;
-  std::cout << "\t" << " done (" << ms_double.count () << "ms)" << std::endl;
-  ;
 }
