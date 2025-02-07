@@ -39,8 +39,8 @@ Hamiltonian::euler (const double s0, const double s, const double ds)
   std::cout << "----------------   " << "Step 0" << "   ---------------"
             << std::endl;
   set_generators ();
-  // set_flow_eq ();
-  flow_eq_gsl();
+  set_flow_eq ();
+  // flow_eq_gsl();
 
   std::ostringstream name1;
   name1 << "im_srg_euler_f_s" << s0 << ".txt";
@@ -123,6 +123,10 @@ Hamiltonian::euler (const double s0, const double s, const double ds)
 
       std::cout << "E = " << E << ",\t" << "dEds = " << dEds << ";\t"
                 << "s = " << (i + 1) * ds << std::endl;
+      std::cout << "f size: " << f.size() << std::endl; 
+      std::cout << "dfds size: " << dfds_map.size() << std::endl; 
+      std::cout << "G size: " << gamma.size() << std::endl; 
+      std::cout << "dGds size: " << dgammads_map.size() << std::endl; 
 
       if (i != 0)
         {
@@ -142,8 +146,8 @@ Hamiltonian::euler (const double s0, const double s, const double ds)
                 << "   ---------------" << std::endl;
       start_step = std::chrono::high_resolution_clock::now ();
       set_generators ();
-      // set_flow_eq ();
-      flow_eq_gsl();
+      set_flow_eq ();
+      // flow_eq_gsl();
 
       E_file << (i + 1) * ds << "\t" << E << "\t" << dEds << std::endl;
       // if (i == 5 || i == 11 || i == 20) {

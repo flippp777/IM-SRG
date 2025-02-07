@@ -19,6 +19,12 @@ main ()
 
   Hamiltonian H = Hamiltonian (filepath);
 
+  auto start = std::chrono::high_resolution_clock::now();
+  H.set_full_vector();
+  auto stop = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double, std::milli> dur = stop-start;
+  std::cout << dur.count() << std::endl;
+
   // std::vector<OneBody> f = H.get_one_body();
   // sort(f);
   // for (const auto &ff : f){
@@ -29,13 +35,13 @@ main ()
   // H.print_one_body();
   // H.print_two_body();
 
-  H.set_generators();
+  // H.set_generators();
 
   // H.set_flow_eq();
   // int status = H.flow_eq_gsl (0., NULL, NULL, NULL);
   // std::cout << status << std::endl;
 
-  H.euler(0.0001, 0.0060, 0.0003);
+  // H.euler(0.0001, 0.0060, 0.0003);
 
   return 0;
 }

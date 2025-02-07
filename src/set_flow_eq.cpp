@@ -8,7 +8,7 @@
 #include <ostream>
 #include <unordered_map>
 
-void
+void const
 Hamiltonian::set_flow_eq ()
 {
   std::cout << "Constructing flow equations" << std::endl;
@@ -17,7 +17,9 @@ Hamiltonian::set_flow_eq ()
   std::cout << "\t" << "Clearing old flow eqs" << std::flush;
   dEds = 0;
   dfds_vec.clear ();
+  dfds_map.clear ();
   dgammads_vec.clear ();
+  dgammads_map.clear ();
 
   auto stop_clear = std::chrono::high_resolution_clock::now ();
   std::chrono::duration<double, std::milli> ms_double = stop_clear - start;
