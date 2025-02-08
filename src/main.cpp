@@ -1,4 +1,4 @@
-#include "Hamiltonian.hpp"
+// #include "Hamiltonian.hpp"
 #include "im_srg_ode.hpp"
 #include "OneBody.hpp"
 #include "TwoBody.hpp"
@@ -21,7 +21,7 @@ main ()
 
   Hamiltonian H = Hamiltonian (filepath);
   
-  // H.set_num_states(5);
+  H.set_num_states(125);
   
   // H.set_generators();
   // std::vector<TwoBody> eta2 = H.get_two_body_generator();
@@ -37,10 +37,10 @@ main ()
   //   dfds_file << key.s << "\t" << key.ss << "\t" << me << "\n";
   // }
 
-  H.euler(0., 0.1, 0.003);
+  H.euler(0., 2, 0.03);
 
 
-  // H.runge_kutta_gsl(0, 10);
+  // H.runge_kutta_gsl(0, 1);
 
 
 

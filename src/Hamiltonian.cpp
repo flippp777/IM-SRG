@@ -216,9 +216,6 @@ const void Hamiltonian::set_elements(const double y[]) {
 
     E = y[0];
 
-    int f_index = 0;
-    int gamma_index = 0;
-
 #pragma omp parallel
     {
         std::vector<OneBody> local_f;
@@ -293,7 +290,7 @@ Hamiltonian::get_full_eqs ()
                       ? dgammads_map[{ i, j, k, l }]
                       : 0;
 
-#pragma omp singe
+#pragma omp single
     {
       dyds.resize (1 + num_states * num_states
                    + num_states * num_states * num_states * num_states);

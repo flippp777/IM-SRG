@@ -327,7 +327,6 @@ Hamiltonian::set_flow_eq ()
     {
       for (const auto &local_map : thread_dfds)
         {
-#pragma omp critical
           for (const auto &[key, me] : local_map)
             {
               dfds_map[key] += me;
@@ -338,7 +337,6 @@ Hamiltonian::set_flow_eq ()
     {
       for (const auto &local_map : thread_dgammads)
         {
-#pragma omp critical
           for (const auto &[key, me] : local_map)
             {
               dgammads_map[key] += me;
