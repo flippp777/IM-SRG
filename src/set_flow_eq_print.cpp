@@ -158,7 +158,7 @@ Hamiltonian::set_flow_eq_print ()
           }
         else if (f[i].s > 3 && f[i].ss < 4)
           {
-            for (const auto &e : gamma_qa.check_s1ss1 (f[i].ss, f[i].s))
+            for (const auto &e : eta2_qa.check_s1ss1 (f[i].ss, f[i].s))
               {
                 local_dfds[{ e->s2, e->ss2 }] += f[i].me * e->me;
               }
