@@ -22,11 +22,10 @@ main ()
   
   H.set_num_states(140);
 
+  H.euler(0., 0.01, 0.0002);
 
-  H.set_full_vector();
-
-  
-  H.runge_kutta_gsl(0, 0.001);
+  // H.set_full_vector();
+  // H.runge_kutta_gsl(0, 0.001);
 
 
 
