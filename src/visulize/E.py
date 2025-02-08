@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-s, E, dEds = np.transpose(np.loadtxt("im_srg_euler_E_s00_s0.1_ds0.0003.txt"))
+s, E, dEds = np.transpose(np.loadtxt("im_srg_euler_E_s00_s0.01_ds0.0003.txt"))
 
 # i = 0
 # new_s = []
