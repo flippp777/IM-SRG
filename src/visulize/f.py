@@ -1,10 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-fs001 = np.loadtxt("output/im_srg_euler_f_s0.txt")
-fs018 = np.loadtxt("output/im_srg_euler_f_s0.018.txt")
-fs036 = np.loadtxt("output/im_srg_euler_f_s0.036.txt")
-fs063 = np.loadtxt("output/im_srg_euler_f_s0.063.txt")
+fs001 = np.loadtxt("im_srg_euler_f_s0.txt")
+fs018 = np.loadtxt("im_srg_euler_f_s0.0498.txt")
+fs036 = np.loadtxt("im_srg_euler_f_s0.1.txt")
 
 N = 140
 
@@ -19,7 +18,6 @@ def fill_mat(matrix_list):
 fd001_mat = fill_mat(fs001)
 fd018_mat = fill_mat(fs018)
 fd036_mat = fill_mat(fs036)
-fd063_mat = fill_mat(fs063)
 
 plt.figure()
 plt.title("s = 0")

@@ -1,18 +1,18 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-s, E, dEds = np.transpose(np.loadtxt("output/im_srg_euler_E_s00_s1_ds0.02.txt"))
+s, E, dEds = np.transpose(np.loadtxt("im_srg_euler_E_s00_s0.1_ds0.0003.txt"))
 
-i = 0
-new_s = []
-while (i<len(s)):
-    new_s.append(i*0.02)
-    i += 1
-
-s = new_s
+# i = 0
+# new_s = []
+# while (i<len(s)):
+#     new_s.append(i*0.02)
+#     i += 1
+#
+# s = new_s
 
 plt.figure()
-plt.plot(s, E, "o-")
+plt.plot(s, E)
 # plt.xlim(right = 0.04)
 plt.xlabel("s")
 # plt.ylim(bottom = -30)

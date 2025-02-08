@@ -64,7 +64,7 @@ Hamiltonian::euler (const double s0, const double s, const double ds)
       std::cout << "dGds size: " << dgammads_map.size () << std::endl;
       std::cout << std::endl;
 
-  for (int i = 0; i <= n; ++i)
+  for (int i = 0; i < n; ++i)
     {
       auto start_step = std::chrono::high_resolution_clock::now ();
 
@@ -166,11 +166,11 @@ Hamiltonian::euler (const double s0, const double s, const double ds)
                 << std::endl;
       std::cout << std::endl;
 
-      if (i == (int)n / 2)
+      if (i == (int)(n / 2))
         {
           std::ostringstream name2;
           name2 << "im_srg_euler_f_s" << i * ds << ".txt";
-          std::ofstream f_file (name1.str ());
+          std::ofstream f_file (name2.str ());
           for (const auto &ff : f)
             {
               f_file << ff.s << "\t" << ff.ss << "\t" << ff.me << std::endl;
@@ -185,7 +185,7 @@ Hamiltonian::euler (const double s0, const double s, const double ds)
 
   std::ostringstream name3;
   name3 << "im_srg_euler_f_s" << s << ".txt";
-  std::ostringstream ff_file (name3.str ());
+  std::ofstream ff_file (name3.str ());
   for (const auto &ff : f)
     {
       ff_file << ff.s << "\t" << ff.ss << "\t" << ff.me << std::endl;
