@@ -26,8 +26,6 @@ private:
   std::unordered_map<OneBodyKey, double> dfds_map;
   std::unordered_map<TwoBodyKey, double> dgammads_map;
 
-  std::vector<double> y;
-
 public:
   Hamiltonian ();
   Hamiltonian (const double E, const std::vector<OneBody> f,
@@ -37,7 +35,7 @@ public:
     num_states = new_num;
   }
 
-  const void set_full_vector ();
+  const std::vector<double> get_full_vector ();
   const void set_generators ();
   const void set_flow_eq ();
   const void set_flow_eq_print ();

@@ -138,10 +138,12 @@ Hamiltonian::Hamiltonian (std::string filename)
   ;
 }
 
-const void
-Hamiltonian::set_full_vector ()
+const std::vector<double>
+Hamiltonian::get_full_vector ()
 {
   std::cout << "Creating the full vector" << std::flush;
+
+  std::vector<double> y;
 
   std::unordered_map<OneBodyKey, double> f_map;
   for (const auto &el : f)
@@ -173,12 +175,12 @@ Hamiltonian::set_full_vector ()
                 = gamma_map.count ({ i, j, k, l }) ? gamma_map[{ i, j, k, l }]
                                                    : 0;
 
-#pragma omp barrier
 #pragma omp single
     {
       y.resize (1 + num_states * num_states + num_states * num_states * num_states * num_states);
       y[0] = E;
     }
+#pragma omp barrier
 
 #pragma omp for collapse(2) nowait
     for (int i = 0; i < num_states; ++i)
