@@ -198,6 +198,7 @@ Hamiltonian::calc_full_vector ()
                              + l];
   }
   printf ("... done\n");
+  return y;
 }
 
 const void

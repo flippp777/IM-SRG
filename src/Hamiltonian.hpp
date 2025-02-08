@@ -88,12 +88,6 @@ public:
     return num_states;
   }
 
-  const std::vector<double> &
-  get_full_vector ()
-  {
-    return y;
-  }
-
   const void
   set_one_body_generator (std::vector<OneBody> new_eta)
   {
