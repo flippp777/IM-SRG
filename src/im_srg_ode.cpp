@@ -13,7 +13,8 @@ int im_srg_ode(double s, const double y[], double dyds[], void* H) {
   h->set_flow_eq();
 
   // fill the full vector of flow equations
-  dyds = h->get_full_eqs().data();
+  std::vector<double> flow_eqs = h->get_full_eqs();
+  std::copy(flow_eqs.begin(), flow_eqs.end(), dyds);
   
   
   return GSL_SUCCESS;

@@ -157,27 +157,31 @@ Hamiltonian::calc_full_vector ()
     }
 
   std::vector<double> f_full (num_states * num_states, 0.0);
-  std::vector<double> gamma_full (num_states * num_states * num_states * num_states, 0.0);
+  std::vector<double> gamma_full (
+      num_states * num_states * num_states * num_states, 0.0);
 
 #pragma omp parallel
   {
 #pragma omp for collapse(2) nowait
     for (int i = 0; i < num_states; ++i)
       for (int j = 0; j < num_states; ++j)
-        f_full[i * num_states + j] = f_map.count ({ i, j }) ? f_map[{ i, j }] : 0;
+        f_full[i * num_states + j]
+            = f_map.count ({ i, j }) ? f_map[{ i, j }] : 0;
 
 #pragma omp for collapse(4) nowait
     for (int i = 0; i < num_states; ++i)
       for (int j = 0; j < num_states; ++j)
         for (int k = 0; k < num_states; ++k)
           for (int l = 0; l < num_states; ++l)
-            gamma_full[i * num_states * num_states * num_states + j * num_states * num_states + k * num_states + l]
+            gamma_full[i * num_states * num_states * num_states
+                       + j * num_states * num_states + k * num_states + l]
                 = gamma_map.count ({ i, j, k, l }) ? gamma_map[{ i, j, k, l }]
                                                    : 0;
 
 #pragma omp single
     {
-      y.resize (1 + num_states * num_states + num_states * num_states * num_states * num_states);
+      y.resize (1 + num_states * num_states
+                + num_states * num_states * num_states * num_states);
       y[0] = E;
     }
 #pragma omp barrier
@@ -193,66 +197,70 @@ Hamiltonian::calc_full_vector ()
         for (int k = 0; k < num_states; ++k)
           for (int l = 0; l < num_states; ++l)
             y[1 + num_states * num_states
-              + (i * num_states * num_states * num_states + j * num_states * num_states + k * num_states + l)]
-                = gamma_full[i * num_states * num_states * num_states + j * num_states * num_states + k * num_states
+              + (i * num_states * num_states * num_states
+                 + j * num_states * num_states + k * num_states + l)]
+                = gamma_full[i * num_states * num_states * num_states
+                             + j * num_states * num_states + k * num_states
                              + l];
   }
   printf ("... done\n");
   return y;
 }
 
-const void
-Hamiltonian::set_elements (const double y[])
-{
-  f.clear ();
-  f.shrink_to_fit ();
-  gamma.clear ();
+const void Hamiltonian::set_elements(const double y[]) {
+    f.clear();
+    gamma.clear();
 
-  f.reserve (num_states * num_states);
-  gamma.reserve (20000000);
+    // f.resize(1000);  
+    // gamma.reserve(20000000); 
 
-  E = y[0];
+    E = y[0];
+
+    int f_index = 0;
+    int gamma_index = 0;
 
 #pragma omp parallel
-  {
+    {
+        std::vector<OneBody> local_f;
+        std::vector<TwoBody> local_gamma;
+
 #pragma omp for collapse(2) nowait
-    for (int i = 0; i < num_states; ++i)
-      {
-        for (int j = 0; j < num_states; ++j)
-          {
-            if (y[1 + i * num_states + j] != 0)
-              {
-#pragma omp critical
-                f.push_back (OneBody (i, j, y[1 + i * num_states + j]));
-              }
-          }
-      }
+        for (int i = 0; i < num_states; ++i) {
+            for (int j = 0; j < num_states; ++j) {
+                double value = y[1 + i * num_states + j];
+                if (value) {
+                    local_f.push_back(OneBody(i, j, value));
+                }
+            }
+        }
+
 #pragma omp for collapse(4) nowait
-    for (int i = 0; i < num_states; ++i)
-      {
-        for (int j = 0; j < num_states; ++j)
-          {
-            for (int k = 0; k < num_states; ++k)
-              {
-                for (int l = 0; l < num_states; ++l)
-                  {
-                    if (y[1 + num_states * num_states
-                          + (i * num_states * num_states * num_states + j * num_states * num_states + k * num_states
-                             + l)]
-                        != 0)
-                      {
+        for (int i = 0; i < num_states; ++i) {
+            for (int j = 0; j < num_states; ++j) {
+                for (int k = 0; k < num_states; ++k) {
+                    for (int l = 0; l < num_states; ++l) {
+                        double value = y[1 + num_states * num_states + 
+                                         (i * num_states * num_states * num_states +
+                                          j * num_states * num_states +
+                                          k * num_states + l)];
+                        if (value > 1e-9) {
+                            local_gamma.push_back(TwoBody(i, j, k, l, value));
+                        }
+                    }
+                }
+            }
+        }
+
 #pragma omp critical
-                        gamma.push_back (
-                            TwoBody (i, j, k, l,
-                                     y[1 + num_states * num_states
-                                       + (i * num_states * num_states * num_states + j * num_states * num_states
-                                          + k * num_states + l)]));
-                      }
-                  }
-              }
-          }
-      }
-  }
+        {
+            f.insert(f.end(), local_f.begin(), local_f.end());
+            gamma.insert(gamma.end(), local_gamma.begin(), local_gamma.end());
+        }
+    }
+
+    // Shrink to fit to free unused memory
+    f.shrink_to_fit();
+    gamma.shrink_to_fit();
 }
 
 std::vector<double>
@@ -263,7 +271,8 @@ Hamiltonian::get_full_eqs ()
   std::vector<double> dgammads_full;
 
   dfds_full.resize (num_states * num_states, 0.0);
-  dgammads_full.resize (num_states * num_states * num_states * num_states, 0.0);
+  dgammads_full.resize (num_states * num_states * num_states * num_states,
+                        0.0);
 
 #pragma omp parallel
   {
@@ -278,14 +287,16 @@ Hamiltonian::get_full_eqs ()
       for (int j = 0; j < num_states; ++j)
         for (int k = 0; k < num_states; ++k)
           for (int l = 0; l < num_states; ++l)
-            dgammads_full[i * num_states * num_states * num_states + j * num_states * num_states + k * num_states + l]
+            dgammads_full[i * num_states * num_states * num_states
+                          + j * num_states * num_states + k * num_states + l]
                 = dgammads_map.count ({ i, j, k, l })
                       ? dgammads_map[{ i, j, k, l }]
                       : 0;
 
 #pragma omp singe
     {
-      dyds.resize (1 + num_states * num_states + num_states * num_states * num_states * num_states);
+      dyds.resize (1 + num_states * num_states
+                   + num_states * num_states * num_states * num_states);
       dyds[0] = E;
     }
 #pragma omp barrier
@@ -301,8 +312,10 @@ Hamiltonian::get_full_eqs ()
         for (int k = 0; k < num_states; ++k)
           for (int l = 0; l < num_states; ++l)
             dyds[1 + num_states * num_states
-                 + (i * num_states * num_states * num_states + j * num_states * num_states + k * num_states + l)]
-                = dgammads_full[i * num_states * num_states * num_states + j * num_states * num_states + k * num_states
+                 + (i * num_states * num_states * num_states
+                    + j * num_states * num_states + k * num_states + l)]
+                = dgammads_full[i * num_states * num_states * num_states
+                                + j * num_states * num_states + k * num_states
                                 + l];
   }
   return dyds;

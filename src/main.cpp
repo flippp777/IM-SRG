@@ -20,11 +20,11 @@ main ()
 
   Hamiltonian H = Hamiltonian (filepath);
   
-  H.set_num_states(140);
+  H.set_num_states(5);
 
   // H.euler(0., 1, 0.02);
 
-  H.runge_kutta_gsl(0, 0.001);
+  H.runge_kutta_gsl(0, 10);
 
 
 

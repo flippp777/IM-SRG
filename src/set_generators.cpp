@@ -43,8 +43,6 @@ Hamiltonian::set_generators ()
                   {
                     local_eta_1body.push_back (OneBody (f[i].s, f[i].ss, me));
                     local_eta_1body.push_back (OneBody (f[i].ss, f[i].s, -me));
-                    // eta_1body.push_back(OneBody(f[i].ss, f[i].s, f[i].me /
-                    // delta));
                   }
               }
             else
