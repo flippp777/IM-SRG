@@ -74,7 +74,7 @@ Hamiltonian::euler (const double s0, const double s, const double ds)
       set_generators ();
       set_flow_eq_print ();
 
-      E_file << s0 << "\t" << E << "\t" << dEds << std::endl;
+      E_file << i*ds << "\t" << E << "\t" << dEds << std::endl;
 
       std::cout << "Calculating Euler steps" << std::endl;
 
