@@ -10,20 +10,29 @@
 #include <fstream>
 
 void
-Hamiltonian::runge_kutta_gsl (double s0, const double s)
+Hamiltonian::runge_kutta_gsl (double s, const double s1)
 {
   std::ofstream E_out ("E_runge-kutta.txt");
-  size_t dimension = 1 + num_states * num_states + num_states * num_states * num_states * num_states;
+  size_t dim = 1 + num_states * num_states + num_states * num_states * num_states * num_states;
 
-  gsl_odeiv2_system sys = { im_srg_ode, NULL, dimension, this };
+  const gsl_odeiv2_step_type *T =gsl_odeiv2_step_rk4;
+
+  gsl_odeiv2_step *step = gsl_odeiv2_step_alloc(T, dim);
+  gsl_odeiv2_control *c = gsl_odeiv2_control_y_new(1e-3, 0.0);
+  gsl_odeiv2_evolve * e = gsl_odeiv2_evolve_alloc(dim);
+
+  gsl_odeiv2_system sys = { im_srg_ode, NULL, dim, this };
 
   gsl_odeiv2_driver *d = gsl_odeiv2_driver_alloc_y_new (
       &sys, gsl_odeiv2_step_rk4, 1e-6, 1e-3, 0.0);
 
-  for (int i = 1; i <= 100; ++i)
+  std::vector<double> y = get_full_vector();
+
+  double h = 1e-6;
+  
+  while (s < s1)
     {
-      double ti = i * s / 100.0;
-      int status = gsl_odeiv2_driver_apply (d, &s0, ti, y.data ());
+      int status = gsl_odeiv2_evolve_apply (e, c, step, &sys, &s, s1, &h, y.data());
 
       if (status != GSL_SUCCESS)
         {
@@ -31,9 +40,11 @@ Hamiltonian::runge_kutta_gsl (double s0, const double s)
           break;
         }
 
-      std::cout << "s = " << s0 << ", E = " << y[0] << std::endl;
-      E_out << s0 << "\t" << y[0] << "\n";
+      std::cout << "s = " << s << ", E = " << y[0] << std::endl;
+      E_out << s << "\t" << y[0] << "\n";
     }
 
-gsl_odeiv2_driver_free(d);
+  gsl_odeiv2_evolve_free (e);
+  gsl_odeiv2_control_free (c);
+  gsl_odeiv2_step_free (step);
 }
