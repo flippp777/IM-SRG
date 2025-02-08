@@ -1,7 +1,15 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-s, E, dEds = np.transpose(np.loadtxt("output/im_srg_euler_E.txt"))
+s, E, dEds = np.transpose(np.loadtxt("output/im_srg_euler_E_s00_s1_ds0.02.txt"))
+
+i = 0
+new_s = []
+while (i<len(s)):
+    new_s.append(i*0.02)
+    i += 1
+
+s = new_s
 
 plt.figure()
 plt.plot(s, E, "o-")

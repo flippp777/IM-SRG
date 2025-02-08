@@ -139,7 +139,7 @@ Hamiltonian::Hamiltonian (std::string filename)
 }
 
 const std::vector<double>
-Hamiltonian::get_full_vector ()
+Hamiltonian::calc_full_vector ()
 {
   std::cout << "Creating the full vector" << std::flush;
 
