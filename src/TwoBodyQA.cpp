@@ -30,6 +30,7 @@ TwoBodyQA::TwoBodyQA (const std::vector<TwoBody> &vec, int par)
         for (const auto &element : vec)
           {
             const TwoBody *ptr = &element;
+#pragma omp critical
             map[TwoBodyKey (element.s1, element.s2, element.ss1, element.ss2)]
                 = ptr;
           }
@@ -38,12 +39,14 @@ TwoBodyQA::TwoBodyQA (const std::vector<TwoBody> &vec, int par)
         for (const auto &element : vec)
           {
             const TwoBody *ptr = &element;
+#pragma omp critical
             index_s1[element.s1].push_back (ptr);
           }
 #pragma omp section
         for (const auto &element : vec)
           {
             const TwoBody *ptr = &element;
+#pragma omp critical
             index_ss1[element.ss1].push_back (ptr);
           }
 
@@ -51,24 +54,28 @@ TwoBodyQA::TwoBodyQA (const std::vector<TwoBody> &vec, int par)
         for (const auto &element : vec)
           {
             const TwoBody *ptr = &element;
+#pragma omp critical
             index_s1s2[element.s1][element.s2].push_back (ptr);
           }
 #pragma omp section
         for (const auto &element : vec)
           {
             const TwoBody *ptr = &element;
+#pragma omp critical
             index_ss1ss2[element.ss1][element.ss2].push_back (ptr);
           }
 #pragma omp section
         for (const auto &element : vec)
           {
             const TwoBody *ptr = &element;
+#pragma omp critical
             index_s1ss1[element.s1][element.ss1].push_back (ptr);
           }
 #pragma omp section
         for (const auto &element : vec)
           {
             const TwoBody *ptr = &element;
+#pragma omp critical
             index_s1s2ss1[element.s1][element.s2][element.ss1].push_back (ptr);
           }
       }

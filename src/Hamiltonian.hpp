@@ -41,7 +41,9 @@ public:
   const void set_flow_eq_print ();
   int alt_flow_eq ();
 
+  double euler_step (double x, double dxds);
   void euler (const double s0, const double s, const double ds);
+  void euler_no_print (const double s0, const double s, const double ds);
 
   const void set_elements (const double y[]);
 

@@ -7,7 +7,7 @@
 #include <string>
 
 double
-euler_step (const double dxds, const double ds)
+Hamiltonian::euler_step (const double dxds, const double ds)
 {
   return ds * dxds;
 }

@@ -100,7 +100,7 @@ Hamiltonian::set_flow_eq ()
     int tid = omp_get_thread_num ();
     std::unordered_map<OneBodyKey, double> &local_dfds = thread_dfds[tid];
 
-#pragma omp for collapse(2)
+#pragma omp for 
     for (int i = 0; i < f_size; ++i)
       {
         for (int j = 0; j < eta1_size; ++j)
@@ -148,7 +148,7 @@ Hamiltonian::set_flow_eq ()
           }
         else if (f[i].s > 3 && f[i].ss < 4)
           {
-            for (const auto &e : gamma_qa.check_s1ss1 (f[i].ss, f[i].s))
+            for (const auto &e : eta2_qa.check_s1ss1 (f[i].ss, f[i].s))
               {
                 local_dfds[{ e->s2, e->ss2 }] += f[i].me * e->me;
               }
@@ -327,6 +327,7 @@ Hamiltonian::set_flow_eq ()
     {
       for (const auto &local_map : thread_dfds)
         {
+#pragma omp critical
           for (const auto &[key, me] : local_map)
             {
               dfds_map[key] += me;
@@ -337,6 +338,7 @@ Hamiltonian::set_flow_eq ()
     {
       for (const auto &local_map : thread_dgammads)
         {
+#pragma omp critical
           for (const auto &[key, me] : local_map)
             {
               dgammads_map[key] += me;

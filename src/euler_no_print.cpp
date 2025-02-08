@@ -3,14 +3,9 @@
 #include <iostream>
 #include <sstream>
 
-double
-euler_step (const double dxds, const double ds)
-{
-  return ds * dxds;
-}
 
 void
-Hamiltonian::euler (const double s0, const double s, const double ds)
+Hamiltonian::euler_no_print (const double s0, const double s, const double ds)
 {
 
   std::ostringstream E_filename;
