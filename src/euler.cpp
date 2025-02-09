@@ -4,7 +4,6 @@
 #include <iostream>
 #include <ratio>
 #include <sstream>
-#include <string>
 
 double
 Hamiltonian::euler_step (const double dxds, const double ds)
@@ -51,7 +50,7 @@ Hamiltonian::euler (const double s0, const double s, const double ds)
     }
 
   set_generators ();
-  set_flow_eq_print ();
+  set_flow_eq ();
 
       std::cout << std::endl;
   std::cout << "E = " << E << ",\t" << "dEds = " << dEds << ";\t"
@@ -72,7 +71,7 @@ Hamiltonian::euler (const double s0, const double s, const double ds)
                 << "   ---------------" << std::endl;
 
       set_generators ();
-      set_flow_eq_print ();
+      set_flow_eq ();
 
       E_file << i*ds << "\t" << E << "\t" << dEds << std::endl;
 

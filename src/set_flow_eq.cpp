@@ -1,7 +1,9 @@
 #include "Hamiltonian.hpp"
 #include "TwoBodyQA.hpp"
 #include "omp.h"
+#include <iostream>
 #include <omp.h>
+#include <ostream>
 #include <unordered_map>
 
 void const
@@ -80,27 +82,13 @@ Hamiltonian::set_flow_eq ()
                               ->me;
               }
           }
-        else if (eta_2body[i].s1 > 3 && eta_2body[i].s2 > 3
-                 && eta_2body[i].ss1 < 4 && eta_2body[i].ss2 < 4)
-          {
-            if (gamma_qa.map.find ({ eta_2body[i].ss1, eta_2body[i].ss2,
-                                     eta_2body[i].s1, eta_2body[i].s2 })
-                != gamma_qa.map.end ())
-              {
-                dEds += 0.5 * eta_2body[i].me
-                        * gamma_qa
-                              .map[{ eta_2body[i].ss1, eta_2body[i].ss2,
-                                     eta_2body[i].s1, eta_2body[i].s2 }]
-                              ->me;
-              }
-          }
       }
-    ///////////////////////////////////////////////// dfds
+
     // first sum
     int tid = omp_get_thread_num ();
     std::unordered_map<OneBodyKey, double> &local_dfds = thread_dfds[tid];
 
-#pragma omp for 
+#pragma omp for collapse(2)
     for (int i = 0; i < f_size; ++i)
       {
         for (int j = 0; j < eta1_size; ++j)
@@ -208,6 +196,8 @@ Hamiltonian::set_flow_eq ()
                 += eta_1body[i].me * g->me;
           }
       }
+#pragma omp single
+    std::cout << "." << std::flush;
 // eta2 terms
 #pragma omp for
     for (int i = 0; i < f_size; ++i)
@@ -321,6 +311,9 @@ Hamiltonian::set_flow_eq ()
           }
       }
   }
+
+  std::cout << "\t" << "Combining thread maps" << std::flush;
+  std::cout << "." << std::flush;
 #pragma omp parallel sections
   {
 #pragma omp section
@@ -335,6 +328,7 @@ Hamiltonian::set_flow_eq ()
     }
 #pragma omp section
     {
+      std::cout << "." << std::flush;
       for (const auto &local_map : thread_dgammads)
         {
           for (const auto &[key, me] : local_map)
