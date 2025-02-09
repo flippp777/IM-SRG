@@ -17,7 +17,7 @@ Hamiltonian::runge_kutta_gsl (double s, const double s1)
   size_t dim = 1 + num_states * num_states
                + num_states * num_states * num_states * num_states;
 
-  const gsl_odeiv2_step_type *T = gsl_odeiv2_step_rk4;
+  const gsl_odeiv2_step_type *T = gsl_odeiv2_step_rkf45;
 
   gsl_odeiv2_step *step = gsl_odeiv2_step_alloc (T, dim);
   gsl_odeiv2_control *c = gsl_odeiv2_control_y_new (1e-6, 0.0);
