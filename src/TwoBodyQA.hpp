@@ -31,7 +31,7 @@ public:
   TwoBodyQA(const TwoBody element);
   TwoBodyQA(const std::vector<TwoBody> &vec, int par);
 
-  ~TwoBodyQA();
+  // ~TwoBodyQA();
 
   void insert(const TwoBody &element);
 
