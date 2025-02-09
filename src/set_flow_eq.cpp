@@ -196,8 +196,6 @@ Hamiltonian::set_flow_eq ()
                 += eta_1body[i].me * g->me;
           }
       }
-#pragma omp single
-    std::cout << "." << std::flush;
 // eta2 terms
 #pragma omp for
     for (int i = 0; i < f_size; ++i)
@@ -312,8 +310,6 @@ Hamiltonian::set_flow_eq ()
       }
   }
 
-  std::cout << "\t" << "Combining thread maps" << std::flush;
-  std::cout << "." << std::flush;
 #pragma omp parallel sections
   {
 #pragma omp section
@@ -328,7 +324,6 @@ Hamiltonian::set_flow_eq ()
     }
 #pragma omp section
     {
-      std::cout << "." << std::flush;
       for (const auto &local_map : thread_dgammads)
         {
           for (const auto &[key, me] : local_map)
