@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-s, E, dEds = np.transpose(np.loadtxt("im_srg_euler_E_s00_s3_ds0.03.txt"))
+s, E, dEds = np.transpose(np.loadtxt("output/im_srg_euler_E_s00_s3_ds0.03.txt"))
 
 # i = 0
 # new_s = []
@@ -18,7 +18,7 @@ plt.xlabel("s")
 # plt.ylim(bottom = -30)
 plt.ylabel("E (MeV)")
 plt.grid(linestyle="--")
-plt.semilogx()
+# plt.semilogx()
 
 plt.figure()
 plt.plot(s, dEds, "o-")

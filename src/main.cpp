@@ -9,7 +9,7 @@ main ()
 
   Hamiltonian H = Hamiltonian (filepath);
   
-  H.set_num_states(50);
+  H.set_num_states(100);
   
   // H.set_generators();
   // std::vector<TwoBody> eta2 = H.get_two_body_generator();
