@@ -1,9 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-fs001 = np.loadtxt("im_srg_euler_f_s0.txt")
-fs018 = np.loadtxt("im_srg_euler_f_s0.0498.txt")
-fs036 = np.loadtxt("im_srg_euler_f_s3.txt")
+fs001 = np.loadtxt("output/im_srg_euler_f_s0.txt")
+fs018 = np.loadtxt("output/im_srg_euler_f_s0.0498.txt")
+# fs036 = np.loadtxt("im_srg_euler_f_s3.txt")
+fs036 = np.loadtxt("f_after_full_s0.0.txt")
 
 N = 140
 
@@ -29,9 +30,9 @@ plt.title("f, s = 0.1")
 plt.matshow(fd036_mat, fignum=0)
 plt.colorbar()
 
-plt.figure()
-plt.title("s = 0.048")
-plt.matshow(fd018_mat, fignum=0)
+# plt.figure()
+# plt.title("s = 0.048")
+# plt.matshow(fd018_mat, fignum=0)
 
 # plt.figure()
 # plt.title("dfds, s = 0")
