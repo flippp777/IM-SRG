@@ -80,7 +80,7 @@ Hamiltonian::set_flow_eq ()
                         * gamma_qa
                               .map[{ eta_2body[i].ss1, eta_2body[i].ss2,
                                      eta_2body[i].s1, eta_2body[i].s2 }]
-                              ->me;
+                              .me;
               }
           }
       }
@@ -113,7 +113,7 @@ Hamiltonian::set_flow_eq ()
             for (const auto &g :
                  gamma_qa.check_s1ss1 (eta_1body[i].ss, eta_1body[i].s))
               {
-                local_dfds[{ g->s2, g->ss2 }] += eta_1body[i].me * g->me;
+                local_dfds[{ g.s2, g.ss2 }] += eta_1body[i].me * g.me;
               }
           }
         else if (eta_1body[i].s > 3 && eta_1body[i].ss < 4)
@@ -121,7 +121,7 @@ Hamiltonian::set_flow_eq ()
             for (const auto &g :
                  gamma_qa.check_s1ss1 (eta_1body[i].ss, eta_1body[i].s))
               {
-                local_dfds[{ g->s2, g->ss2 }] += -eta_1body[i].me * g->me;
+                local_dfds[{ g.s2, g.ss2 }] += -eta_1body[i].me * g.me;
               }
           }
       }
@@ -132,14 +132,14 @@ Hamiltonian::set_flow_eq ()
           {
             for (const auto &e : eta2_qa.check_s1ss1 (f[i].ss, f[i].s))
               {
-                local_dfds[{ e->s2, e->ss2 }] += -f[i].me * e->me;
+                local_dfds[{ e.s2, e.ss2 }] += -f[i].me * e.me;
               }
           }
         else if (f[i].s > 3 && f[i].ss < 4)
           {
             for (const auto &e : eta2_qa.check_s1ss1 (f[i].ss, f[i].s))
               {
-                local_dfds[{ e->s2, e->ss2 }] += f[i].me * e->me;
+                local_dfds[{ e.s2, e.ss2 }] += f[i].me * e.me;
               }
           }
       }
@@ -154,10 +154,10 @@ Hamiltonian::set_flow_eq ()
             for (const auto &g : gamma_qa.check_s1s2ss1 (
                      eta_2body[i].ss1, eta_2body[i].ss2, eta_2body[i].s1))
               {
-                local_dfds[{ eta_2body[i].s2, g->ss2 }]
-                    += 0.5 * eta_2body[i].me * g->me;
-                local_dfds[{ g->ss2, eta_2body[i].s2 }]
-                    += 0.5 * eta_2body[i].me * g->me;
+                local_dfds[{ eta_2body[i].s2, g.ss2 }]
+                    += 0.5 * eta_2body[i].me * g.me;
+                local_dfds[{ g.ss2, eta_2body[i].s2 }]
+                    += 0.5 * eta_2body[i].me * g.me;
               }
           }
         else if (eta_2body[i].ss1 > 3 && eta_2body[i].ss2 > 3
@@ -166,10 +166,10 @@ Hamiltonian::set_flow_eq ()
             for (const auto &g : gamma_qa.check_s1s2ss1 (
                      eta_2body[i].ss1, eta_2body[i].ss2, eta_2body[i].s1))
               {
-                local_dfds[{ eta_2body[i].s2, g->ss2 }]
-                    += -0.5 * eta_2body[i].me * g->me;
-                local_dfds[{ g->ss2, eta_2body[i].s2 }]
-                    += -0.5 * eta_2body[i].me * g->me;
+                local_dfds[{ eta_2body[i].s2, g.ss2 }]
+                    += -0.5 * eta_2body[i].me * g.me;
+                local_dfds[{ g.ss2, eta_2body[i].s2 }]
+                    += -0.5 * eta_2body[i].me * g.me;
               }
           }
       }
@@ -184,17 +184,17 @@ Hamiltonian::set_flow_eq ()
       {
         for (const auto &g : gamma_qa.check_s1 (eta_1body[i].ss))
           {
-            local_dgammads[{ eta_1body[i].s, g->s2, g->ss1, g->ss2 }]
-                += eta_1body[i].me * g->me;
-            local_dgammads[{ g->s2, eta_1body[i].s, g->ss1, g->ss2 }]
-                += -eta_1body[i].me * g->me;
+            local_dgammads[{ eta_1body[i].s, g.s2, g.ss1, g.ss2 }]
+                += eta_1body[i].me * g.me;
+            local_dgammads[{ g.s2, eta_1body[i].s, g.ss1, g.ss2 }]
+                += -eta_1body[i].me * g.me;
           }
         for (const auto &g : gamma_qa.check_ss1 (eta_1body[i].s))
           {
-            local_dgammads[{ g->s1, g->s2, eta_1body[i].ss, g->ss2 }]
-                += -eta_1body[i].me * g->me;
-            local_dgammads[{ g->s1, g->s2, g->ss2, eta_1body[i].ss }]
-                += eta_1body[i].me * g->me;
+            local_dgammads[{ g.s1, g.s2, eta_1body[i].ss, g.ss2 }]
+                += -eta_1body[i].me * g.me;
+            local_dgammads[{ g.s1, g.s2, g.ss2, eta_1body[i].ss }]
+                += eta_1body[i].me * g.me;
           }
       }
 // eta2 terms
@@ -203,17 +203,17 @@ Hamiltonian::set_flow_eq ()
       {
         for (const auto &e : eta2_qa.check_s1 (f[i].ss))
           {
-            local_dgammads[{ f[i].s, e->s2, e->ss1, e->ss2 }]
-                += -f[i].me * e->me;
-            local_dgammads[{ e->s2, f[i].s, e->ss1, e->ss2 }]
-                += f[i].me * e->me;
+            local_dgammads[{ f[i].s, e.s2, e.ss1, e.ss2 }]
+                += -f[i].me * e.me;
+            local_dgammads[{ e.s2, f[i].s, e.ss1, e.ss2 }]
+                += f[i].me * e.me;
           }
         for (const auto &e : eta2_qa.check_ss1 (f[i].s))
           {
-            local_dgammads[{ e->s1, e->s2, f[i].ss, e->ss2 }]
-                += f[i].me * e->me;
-            local_dgammads[{ e->s1, e->s2, e->ss2, f[i].ss }]
-                += -f[i].me * e->me;
+            local_dgammads[{ e.s1, e.s2, f[i].ss, e.ss2 }]
+                += f[i].me * e.me;
+            local_dgammads[{ e.s1, e.s2, e.ss2, f[i].ss }]
+                += -f[i].me * e.me;
           }
       }
 // 2. and 3. sum
@@ -226,9 +226,9 @@ Hamiltonian::set_flow_eq ()
             for (const auto &g :
                  gamma_qa.check_s1s2 (eta_2body[i].ss1, eta_2body[i].ss2))
               {
-                local_dgammads[{ eta_2body[i].s1, eta_2body[i].s2, g->ss1,
-                                 g->ss2 }]
-                    += -0.5 * eta_2body[i].me * g->me;
+                local_dgammads[{ eta_2body[i].s1, eta_2body[i].s2, g.ss1,
+                                 g.ss2 }]
+                    += -0.5 * eta_2body[i].me * g.me;
               }
           }
         else if (eta_2body[i].s1 < 4 && eta_2body[i].s2 < 4)
@@ -236,9 +236,9 @@ Hamiltonian::set_flow_eq ()
             for (const auto &g :
                  gamma_qa.check_ss1ss2 (eta_2body[i].s1, eta_2body[i].s2))
               {
-                local_dgammads[{ g->s1, g->s2, eta_2body[i].ss1,
+                local_dgammads[{ g.s1, g.s2, eta_2body[i].ss1,
                                  eta_2body[i].ss2 }]
-                    += 0.5 * eta_2body[i].me * g->me;
+                    += 0.5 * eta_2body[i].me * g.me;
               }
           }
         else if (eta_2body[i].ss1 > 3 && eta_2body[i].ss2 > 3)
@@ -246,9 +246,9 @@ Hamiltonian::set_flow_eq ()
             for (const auto &g :
                  gamma_qa.check_s1s2 (eta_2body[i].ss1, eta_2body[i].ss2))
               {
-                local_dgammads[{ eta_2body[i].s1, eta_2body[i].s2, g->ss1,
-                                 g->ss2 }]
-                    += 0.5 * eta_2body[i].me * g->me;
+                local_dgammads[{ eta_2body[i].s1, eta_2body[i].s2, g.ss1,
+                                 g.ss2 }]
+                    += 0.5 * eta_2body[i].me * g.me;
               }
           }
         else if (eta_2body[i].s1 > 3 && eta_2body[i].s2 > 3)
@@ -256,9 +256,9 @@ Hamiltonian::set_flow_eq ()
             for (const auto &g :
                  gamma_qa.check_ss1ss2 (eta_2body[i].s1, eta_2body[i].s2))
               {
-                local_dgammads[{ g->s1, g->s2, eta_2body[i].ss1,
+                local_dgammads[{ g.s1, g.s2, eta_2body[i].ss1,
                                  eta_2body[i].ss2 }]
-                    += -0.5 * eta_2body[i].me * g->me;
+                    += -0.5 * eta_2body[i].me * g.me;
               }
             // 3. sum
           }
@@ -268,21 +268,21 @@ Hamiltonian::set_flow_eq ()
                  gamma_qa.check_s1ss1 (eta_2body[i].ss1, eta_2body[i].s1))
               {
                 // 1
-                local_dgammads[{ g->s2, eta_2body[i].s2, g->ss2,
+                local_dgammads[{ g.s2, eta_2body[i].s2, g.ss2,
                                  eta_2body[i].ss2 }]
-                    += -eta_2body[i].me * g->me;
+                    += -eta_2body[i].me * g.me;
                 // -P_12
-                local_dgammads[{ eta_2body[i].s2, g->s2, g->ss2,
+                local_dgammads[{ eta_2body[i].s2, g.s2, g.ss2,
                                  eta_2body[i].ss2 }]
-                    += eta_2body[i].me * g->me;
+                    += eta_2body[i].me * g.me;
                 // -P_34
-                local_dgammads[{ g->s2, eta_2body[i].s2, eta_2body[i].ss2,
-                                 g->ss2 }]
-                    += eta_2body[i].me * g->me;
+                local_dgammads[{ g.s2, eta_2body[i].s2, eta_2body[i].ss2,
+                                 g.ss2 }]
+                    += eta_2body[i].me * g.me;
                 // P_12 P_34
-                local_dgammads[{ eta_2body[i].s2, g->s2, eta_2body[i].ss2,
-                                 g->ss2 }]
-                    += -eta_2body[i].me * g->me;
+                local_dgammads[{ eta_2body[i].s2, g.s2, eta_2body[i].ss2,
+                                 g.ss2 }]
+                    += -eta_2body[i].me * g.me;
               }
           }
         else if (eta_2body[i].ss1 > 3 && eta_2body[i].s1 < 4)
@@ -291,21 +291,21 @@ Hamiltonian::set_flow_eq ()
                  gamma_qa.check_s1ss1 (eta_2body[i].ss1, eta_2body[i].s1))
               {
                 // 1
-                local_dgammads[{ g->s2, eta_2body[i].s2, g->ss2,
+                local_dgammads[{ g.s2, eta_2body[i].s2, g.ss2,
                                  eta_2body[i].ss2 }]
-                    += eta_2body[i].me * g->me;
+                    += eta_2body[i].me * g.me;
                 // -P_12
-                local_dgammads[{ eta_2body[i].s2, g->s2, g->ss2,
+                local_dgammads[{ eta_2body[i].s2, g.s2, g.ss2,
                                  eta_2body[i].ss2 }]
-                    += -eta_2body[i].me * g->me;
+                    += -eta_2body[i].me * g.me;
                 // -P_34
-                local_dgammads[{ g->s2, eta_2body[i].s2, eta_2body[i].ss2,
-                                 g->ss2 }]
-                    += -eta_2body[i].me * g->me;
+                local_dgammads[{ g.s2, eta_2body[i].s2, eta_2body[i].ss2,
+                                 g.ss2 }]
+                    += -eta_2body[i].me * g.me;
                 // P_12 P_34
-                local_dgammads[{ eta_2body[i].s2, g->s2, eta_2body[i].ss2,
-                                 g->ss2 }]
-                    += eta_2body[i].me * g->me;
+                local_dgammads[{ eta_2body[i].s2, g.s2, eta_2body[i].ss2,
+                                 g.ss2 }]
+                    += eta_2body[i].me * g.me;
               }
           }
       }
@@ -431,7 +431,7 @@ Hamiltonian::set_flow_eq_print ()
                         * gamma_qa
                               .map[{ eta_2body[i].ss1, eta_2body[i].ss2,
                                      eta_2body[i].s1, eta_2body[i].s2 }]
-                              ->me;
+                              .me;
               }
           }
       }
@@ -466,7 +466,7 @@ Hamiltonian::set_flow_eq_print ()
             for (const auto &g :
                  gamma_qa.check_s1ss1 (eta_1body[i].ss, eta_1body[i].s))
               {
-                local_dfds[{ g->s2, g->ss2 }] += eta_1body[i].me * g->me;
+                local_dfds[{ g.s2, g.ss2 }] += eta_1body[i].me * g.me;
               }
           }
         else if (eta_1body[i].s > 3 && eta_1body[i].ss < 4)
@@ -474,7 +474,7 @@ Hamiltonian::set_flow_eq_print ()
             for (const auto &g :
                  gamma_qa.check_s1ss1 (eta_1body[i].ss, eta_1body[i].s))
               {
-                local_dfds[{ g->s2, g->ss2 }] += -eta_1body[i].me * g->me;
+                local_dfds[{ g.s2, g.ss2 }] += -eta_1body[i].me * g.me;
               }
           }
       }
@@ -485,14 +485,14 @@ Hamiltonian::set_flow_eq_print ()
           {
             for (const auto &e : eta2_qa.check_s1ss1 (f[i].ss, f[i].s))
               {
-                local_dfds[{ e->s2, e->ss2 }] += -f[i].me * e->me;
+                local_dfds[{ e.s2, e.ss2 }] += -f[i].me * e.me;
               }
           }
         else if (f[i].s > 3 && f[i].ss < 4)
           {
             for (const auto &e : eta2_qa.check_s1ss1 (f[i].ss, f[i].s))
               {
-                local_dfds[{ e->s2, e->ss2 }] += f[i].me * e->me;
+                local_dfds[{ e.s2, e.ss2 }] += f[i].me * e.me;
               }
           }
       }
@@ -509,10 +509,10 @@ Hamiltonian::set_flow_eq_print ()
             for (const auto &g : gamma_qa.check_s1s2ss1 (
                      eta_2body[i].ss1, eta_2body[i].ss2, eta_2body[i].s1))
               {
-                local_dfds[{ eta_2body[i].s2, g->ss2 }]
-                    += 0.5 * eta_2body[i].me * g->me;
-                local_dfds[{ g->ss2, eta_2body[i].s2 }]
-                    += 0.5 * eta_2body[i].me * g->me;
+                local_dfds[{ eta_2body[i].s2, g.ss2 }]
+                    += 0.5 * eta_2body[i].me * g.me;
+                local_dfds[{ g.ss2, eta_2body[i].s2 }]
+                    += 0.5 * eta_2body[i].me * g.me;
               }
           }
         else if (eta_2body[i].ss1 > 3 && eta_2body[i].ss2 > 3
@@ -521,10 +521,10 @@ Hamiltonian::set_flow_eq_print ()
             for (const auto &g : gamma_qa.check_s1s2ss1 (
                      eta_2body[i].ss1, eta_2body[i].ss2, eta_2body[i].s1))
               {
-                local_dfds[{ eta_2body[i].s2, g->ss2 }]
-                    += -0.5 * eta_2body[i].me * g->me;
-                local_dfds[{ g->ss2, eta_2body[i].s2 }]
-                    += -0.5 * eta_2body[i].me * g->me;
+                local_dfds[{ eta_2body[i].s2, g.ss2 }]
+                    += -0.5 * eta_2body[i].me * g.me;
+                local_dfds[{ g.ss2, eta_2body[i].s2 }]
+                    += -0.5 * eta_2body[i].me * g.me;
               }
           }
       }
@@ -539,17 +539,17 @@ Hamiltonian::set_flow_eq_print ()
       {
         for (const auto &g : gamma_qa.check_s1 (eta_1body[i].ss))
           {
-            local_dgammads[{ eta_1body[i].s, g->s2, g->ss1, g->ss2 }]
-                += eta_1body[i].me * g->me;
-            local_dgammads[{ g->s2, eta_1body[i].s, g->ss1, g->ss2 }]
-                += -eta_1body[i].me * g->me;
+            local_dgammads[{ eta_1body[i].s, g.s2, g.ss1, g.ss2 }]
+                += eta_1body[i].me * g.me;
+            local_dgammads[{ g.s2, eta_1body[i].s, g.ss1, g.ss2 }]
+                += -eta_1body[i].me * g.me;
           }
         for (const auto &g : gamma_qa.check_ss1 (eta_1body[i].s))
           {
-            local_dgammads[{ g->s1, g->s2, eta_1body[i].ss, g->ss2 }]
-                += -eta_1body[i].me * g->me;
-            local_dgammads[{ g->s1, g->s2, g->ss2, eta_1body[i].ss }]
-                += eta_1body[i].me * g->me;
+            local_dgammads[{ g.s1, g.s2, eta_1body[i].ss, g.ss2 }]
+                += -eta_1body[i].me * g.me;
+            local_dgammads[{ g.s1, g.s2, g.ss2, eta_1body[i].ss }]
+                += eta_1body[i].me * g.me;
           }
       }
 #pragma omp single
@@ -560,17 +560,17 @@ Hamiltonian::set_flow_eq_print ()
       {
         for (const auto &e : eta2_qa.check_s1 (f[i].ss))
           {
-            local_dgammads[{ f[i].s, e->s2, e->ss1, e->ss2 }]
-                += -f[i].me * e->me;
-            local_dgammads[{ e->s2, f[i].s, e->ss1, e->ss2 }]
-                += f[i].me * e->me;
+            local_dgammads[{ f[i].s, e.s2, e.ss1, e.ss2 }]
+                += -f[i].me * e.me;
+            local_dgammads[{ e.s2, f[i].s, e.ss1, e.ss2 }]
+                += f[i].me * e.me;
           }
         for (const auto &e : eta2_qa.check_ss1 (f[i].s))
           {
-            local_dgammads[{ e->s1, e->s2, f[i].ss, e->ss2 }]
-                += f[i].me * e->me;
-            local_dgammads[{ e->s1, e->s2, e->ss2, f[i].ss }]
-                += -f[i].me * e->me;
+            local_dgammads[{ e.s1, e.s2, f[i].ss, e.ss2 }]
+                += f[i].me * e.me;
+            local_dgammads[{ e.s1, e.s2, e.ss2, f[i].ss }]
+                += -f[i].me * e.me;
           }
       }
 // 2. and 3. sum
@@ -583,9 +583,9 @@ Hamiltonian::set_flow_eq_print ()
             for (const auto &g :
                  gamma_qa.check_s1s2 (eta_2body[i].ss1, eta_2body[i].ss2))
               {
-                local_dgammads[{ eta_2body[i].s1, eta_2body[i].s2, g->ss1,
-                                 g->ss2 }]
-                    += -0.5 * eta_2body[i].me * g->me;
+                local_dgammads[{ eta_2body[i].s1, eta_2body[i].s2, g.ss1,
+                                 g.ss2 }]
+                    += -0.5 * eta_2body[i].me * g.me;
               }
           }
         else if (eta_2body[i].s1 < 4 && eta_2body[i].s2 < 4)
@@ -593,9 +593,9 @@ Hamiltonian::set_flow_eq_print ()
             for (const auto &g :
                  gamma_qa.check_ss1ss2 (eta_2body[i].s1, eta_2body[i].s2))
               {
-                local_dgammads[{ g->s1, g->s2, eta_2body[i].ss1,
+                local_dgammads[{ g.s1, g.s2, eta_2body[i].ss1,
                                  eta_2body[i].ss2 }]
-                    += 0.5 * eta_2body[i].me * g->me;
+                    += 0.5 * eta_2body[i].me * g.me;
               }
           }
         else if (eta_2body[i].ss1 > 3 && eta_2body[i].ss2 > 3)
@@ -603,9 +603,9 @@ Hamiltonian::set_flow_eq_print ()
             for (const auto &g :
                  gamma_qa.check_s1s2 (eta_2body[i].ss1, eta_2body[i].ss2))
               {
-                local_dgammads[{ eta_2body[i].s1, eta_2body[i].s2, g->ss1,
-                                 g->ss2 }]
-                    += 0.5 * eta_2body[i].me * g->me;
+                local_dgammads[{ eta_2body[i].s1, eta_2body[i].s2, g.ss1,
+                                 g.ss2 }]
+                    += 0.5 * eta_2body[i].me * g.me;
               }
           }
         else if (eta_2body[i].s1 > 3 && eta_2body[i].s2 > 3)
@@ -613,9 +613,9 @@ Hamiltonian::set_flow_eq_print ()
             for (const auto &g :
                  gamma_qa.check_ss1ss2 (eta_2body[i].s1, eta_2body[i].s2))
               {
-                local_dgammads[{ g->s1, g->s2, eta_2body[i].ss1,
+                local_dgammads[{ g.s1, g.s2, eta_2body[i].ss1,
                                  eta_2body[i].ss2 }]
-                    += -0.5 * eta_2body[i].me * g->me;
+                    += -0.5 * eta_2body[i].me * g.me;
               }
             // 3. sum
           }
@@ -625,21 +625,21 @@ Hamiltonian::set_flow_eq_print ()
                  gamma_qa.check_s1ss1 (eta_2body[i].ss1, eta_2body[i].s1))
               {
                 // 1
-                local_dgammads[{ g->s2, eta_2body[i].s2, g->ss2,
+                local_dgammads[{ g.s2, eta_2body[i].s2, g.ss2,
                                  eta_2body[i].ss2 }]
-                    += -eta_2body[i].me * g->me;
+                    += -eta_2body[i].me * g.me;
                 // -P_12
-                local_dgammads[{ eta_2body[i].s2, g->s2, g->ss2,
+                local_dgammads[{ eta_2body[i].s2, g.s2, g.ss2,
                                  eta_2body[i].ss2 }]
-                    += eta_2body[i].me * g->me;
+                    += eta_2body[i].me * g.me;
                 // -P_34
-                local_dgammads[{ g->s2, eta_2body[i].s2, eta_2body[i].ss2,
-                                 g->ss2 }]
-                    += eta_2body[i].me * g->me;
+                local_dgammads[{ g.s2, eta_2body[i].s2, eta_2body[i].ss2,
+                                 g.ss2 }]
+                    += eta_2body[i].me * g.me;
                 // P_12 P_34
-                local_dgammads[{ eta_2body[i].s2, g->s2, eta_2body[i].ss2,
-                                 g->ss2 }]
-                    += -eta_2body[i].me * g->me;
+                local_dgammads[{ eta_2body[i].s2, g.s2, eta_2body[i].ss2,
+                                 g.ss2 }]
+                    += -eta_2body[i].me * g.me;
               }
           }
         else if (eta_2body[i].ss1 > 3 && eta_2body[i].s1 < 4)
@@ -648,21 +648,21 @@ Hamiltonian::set_flow_eq_print ()
                  gamma_qa.check_s1ss1 (eta_2body[i].ss1, eta_2body[i].s1))
               {
                 // 1
-                local_dgammads[{ g->s2, eta_2body[i].s2, g->ss2,
+                local_dgammads[{ g.s2, eta_2body[i].s2, g.ss2,
                                  eta_2body[i].ss2 }]
-                    += eta_2body[i].me * g->me;
+                    += eta_2body[i].me * g.me;
                 // -P_12
-                local_dgammads[{ eta_2body[i].s2, g->s2, g->ss2,
+                local_dgammads[{ eta_2body[i].s2, g.s2, g.ss2,
                                  eta_2body[i].ss2 }]
-                    += -eta_2body[i].me * g->me;
+                    += -eta_2body[i].me * g.me;
                 // -P_34
-                local_dgammads[{ g->s2, eta_2body[i].s2, eta_2body[i].ss2,
-                                 g->ss2 }]
-                    += -eta_2body[i].me * g->me;
+                local_dgammads[{ g.s2, eta_2body[i].s2, eta_2body[i].ss2,
+                                 g.ss2 }]
+                    += -eta_2body[i].me * g.me;
                 // P_12 P_34
-                local_dgammads[{ eta_2body[i].s2, g->s2, eta_2body[i].ss2,
-                                 g->ss2 }]
-                    += eta_2body[i].me * g->me;
+                local_dgammads[{ eta_2body[i].s2, g.s2, eta_2body[i].ss2,
+                                 g.ss2 }]
+                    += eta_2body[i].me * g.me;
               }
           }
       }
@@ -707,5 +707,5 @@ Hamiltonian::set_flow_eq_print ()
   std::cout << "\t" << " done (" << ms_double.count () << "ms)" << std::endl;
 
   ms_double = stop_comb - start;
-  std::cout << "\t" << "|-> done(" << ms_double.count () << "ms)" << std::endl;
+  std::cout << "\t" << "|. done(" << ms_double.count () << "ms)" << std::endl;
 }
