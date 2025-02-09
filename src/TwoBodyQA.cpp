@@ -144,8 +144,8 @@ const std::vector<TwoBody>
 TwoBodyQA::check_s1s2ss1 (const int s1, const int s2, const int ss1)
 {
   if (index_s1s2ss1.find (s1) != index_s1s2ss1.end ()
-      && index_s1s2ss1[s2].find (s2) != index_s1s2ss1[s2].end ()
-      && index_s1s2ss1[s2][ss1].find (ss1) != index_s1s2ss1[s2][ss1].end ())
+      && index_s1s2ss1[s1].find (s2) != index_s1s2ss1[s1].end ()
+      && index_s1s2ss1[s1][s2].find (ss1) != index_s1s2ss1[s1][s2].end ())
     return index_s1s2ss1[s1][s2][ss1];
 
   return {};
