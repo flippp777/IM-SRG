@@ -214,12 +214,12 @@ Hamiltonian::euler (const double s0, const double s, const double ds)
     }
 
   set_generators ();
-  set_flow_eq_print ();
+  set_flow_eq ();
 
   for (int i = 0; i < n; ++i)
     {
       set_generators ();
-      set_flow_eq_print ();
+      set_flow_eq ();
 
       E_file << i*ds << "\t" << E << "\t" << dEds << std::endl;
 
