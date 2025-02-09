@@ -42,7 +42,7 @@ public:
   int alt_flow_eq ();
 
   void euler (const double s0, const double s, const double ds);
-  void euler_no_print (const double s0, const double s, const double ds);
+  void euler_print (const double s0, const double s, const double ds);
 
   const void set_elements (const double y[]);
 

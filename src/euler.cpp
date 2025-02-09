@@ -6,13 +6,13 @@
 #include <sstream>
 
 double
-Hamiltonian::euler_step (const double dxds, const double ds)
+euler_step (const double dxds, const double ds)
 {
   return ds * dxds;
 }
 
 void
-Hamiltonian::euler (const double s0, const double s, const double ds)
+Hamiltonian::euler_no_print (const double s0, const double s, const double ds)
 {
   auto start = std::chrono::high_resolution_clock::now ();
 
@@ -192,7 +192,7 @@ Hamiltonian::euler (const double s0, const double s, const double ds)
 }
 
 void
-Hamiltonian::euler_no_print (const double s0, const double s, const double ds)
+Hamiltonian::euler (const double s0, const double s, const double ds)
 {
 
   std::ostringstream E_filename;
