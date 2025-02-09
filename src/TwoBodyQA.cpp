@@ -10,6 +10,16 @@ TwoBodyQA::TwoBodyQA ()
 {
 }
 
+  TwoBodyQA::~TwoBodyQA() {
+  map.clear();
+  index_s1.clear();
+  index_ss1.clear();
+  index_s1s2.clear();
+  index_s1ss1.clear();
+  index_ss1ss2.clear();
+  index_s1s2ss1.clear();
+}
+
 TwoBodyQA::TwoBodyQA (const TwoBody element) { insert (element); }
 
 TwoBodyQA::TwoBodyQA (const std::vector<TwoBody> &vec, int par)
