@@ -39,7 +39,7 @@ TwoBodyQA::TwoBodyQA (const std::vector<TwoBody> &vec, int par)
 #pragma omp section
         for (const auto &element : vec)
           {
-            const TwoBody *ptr = &element;
+            auto ptr = std::make_shared<TwoBody>(element);;
             map[TwoBodyKey (element.s1, element.s2, element.ss1, element.ss2)]
                 = ptr;
           }
@@ -47,38 +47,38 @@ TwoBodyQA::TwoBodyQA (const std::vector<TwoBody> &vec, int par)
 #pragma omp section
         for (const auto &element : vec)
           {
-            const TwoBody *ptr = &element;
+            auto ptr = std::make_shared<TwoBody>(element);;
             index_s1[element.s1].push_back (ptr);
           }
 #pragma omp section
         for (const auto &element : vec)
           {
-            const TwoBody *ptr = &element;
+            auto ptr = std::make_shared<TwoBody>(element);;
             index_ss1[element.ss1].push_back (ptr);
           }
 
 #pragma omp section
         for (const auto &element : vec)
           {
-            const TwoBody *ptr = &element;
+            auto ptr = std::make_shared<TwoBody>(element);;
             index_s1s2[element.s1][element.s2].push_back (ptr);
           }
 #pragma omp section
         for (const auto &element : vec)
           {
-            const TwoBody *ptr = &element;
+            auto ptr = std::make_shared<TwoBody>(element);;
             index_ss1ss2[element.ss1][element.ss2].push_back (ptr);
           }
 #pragma omp section
         for (const auto &element : vec)
           {
-            const TwoBody *ptr = &element;
+            auto ptr = std::make_shared<TwoBody>(element);;
             index_s1ss1[element.s1][element.ss1].push_back (ptr);
           }
 #pragma omp section
         for (const auto &element : vec)
           {
-            const TwoBody *ptr = &element;
+            auto ptr = std::make_shared<TwoBody>(element);;
             index_s1s2ss1[element.s1][element.s2][element.ss1].push_back (ptr);
           }
       }
@@ -88,7 +88,7 @@ TwoBodyQA::TwoBodyQA (const std::vector<TwoBody> &vec, int par)
 void
 TwoBodyQA::insert (const TwoBody &element)
 {
-  const TwoBody *ptr = &element;
+  auto ptr = std::make_shared<TwoBody>(element);;
   map[{ element.s1, element.s2, element.ss1, element.ss2 }] = ptr;
 
   index_s1[element.s1].push_back (ptr);
@@ -101,7 +101,7 @@ TwoBodyQA::insert (const TwoBody &element)
 }
 
 // check single indices
-const std::vector<const TwoBody *>
+const std::vector<std::shared_ptr<TwoBody>>
 TwoBodyQA::check_s1 (const int s1)
 {
   if (index_s1.find (s1) != index_s1.end ())
@@ -110,7 +110,7 @@ TwoBodyQA::check_s1 (const int s1)
     }
   return {};
 }
-const std::vector<const TwoBody *>
+const std::vector<std::shared_ptr<TwoBody>>
 TwoBodyQA::check_ss1 (const int ss1)
 {
   if (index_ss1.find (ss1) != index_ss1.end ())
@@ -121,7 +121,7 @@ TwoBodyQA::check_ss1 (const int ss1)
 }
 
 // check two indices
-const std::vector<const TwoBody *>
+const std::vector<std::shared_ptr<TwoBody>>
 TwoBodyQA::check_s1s2 (const int s1, const int s2)
 {
   if (index_s1s2.find (s1) != index_s1s2.end ()
@@ -130,7 +130,7 @@ TwoBodyQA::check_s1s2 (const int s1, const int s2)
 
   return {};
 }
-const std::vector<const TwoBody *>
+const std::vector<std::shared_ptr<TwoBody>>
 TwoBodyQA::check_ss1ss2 (const int ss1, const int ss2)
 {
   if (index_ss1ss2.find (ss1) != index_ss1ss2.end ()
@@ -139,7 +139,7 @@ TwoBodyQA::check_ss1ss2 (const int ss1, const int ss2)
 
   return {};
 }
-const std::vector<const TwoBody *>
+const std::vector<std::shared_ptr<TwoBody>>
 TwoBodyQA::check_s1ss1 (const int s1, const int ss1)
 {
   if (index_s1ss1.find (s1) != index_s1ss1.end ()
@@ -148,7 +148,7 @@ TwoBodyQA::check_s1ss1 (const int s1, const int ss1)
 
   return {};
 }
-const std::vector<const TwoBody *>
+const std::vector<std::shared_ptr<TwoBody>>
 TwoBodyQA::check_s1s2ss1 (const int s1, const int s2, const int ss1)
 {
   if (index_s1s2ss1.find (s1) != index_s1s2ss1.end ()
