@@ -12,7 +12,7 @@ main ()
 
   Hamiltonian H = Hamiltonian (filepath);
   
-  H.set_num_states(25);
+  // H.set_num_states(10);
   
   // std::vector<double> y = H.full_vector();
   // H.set_elements(y.data());
@@ -39,10 +39,10 @@ main ()
   //   dfds_file << key.s << "\t" << key.ss << "\t" << me << "\n";
   // }
 
-  // H.euler(0., 3, 0.03);
+  H.euler(0., 3, 0.001);
 
 
-  H.runge_kutta_gsl(0, 1);
+  // H.runge_kutta_gsl(0, 1);
 
 
 

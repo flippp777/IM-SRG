@@ -20,14 +20,14 @@ Hamiltonian::runge_kutta_gsl (double s, const double s1)
   const gsl_odeiv2_step_type *T = gsl_odeiv2_step_rkf45;
 
   gsl_odeiv2_step *step = gsl_odeiv2_step_alloc (T, dim);
-  gsl_odeiv2_control *c = gsl_odeiv2_control_y_new (1e-6, 0.0);
+  gsl_odeiv2_control *c = gsl_odeiv2_control_y_new (1e-3, 0.0);
   gsl_odeiv2_evolve *e = gsl_odeiv2_evolve_alloc (dim);
 
   gsl_odeiv2_system sys = { im_srg_ode, NULL, dim, this };
 
   std::vector<double> y = full_vector ();
 
-  double h = 1e-6;
+  double h = 1e-3;
 
   while (s < s1)
     {
@@ -41,7 +41,7 @@ Hamiltonian::runge_kutta_gsl (double s, const double s1)
         }
 
       std::cout << "s = " << s << ", E = " << y[0] << std::endl;
-      E_out << s << "\t" << y[0] << "\n";
+      E_out << s << "\t" << y[0] << std::endl;
 
     }
 
