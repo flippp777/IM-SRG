@@ -1,4 +1,5 @@
 #include "Hamiltonian.hpp"
+#include <iostream>
 #include <vector>
 #include <fstream>
 
@@ -11,16 +12,19 @@ main ()
 
   Hamiltonian H = Hamiltonian (filepath);
   
-  H.set_num_states(140);
+  H.set_num_states(25);
   
-  std::vector<double> y = H.calc_full_vector();
-  H.set_elements(y.data());
-
-  std::vector<OneBody> f = H.get_one_body_generator();
-  std::ofstream f_file ("f_after_full_s0.0.txt");
-  for (const auto &eta : f) {
-    f_file << eta.s << "\t" << eta.ss << "\t" << eta.me << "\n";
-  }
+  // std::vector<double> y = H.full_vector();
+  // H.set_elements(y.data());
+  //
+  // std::vector<OneBody> f = H.get_one_body();
+  // std::ofstream f_file ("f_after_full_s0.0.txt");
+  // for (const auto &eta : f) {
+  //   f_file << eta.s << "\t" << eta.ss << "\t" << eta.me << "\n";
+  // }
+  // for (const auto &eta : f) {
+  //   std::cout << eta.s << "\t" << eta.ss << "\t" << eta.me << std::endl;
+  // }
   // H.set_generators();
   // std::vector<TwoBody> eta2 = H.get_two_body_generator();
   // std::ofstream eta_file ("etaTwoBody_s0.0.txt");
@@ -38,7 +42,7 @@ main ()
   // H.euler(0., 3, 0.03);
 
 
-  // H.runge_kutta_gsl(0, 1);
+  H.runge_kutta_gsl(0, 1);
 
 
 

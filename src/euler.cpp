@@ -12,7 +12,7 @@ euler_step (const double dxds, const double ds)
 }
 
 void
-Hamiltonian::euler_no_print (const double s0, const double s, const double ds)
+Hamiltonian::euler_print (const double s0, const double s, const double ds)
 {
   auto start = std::chrono::high_resolution_clock::now ();
 

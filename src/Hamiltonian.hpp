@@ -12,6 +12,8 @@ class Hamiltonian
 {
 private:
   int num_states = 140;
+  int num_uniqe_f = (num_states + 1) * num_states/2;
+  int num_uniqe_gamma = 0;
 
   double E;
   std::vector<OneBody> f;
@@ -35,7 +37,7 @@ public:
     num_states = new_num;
   }
 
-  const std::vector<double> calc_full_vector ();
+  const std::vector<double> full_vector ();
   const void set_generators ();
   const void set_flow_eq ();
   const void set_flow_eq_print ();

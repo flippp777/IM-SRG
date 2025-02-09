@@ -25,7 +25,7 @@ Hamiltonian::runge_kutta_gsl (double s, const double s1)
 
   gsl_odeiv2_system sys = { im_srg_ode, NULL, dim, this };
 
-  std::vector<double> y = calc_full_vector ();
+  std::vector<double> y = full_vector ();
 
   double h = 1e-6;
 
