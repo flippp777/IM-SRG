@@ -237,8 +237,6 @@ Hamiltonian::euler (const double s0, const double s, const double ds)
             }
         }
 
-      std::cout << "\t" << "Euler step for G";
-
       for (const auto &[key, me] : dgammads_map)
         {
           if (gamma_map.count (key) != 0)
@@ -264,6 +262,8 @@ Hamiltonian::euler (const double s0, const double s, const double ds)
               f_file << ff.s << "\t" << ff.ss << "\t" << ff.me << std::endl;
             }
         }
+      std::cout << "E = " << E << ",\t" << "dEds = " << dEds << ";\t"
+                << "s = " << (i + 1) * ds << std::endl;
     }
 
   std::ostringstream name3;

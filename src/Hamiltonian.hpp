@@ -1,6 +1,7 @@
 #include "OneBody.hpp"
 #include "TwoBody.hpp"
 
+#include <map>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -19,6 +20,9 @@ private:
   std::vector<OneBody> f;
   std::vector<TwoBody> gamma;
 
+  std::unordered_map<OneBodyKey, int> index_f;
+  std::unordered_map<TwoBodyKey, int> index_gamma; 
+
   std::vector<OneBody> eta_1body;
   std::vector<TwoBody> eta_2body;
 
@@ -36,6 +40,7 @@ public:
   const void set_num_states(int new_num){
     num_states = new_num;
   }
+  const void set_index_maps();
 
   const std::vector<double> full_vector ();
   const void set_generators ();

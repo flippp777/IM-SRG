@@ -122,6 +122,25 @@ Hamiltonian::Hamiltonian(std::string filename) {
             << std::endl;
 }
 
+const void Hamiltonian::set_index_maps() {
+  int idx = 1;
+  for (int i = 0; i < num_states; i++) {
+    for (int j = i; j < num_states; ++j) {
+      index_f.insert({{i, j}, idx});
+      idx++;
+    }
+  }
+  for (int i = 0; i < num_states; ++i) {
+    for (int j = i + 1; j < num_states; ++j) {
+      for (int k = j; k < num_states; ++k) {
+        for (int l = k + 1; l < num_states; ++l) {
+          index_gamma.insert({{i, j, k, l}, idx});
+          idx++;
+        }
+      }
+    }
+  }
+}
 
 const std::vector<double> Hamiltonian::full_vector() {
   std::cout << "Creating the full vector" << std::flush;
@@ -145,15 +164,15 @@ const std::vector<double> Hamiltonian::full_vector() {
   {
 #pragma omp for collapse(2) nowait
     for (int i = 0; i < num_states; ++i)
-      for (int j = i ; j < num_states; ++j)
-        f_full[i*(2*num_states-i+1)/2+j-i] =
+      for (int j = i; j < num_states; ++j)
+        f_full[i * (2 * num_states - i + 1) / 2 + j - i] =
             f_map.count({i, j}) ? f_map[{i, j}] : 0;
 
 #pragma omp for collapse(4) nowait
     for (int i = 0; i < num_states; ++i)
-      for (int j = 0 ; j < num_states; ++j)
-        for (int k = 0 ; k < num_states; ++k)
-          for (int l = 0 ; l < num_states; ++l)
+      for (int j = 0; j < num_states; ++j)
+        for (int k = 0; k < num_states; ++k)
+          for (int l = 0; l < num_states; ++l)
             gamma_full[i * num_states * num_states * num_states +
                        j * num_states * num_states + k * num_states + l] =
                 gamma_map.count({i, j, k, l}) ? gamma_map[{i, j, k, l}]
@@ -169,7 +188,7 @@ const std::vector<double> Hamiltonian::full_vector() {
 
 #pragma omp for nowait
     for (int i = 0; i < num_uniqe_f; ++i)
-        y[1 + i] = f_full[i];
+      y[1 + i] = f_full[i];
 
 #pragma omp for collapse(4) nowait
     for (int i = 0; i < num_states; ++i)
@@ -201,7 +220,7 @@ const void Hamiltonian::set_elements(const double y[]) {
 #pragma omp for collapse(2) nowait
     for (int i = 0; i < num_states; ++i) {
       for (int j = i; j < num_states; ++j) {
-        double value = y[1 + i*(2*num_states-i+1)/2+j-i];
+        double value = y[1 + i * (2 * num_states - i + 1) / 2 + j - i];
         if (std::abs(value) > 1e-9) {
 #pragma omp critical
           {
