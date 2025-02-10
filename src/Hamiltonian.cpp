@@ -159,8 +159,6 @@ const std::vector<double> Hamiltonian::full_vector() {
   std::vector<double> y(1 + f_index.size() + gamma_index.size(), 0.0);
   y[0] = E;
 
-  std::cout << "." << std::flush;
-
   int f_size = f.size();
   int gamma_size = gamma.size();
 

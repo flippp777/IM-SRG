@@ -8,9 +8,8 @@
 #include <iostream>
 #include <ostream>
 #include <ratio>
+#include <sstream>
 #include <stdio.h>
-#include <strstream>
-#include <sys/resource.h>
 #include <vector>
 
 void Hamiltonian::runge_kutta_gsl(double s, const double s1, double h) {
@@ -18,7 +17,7 @@ void Hamiltonian::runge_kutta_gsl(double s, const double s1, double h) {
   std::cout << std::endl;
   auto start = std::chrono::high_resolution_clock::now();
 
-  std::ostrstream E_path;
+  std::ostringstream E_path;
   E_path << "E_rk_h" << h << "_s" << s << ".txt";
   std::ofstream E_out(E_path.str());
 
@@ -40,6 +39,8 @@ void Hamiltonian::runge_kutta_gsl(double s, const double s1, double h) {
 
   while (s < s1) {
     auto start_step = std::chrono::high_resolution_clock::now();
+    std::cout << "0\%" << std::flush;
+    rk_animation_couner = 1;
 
     int status =
         gsl_odeiv2_evolve_apply(e, c, step, &sys, &s, s1, &h, y.data());
@@ -52,9 +53,10 @@ void Hamiltonian::runge_kutta_gsl(double s, const double s1, double h) {
     auto stop_step = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> ms_double =
         stop_step - start_step;
-
-    std::cout << "s = " << s << ", E = " << y[0] << std::endl;
-    std::cout << "Step time: " << ms_double.count()* 1e-3 << "s" << std::endl;
+    
+    std::cout << "\b\b\b\b" <<"s = " << s << ", E = " << y[0] << std::endl;
+    std::cout << "Step time: " << ms_double.count() * 1e-3 << "s"
+              << std::endl;
     std::cout << std::endl;
     E_out << s << "\t" << y[0] << std::endl;
   }
@@ -65,6 +67,6 @@ void Hamiltonian::runge_kutta_gsl(double s, const double s1, double h) {
 
   auto stop = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double, std::milli> ms_double = stop - start;
-  std::cout << "Integration time: " << ms_double.count() * 1e-3 << "s"
+  std::cout << "Integration time: " << ms_double.count() * 1e-3/60 << "m"
             << std::endl;
 }
