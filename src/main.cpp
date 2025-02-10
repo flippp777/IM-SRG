@@ -16,17 +16,27 @@ main()
 
   H.set_index_maps();
 
-  std::vector<double> y = H.full_vector();
-  H.set_elements(y.data());
+  // std::vector<double> y = H.full_vector();
+  // H.set_elements(y.data());
 
-  std::vector<OneBody> f = H.get_one_body();
-  std::ofstream f_file("f_after_full_s0.0.txt");
-  for (const auto& eta : f) {
-    f_file << eta.s << "\t" << eta.ss << "\t" << eta.me << "\n";
-  }
+  // std::vector<OneBody> f = H.get_one_body();
+  // std::ofstream f_file("f_after_full_s0.0.txt");
+  // for (const auto& eta : f) {
+  //   f_file << eta.s << "\t" << eta.ss << "\t" << eta.me << "\n";
+  // }
   // for (const auto &eta : f) {
   //   std::cout << eta.s << "\t" << eta.ss << "\t" << eta.me << std::endl;
   // }
+
+  // std::vector<TwoBody> gamma = H.get_two_body();
+  // for (const auto &g : gamma) {
+  //   std::cout << g.s1 << " " << g.s2 << " " 
+  //             << g.ss1 << " " << g.ss2 << " " << g.me << std::endl;
+  // }
+
+  // H.set_flow_eq();
+  // H.get_full_eqs();
+
   // H.set_generators();
   // std::vector<TwoBody> eta2 = H.get_two_body_generator();
   // std::ofstream eta_file ("etaTwoBody_s0.0.txt");
@@ -44,7 +54,7 @@ main()
 
   // H.euler(0., 3, 0.001);
 
-  // H.runge_kutta_gsl(0, 1);
+  H.runge_kutta_gsl(0, 1);
 
   return 0;
 }

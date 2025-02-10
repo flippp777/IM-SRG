@@ -97,7 +97,6 @@ Hamiltonian::Hamiltonian(std::string filename)
 
   std::vector<OneBody> f_new;
   const int gamma_size = gamma.size();
-  const int f_size = f.size();
 
 #pragma omp parallel
   {
@@ -119,7 +118,7 @@ Hamiltonian::Hamiltonian(std::string filename)
     }
     // remove values close to 0
 #pragma omp for
-    for (int i = 0; i < f_size; ++i) {
+    for (size_t i = 0; i < f.size(); ++i) {
       if (std::abs(f[i].me) > 1e-9) {
 #pragma omp critical
         f_new.push_back(f[i]);
@@ -139,7 +138,7 @@ Hamiltonian::set_index_maps()
   for (int i = 0; i < num_states; i++) {
     for (int j = i; j < num_states; ++j) {
       f_index.insert({ { i, j }, idx });
-      index_f.insert({idx, {i, j}});
+      index_f.insert({ idx, { i, j } });
       idx++;
     }
   }
@@ -148,7 +147,7 @@ Hamiltonian::set_index_maps()
       for (int k = j; k < num_states; ++k) {
         for (int l = k + 1; l < num_states; ++l) {
           gamma_index.insert({ { i, j, k, l }, idx });
-          index_gamma.insert({ idx , { i, j, k, l }});
+          index_gamma.insert({ idx, { i, j, k, l } });
           idx++;
         }
       }
@@ -160,107 +159,132 @@ const std::vector<double>
 Hamiltonian::full_vector()
 {
   std::cout << "Creating the full vector" << std::flush;
+  auto start = std::chrono::high_resolution_clock::now();
 
   std::unordered_map<OneBodyKey, double> f_map;
   for (const auto& el : f) {
     f_map[{ el.s, el.ss }] = el.me;
   }
+
+  std::cout << "." << std::flush;
+
   std::unordered_map<TwoBodyKey, double> gamma_map;
   for (const auto& el : gamma) {
     gamma_map[{ el.s1, el.s2, el.ss1, el.ss2 }] = el.me;
   }
 
-  std::vector<double> f_full(f_index.size(), 0.0);
-  std::vector<double> gamma_full(gamma_index.size(), 0.0);
-
   std::vector<double> y(1 + f_index.size() + gamma_index.size(), 0.0);
   y[0] = E;
 
+  std::cout << "." << std::flush;
+
+  int f_size = f.size();
+  int gamma_size = gamma.size();
+
 #pragma omp parallel
   {
-// #pragma omp for collapse(2) nowait
-//     for (int i = 0; i < num_states; ++i)
-//       for (int j = i; j < num_states; ++j)
-//         f_full[i * (2 * num_states - i + 1) / 2 + j - i] =
-//           f_map.count({ i, j }) ? f_map[{ i, j }] : 0;
-//
-// #pragma omp for collapse(4)
-//     for (int i = 0; i < num_states; ++i)
-//       for (int j = 0; j < num_states; ++j)
-//         for (int k = 0; k < num_states; ++k)
-//           for (int l = 0; l < num_states; ++l)
-//             gamma_full[i * num_states * num_states * num_states +
-//                        j * num_states * num_states + k * num_states + l] =
-//               gamma_map.count({ i, j, k, l }) ? gamma_map[{ i, j, k, l }] : 0;
-
-#pragma omp for nowait
-    for (int i = 0; i < f.size(); ++i) 
-    {
+#pragma omp for
+    for (int i = 0; i < f_size; ++i) {
       auto idx = f_index.find({ f[i].s, f[i].ss });
-      if (idx != f_index.end())
+      if (idx != f_index.end()) {
         y[idx->second] = f[i].me;
+      }
     }
-// #pragma omp for collapse(4)
-//     for (int i = 0; i < num_states; ++i)
-//       for (int j = 0; j < num_states; ++j)
-//         for (int k = 0; k < num_states; ++k)
-//           for (int l = 0; l < num_states; ++l)
-//             y[1 + num_uniqe_f +
-//               (i * num_states * num_states * num_states +
-//                j * num_states * num_states + k * num_states + l)] =
-//               gamma_full[i * num_states * num_states * num_states +
-//                          j * num_states * num_states + k * num_states + l];
+#pragma omp for
+    for (int i = 0; i < gamma_size; ++i) {
+      auto idx = gamma_index.find(
+        { gamma[i].s1, gamma[i].s2, gamma[i].ss1, gamma[i].ss2 });
+      if (idx != gamma_index.end()) {
+        y[idx->second] = gamma[i].me;
+      }
+    }
   }
-  printf("... done\n");
+  std::cout << "." << std::flush;
+  auto stop = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double, std::milli> ms_double = stop - start;
+  std::cout << "\t" << " done (" << ms_double.count() << "ms)" << std::endl;
   return y;
 }
 
 const void
 Hamiltonian::set_elements(const double y[])
 {
+  std::cout << "Setting non-zero ME" << std::flush;
+  auto start = std::chrono::high_resolution_clock::now();
+  std::cout << "." << std::flush;
+
   f.clear();
   gamma.clear();
 
-  f.resize(1000);
-  // gamma.reserve(20000000);
+  f.reserve(1000);
+  gamma.reserve(20000000);
 
-  int index_f_size = f_index.size();
+  int f_index_size = f_index.size();
+  int gamma_index_size = gamma_index.size();
 
   E = y[0];
+  std::cout << "." << std::flush;
 
 #pragma omp parallel
   {
-#pragma omp for nowait
-    for (int i = 0; i < index_f_size; ++i) {
-        double me = y[1 + i];
-        if (std::abs(me) > 1e-9) {
+#pragma omp for
+    for (int i = 1; i < 1 + f_index_size; ++i) {
+      double me = y[i];
+      if (std::abs(me) > 1e-9) {
         int a = std::get<0>(index_f.at(i));
         int b = std::get<1>(index_f.at(i));
 #pragma omp critical
-          {
-            f.push_back(OneBody(a, b, me));
-            f.push_back(OneBody(b, a, me));
+        {
+          f.push_back(OneBody(a, b, me));
+          f.push_back(OneBody(b, a, me));
+        }
+      }
+    }
+#pragma omp for
+    for (int i = 1 + f_index_size; i < 1 + f_index_size + gamma_index_size;
+         ++i) {
+      double me = y[i];
+      if (std::abs(me) > 1e-9) {
+        int a = std::get<0>(index_gamma.at(i));
+        int b = std::get<1>(index_gamma.at(i));
+        int c = std::get<2>(index_gamma.at(i));
+        int d = std::get<3>(index_gamma.at(i));
+#pragma omp critical
+        {
+          if (a == c && b == d) {
+            // <ab|H|ab>
+            gamma.push_back(TwoBody(a, b, c, d, me));
+            // <ba|H|ab>
+            gamma.push_back(TwoBody(b, a, c, d, -me));
+            // <ba|H|ba>
+            gamma.push_back(TwoBody(b, a, d, c, me));
+            // <ab|H|ba>
+            gamma.push_back(TwoBody(a, b, d, c, -me));
+          } else {
+            // <ab|H|cd>
+            gamma.push_back(TwoBody(a, b, c, d, me));
+            // <ba|H|cd>
+            gamma.push_back(TwoBody(b, a, c, d, -me));
+            // <ba|H|dc>
+            gamma.push_back(TwoBody(b, a, d, c, me));
+            // <ab|H|dc>
+            gamma.push_back(TwoBody(a, b, d, c, -me));
+            // <cd|H|ab>
+            gamma.push_back(TwoBody(c, d, a, b, me));
+            // <dc|H|ab>
+            gamma.push_back(TwoBody(d, c, a, b, -me));
+            // <dc|H|ba>
+            gamma.push_back(TwoBody(d, c, b, a, me));
+            // <cd|H|ba>
+            gamma.push_back(TwoBody(c, d, b, a, -me));
           }
         }
+      }
     }
-
-    // for (int i = 0; i < num_states; ++i) {
-//       #pragma omp for collapse(4) nowait
-//       for (int j = 0; j < num_states; ++j) {
-//         for (int k = 0; k < num_states; ++k) {
-//           for (int l = 0; l < num_states; ++l) {
-//             double value =
-//               y[1 + num_uniqe_f +
-//                 (i * num_states * num_states * num_states +
-//                  j * num_states * num_states + k * num_states + l)];
-//             if (std::abs(value) > 1e-9) {
-// #pragma omp critical
-//               gamma.push_back(TwoBody(i, j, k, l, value));
-//             }
-//           }
-//         }
-//       }
-//     }
+  std::cout << "." << std::flush;
+  auto stop = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double, std::milli> ms_double = stop - start;
+  std::cout << "\t" << " done (" << ms_double.count() << "ms)" << std::endl;
   }
 
   f.shrink_to_fit();
@@ -270,55 +294,54 @@ Hamiltonian::set_elements(const double y[])
 std::vector<double>
 Hamiltonian::get_full_eqs()
 {
-  std::vector<double> dyds;
-  std::vector<double> dfds_full;
-  std::vector<double> dgammads_full;
+  std::cout << "Creating full flow eqs" << std::flush;
+  auto start = std::chrono::high_resolution_clock::now();
+  std::cout << "." << std::flush;
 
-  dfds_full.resize(num_states * num_states, 0.0);
-  dgammads_full.resize(num_states * num_states * num_states * num_states, 0.0);
+  // std::vector<double> dfds_full;
+  // std::vector<double> dgammads_full;
+  //
+  // dfds_full.resize(num_states * num_states, 0.0);
+  // dgammads_full.resize(num_states * num_states * num_states * num_states, 0.0);
 
-#pragma omp parallel
-  {
-#pragma omp for collapse(2) nowait
-    for (int i = 0; i < num_states; ++i)
-      for (int j = 0; j < num_states; ++j)
-        dfds_full[i * num_states + j] =
-          dfds_map.count({ i, j }) ? dfds_map[{ i, j }] : 0;
+  std::vector<double> dyds(1 + f_index.size() + gamma_index.size(), 0.0);
+  dyds[0] = E;
 
-#pragma omp for collapse(4) nowait
-    for (int i = 0; i < num_states; ++i)
-      for (int j = 0; j < num_states; ++j)
-        for (int k = 0; k < num_states; ++k)
-          for (int l = 0; l < num_states; ++l)
-            dgammads_full[i * num_states * num_states * num_states +
-                          j * num_states * num_states + k * num_states + l] =
-              dgammads_map.count({ i, j, k, l }) ? dgammads_map[{ i, j, k, l }]
-                                                 : 0;
+  // int dfds_size = dfds_map.size();
+  // int dgammads_size = dgammads_map.size();
 
-#pragma omp single
-    {
-      dyds.resize(1 + num_states * num_states +
-                  num_states * num_states * num_states * num_states);
-      dyds[0] = E;
-    }
-#pragma omp barrier
+  // #pragma omp parallel
+  //   {
+  // #pragma omp for
+  //     for (int i = 0; i < dfds_size; ++i) {
+  //       auto idx = f_index.find({ d[i].s, f[i].ss });
+  //       if (idx != f_index.end()) {
+  //         y[idx->second] = f[i].me;
+  //       }
+  //     }
+  // #pragma omp for
+  //     for (int i = 0; i < dgammads_size; ++i) {
+  //       auto idx = gamma_index.find(
+  //         { gamma[i].s1, gamma[i].s2, gamma[i].ss1, gamma[i].ss2 });
+  //       if (idx != gamma_index.end()) {
+  //         y[idx->second] = gamma[i].me;
+  //       }
+  //     }
+  //   }
 
-#pragma omp for collapse(2) nowait
-    for (int i = 0; i < num_states; ++i)
-      for (int j = 0; j < num_states; ++j)
-        dyds[1 + i * num_states + j] = dfds_full[i * num_states + j];
-
-#pragma omp for collapse(4) nowait
-    for (int i = 0; i < num_states; ++i)
-      for (int j = 0; j < num_states; ++j)
-        for (int k = 0; k < num_states; ++k)
-          for (int l = 0; l < num_states; ++l)
-            dyds[1 + num_states * num_states +
-                 (i * num_states * num_states * num_states +
-                  j * num_states * num_states + k * num_states + l)] =
-              dgammads_full[i * num_states * num_states * num_states +
-                            j * num_states * num_states + k * num_states + l];
+  for (const auto& [key, me] : dfds_map) {
+    dyds[f_index.at(key)] = me;
   }
+  std::cout << "." << std::flush;
+  for (const auto& [key, me] : dgammads_map) {
+    dyds[gamma_index.at(key)] = me;
+  }
+
+  std::cout << "." << std::flush;
+  auto stop = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double, std::milli> ms_double = stop - start;
+  std::cout << "\t" << " done (" << ms_double.count() << "ms)" << std::endl;
+
   return dyds;
 }
 
