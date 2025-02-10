@@ -5,4 +5,3 @@ bin
 compile.sh
 compile_and_run.sh
 core.*
-output

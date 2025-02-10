@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-# s, E, dEds = np.transpose(np.loadtxt("output/im_srg_euler_E_s00_s3_ds0.03.txt"))
+s1, E1, dEds1 = np.transpose(np.loadtxt("output/im_srg_euler_E_s00_s3_ds0.03.txt"))
 # s, E = np.transpose(np.loadtxt("E_runge-kutta.txt"))
-s, E, dEds = np.transpose(np.loadtxt("im_srg_euler_E_s00_s3_ds0.001.txt"))
+s2, E2, dEds2 = np.transpose(np.loadtxt("output/im_srg_euler_E_s00_s3_ds0.001.txt"))
 
 
 # i = 0
@@ -15,7 +15,8 @@ s, E, dEds = np.transpose(np.loadtxt("im_srg_euler_E_s00_s3_ds0.001.txt"))
 # s = new_s
 
 plt.figure()
-plt.plot(s, E, "o-")
+plt.plot(s1, E1)
+plt.plot(s2, E2)
 # plt.xlim(right = 0.04)
 plt.xlabel("s")
 # plt.ylim(bottom = -30)

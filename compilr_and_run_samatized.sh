@@ -1,1 +1,0 @@
-g++ -fsanitize=address -fdiagnostics-color=always -fopenmp -O3 -std=c++23 -o /home/flip/uni/master/seminar/CNSP/IM-SRG/bin/im_srg /home/flip/uni/master/seminar/CNSP/IM-SRG/src/*.cpp -lgsl -lgslcblas -lm && ./bin/im_srg
