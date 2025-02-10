@@ -3,18 +3,24 @@
 #include <iostream>
 #include <vector>
 
-int
-main()
-{
-  std::string filepath = "matrix_elements/"
-                         "hint_He4_chi2bM3A_srg0800_eMax04_nMax02_lMax04_"
-                         "hwHO020.me2m";
+int main() {
+  try {
+    std::string filepath =
+        "matrix_elements/"
+        "hint_He4_chi2bM3A_srg0800_eMax04_nMax02_lMax04_"
+        "hwHO020.me2m";
 
-  Hamiltonian H = Hamiltonian(filepath);
+    Hamiltonian H = Hamiltonian(filepath);
 
-  // H.set_num_states(10);
+    H.set_num_states(140);
 
-  H.set_index_maps();
+    H.set_index_maps();
+
+    H.runge_kutta_gsl(0, 3, 1e-3);
+  } catch (const std::exception &e) {
+    std::cerr << "Error: " << e.what() << std::endl;
+    return 1;
+  }
 
   // std::vector<double> y = H.full_vector();
   // H.set_elements(y.data());
@@ -30,7 +36,7 @@ main()
 
   // std::vector<TwoBody> gamma = H.get_two_body();
   // for (const auto &g : gamma) {
-  //   std::cout << g.s1 << " " << g.s2 << " " 
+  //   std::cout << g.s1 << " " << g.s2 << " "
   //             << g.ss1 << " " << g.ss2 << " " << g.me << std::endl;
   // }
 
@@ -53,8 +59,6 @@ main()
   // }
 
   // H.euler(0., 3, 0.001);
-
-  H.runge_kutta_gsl(0, 1);
 
   return 0;
 }

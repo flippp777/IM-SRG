@@ -37,9 +37,11 @@ public:
   Hamiltonian (const double E, const std::vector<OneBody> f,
                const std::vector<TwoBody> gamma);
   Hamiltonian (std::string filepath);
+
   const void set_num_states(int new_num){
     num_states = new_num;
   }
+
   const void set_index_maps();
 
   const std::vector<double> full_vector ();
@@ -55,7 +57,7 @@ public:
 
   std::vector<double> get_full_eqs ();
 
-  void runge_kutta_gsl (double s0, const double s);
+  void runge_kutta_gsl (double s, const double s1, const double h);
 
   const void
   set_zero_body (double new_E)
