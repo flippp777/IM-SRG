@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 s1, E1, dEds1 = np.transpose(np.loadtxt("output/im_srg_euler_E_s00_s3_ds0.03.txt"))
-# s, E = np.transpose(np.loadtxt("E_runge-kutta.txt"))
+# srk, Erk = np.transpose(np.loadtxt("output/E_runge-kutta.txt"))
 s2, E2, dEds2 = np.transpose(np.loadtxt("output/im_srg_euler_E_s00_s3_ds0.001.txt"))
 
 
@@ -17,12 +17,12 @@ s2, E2, dEds2 = np.transpose(np.loadtxt("output/im_srg_euler_E_s00_s3_ds0.001.tx
 plt.figure()
 plt.plot(s1, E1)
 plt.plot(s2, E2)
-# plt.xlim(right = 0.04)
+# plt.plot(srk, Erk)
 plt.xlabel("s")
-# plt.ylim(bottom = -30)
 plt.ylabel("E (MeV)")
 plt.grid(linestyle="--")
-# plt.semilogx()
+plt.legend(["ds = 0.03", "ds = 0.001", "rk"])
+plt.semilogx()
 
 # plt.figure()
 # plt.plot(s, dEds, "o-")
