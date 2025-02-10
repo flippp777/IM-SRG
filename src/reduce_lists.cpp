@@ -18,7 +18,7 @@ reduce_map(std::vector<std::unordered_map<OneBodyKey, double>> &old_maps) {
       std::unordered_map<OneBodyKey, double> local_map;
 
 #pragma omp for nowait
-      for (int i = 0; i < old_maps.size() / 2; ++i) {
+      for (size_t i = 0; i < old_maps.size() / 2; ++i) {
         local_map = old_maps[2 * i];
         for (const auto &[key, el] : old_maps[2 * i + 1]) {
           local_map[key] += el;
@@ -48,7 +48,7 @@ reduce_map(std::vector<std::unordered_map<TwoBodyKey, double>> &old_maps) {
       std::unordered_map<TwoBodyKey, double> local_map;
 
 #pragma omp for nowait
-      for (int i = 0; i < old_maps.size() / 2; ++i) {
+      for (size_t i = 0; i < old_maps.size() / 2; ++i) {
         local_map = old_maps[2 * i];
         for (const auto &[key, el] : old_maps[2 * i + 1]) {
           local_map[key] += el;
@@ -90,7 +90,7 @@ std::vector<OneBody> reduce_vec(std::vector<std::vector<OneBody>> &vecs) {
     std::vector<std::vector<OneBody>> new_vecs((int)vecs.size() / 2);
 
 #pragma omp parallel for
-    for (int i = 0; i < vecs.size() / 2; ++i) {
+    for (size_t i = 0; i < vecs.size() / 2; ++i) {
       std::vector<OneBody> local_vec = vecs[i * 2];
       local_vec.insert(local_vec.end(), vecs[2 * i + 1].begin(),
                        vecs[2 * i + 1].end());
@@ -133,7 +133,7 @@ std::vector<TwoBody> reduce_vec(std::vector<std::vector<TwoBody>> &vecs) {
     std::vector<std::vector<TwoBody>> new_vecs((int)vecs.size() / 2);
 
 #pragma omp parallel for
-    for (int i = 0; i < vecs.size() / 2; ++i) {
+    for (size_t i = 0; i < vecs.size() / 2; ++i) {
       std::cout << omp_get_thread_num() << std::endl;
       std::vector<TwoBody> local_vec = vecs[i * 2];
       local_vec.insert(local_vec.end(), vecs[2 * i + 1].begin(),

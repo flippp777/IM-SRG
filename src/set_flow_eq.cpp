@@ -35,7 +35,6 @@ Hamiltonian::set_flow_eq ()
 
   const int f_size = f.size ();
   const int eta1_size = eta_1body.size ();
-  const int gamma_size = gamma.size ();
   const int eta2_size = eta_2body.size ();
 
   int max_threads = omp_get_max_threads ();
@@ -383,7 +382,6 @@ Hamiltonian::set_flow_eq_print ()
 
   const int f_size = f.size ();
   const int eta1_size = eta_1body.size ();
-  const int gamma_size = gamma.size ();
   const int eta2_size = eta_2body.size ();
 
   int max_threads = omp_get_max_threads ();

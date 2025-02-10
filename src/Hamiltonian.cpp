@@ -49,7 +49,6 @@ Hamiltonian::Hamiltonian(std::string filename) {
   std::cout << "." << std::flush;
 
   // full gamma
-  const int gamma_init_size = gamma.size();
   std::vector<TwoBody> gamma_full;
   gamma_full.reserve(7500000);
   for (const auto &g : gamma) {
@@ -87,6 +86,7 @@ Hamiltonian::Hamiltonian(std::string filename) {
 
   std::vector<OneBody> f_new;
   const int gamma_size = gamma.size();
+  const int f_size = f.size();
 
 #pragma omp parallel
   {
@@ -108,7 +108,7 @@ Hamiltonian::Hamiltonian(std::string filename) {
     }
     // remove values close to 0
 #pragma omp for
-    for (int i = 0; i < f.size(); ++i) {
+    for (int i = 0; i < f_size; ++i) {
       if (std::abs(f[i].me) > 1e-9) {
 #pragma omp critical
         f_new.push_back(f[i]);

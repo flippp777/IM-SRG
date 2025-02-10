@@ -5,8 +5,8 @@
 #include <vector>
 
 TwoBodyQA::TwoBodyQA ()
-    : map (), index_s1 (), index_ss1 (), index_s1s2 (), index_ss1ss2 (),
-      index_s1ss1 ()
+    : index_s1 (), index_ss1 (), index_s1s2 (), index_ss1ss2 (),
+      index_s1ss1 (), map ()
 {
 }
 
