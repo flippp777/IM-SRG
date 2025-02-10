@@ -4,24 +4,26 @@
 #include <vector>
 
 int
-main ()
+main()
 {
   std::string filepath = "matrix_elements/"
                          "hint_He4_chi2bM3A_srg0800_eMax04_nMax02_lMax04_"
                          "hwHO020.me2m";
 
-  Hamiltonian H = Hamiltonian (filepath);
-  //
+  Hamiltonian H = Hamiltonian(filepath);
+
   // H.set_num_states(10);
 
-  // std::vector<double> y = H.full_vector();
-  // H.set_elements(y.data());
-  //
-  // std::vector<OneBody> f = H.get_one_body();
-  // std::ofstream f_file ("f_after_full_s0.0.txt");
-  // for (const auto &eta : f) {
-  //   f_file << eta.s << "\t" << eta.ss << "\t" << eta.me << "\n";
-  // }
+  H.set_index_maps();
+
+  std::vector<double> y = H.full_vector();
+  H.set_elements(y.data());
+
+  std::vector<OneBody> f = H.get_one_body();
+  std::ofstream f_file("f_after_full_s0.0.txt");
+  for (const auto& eta : f) {
+    f_file << eta.s << "\t" << eta.ss << "\t" << eta.me << "\n";
+  }
   // for (const auto &eta : f) {
   //   std::cout << eta.s << "\t" << eta.ss << "\t" << eta.me << std::endl;
   // }

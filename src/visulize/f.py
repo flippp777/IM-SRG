@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-fs001 = np.loadtxt("output/im_srg_euler_f_s0.txt")
-fs018 = np.loadtxt("output/im_srg_euler_f_s0.0498.txt")
+fs001 = np.loadtxt("output/f/im_srg_euler_f_s0.txt")
+fs018 = np.loadtxt("output/f/im_srg_euler_f_s0.0498.txt")
 # fs036 = np.loadtxt("im_srg_euler_f_s3.txt")
 fs036 = np.loadtxt("f_after_full_s0.0.txt")
 

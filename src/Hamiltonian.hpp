@@ -13,15 +13,15 @@ class Hamiltonian
 {
 private:
   int num_states = 140;
-  int num_uniqe_f = (num_states + 1) * num_states/2;
-  int num_uniqe_gamma = 0;
 
   double E;
   std::vector<OneBody> f;
   std::vector<TwoBody> gamma;
 
-  std::unordered_map<OneBodyKey, int> index_f;
-  std::unordered_map<TwoBodyKey, int> index_gamma; 
+  std::unordered_map<OneBodyKey, int> f_index;
+  std::unordered_map<TwoBodyKey, int> gamma_index; 
+  std::unordered_map<int, std::tuple<int, int>> index_f;
+  std::unordered_map<int, std::tuple<int, int, int, int>> index_gamma;
 
   std::vector<OneBody> eta_1body;
   std::vector<TwoBody> eta_2body;
