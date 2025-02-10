@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 s1, E1, dEds1 = np.transpose(np.loadtxt("output/E/im_srg_euler_E_s00_s3_ds0.03.txt"))
-srk, Erk = np.transpose(np.loadtxt("output/E/E_runge-kutta.txt"))
+srk, Erk = np.transpose(np.loadtxt("output/E/E_rk_h1e-05_s0.txt"))
 s2, E2, dEds2 = np.transpose(np.loadtxt("output/E/im_srg_euler_E_s00_s3_ds0.001.txt"))
 
 
