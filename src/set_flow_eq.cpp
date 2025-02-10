@@ -333,9 +333,6 @@ Hamiltonian::set_flow_eq ()
         }
     }
   }
-  // dfds_map = reduce_map(thread_dfds);
-  // std::cout << "." << std::flush;
-  // dgammads_map = reduce_map(thread_dgammads);
 }
 
 void const
