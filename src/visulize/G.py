@@ -1,8 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.sparse import coo_array
 
-Gamma = np.loadtxt("output/G/Gamma_s0.0.txt")
-N = int(140**2*0.75)
+data = np.transpose(np.loadtxt("output/G/Gamma_s0.0.txt"))
+cols, rows, vals = data[0].astype(int), data[1].astype(int), np.sign(data[2])
+N = int(140**2 *0.5)
+
+coo_Gamma = coo_array((vals, (rows, cols)))
 
 
 def fill_mat(matrix_list):
@@ -13,28 +17,17 @@ def fill_mat(matrix_list):
             matrix[int(element[0]), int(element[1])] = element[2]
     return matrix
 
-Gamma_mat = fill_mat(Gamma)
+
 # Gamma_mat2 = Gamma_mat[int(140*140/2):, int(140*140/2):]
 
 plt.figure()
+plt.spy(coo_Gamma, markersize=0.05)
 plt.title("Gamma, s = 0")
-plt.matshow(Gamma_mat, fignum=0)
-plt.colorbar()
-
 
 # plt.figure()
-# plt.title("s = 0.048")
-# plt.matshow(fd018_mat, fignum=0)
-
-# plt.figure()
-# plt.title("dfds, s = 0")
-# plt.matshow(dfds_mat, fignum=0)
+# plt.imshow(coo_Gamma.toarray(), cmap="seismic", interpolation="none")
 # plt.colorbar()
-
-# plt.figure()
-# plt.title("eta, s = 0")
-# plt.matshow(eta_mat, fignum=0)
-# plt.colorbar()
-plt.savefig("Gamma_mat.pdf")
+#
+# plt.savefig("Gamma_mat.svg")
 
 plt.show()
