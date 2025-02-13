@@ -6,6 +6,7 @@ MatrixRepresentation::MatrixRepresentation(Hamiltonian &H) {
   num_states = H.get_num_states();
 
   f = H.get_one_body();
+  eta1 = H.get_one_body_generator();
   Gamma = H.get_two_body();
 
   int idx = 0;
@@ -27,6 +28,14 @@ const void MatrixRepresentation::export_one_body(std::string name) {
   std::ofstream f_file(name);
   for (const auto &ff : f) {
     f_file << ff.s << "\t" << ff.ss << "\t" << ff.me << "\n";
+  }
+  f_file.close();
+}
+
+const void MatrixRepresentation::export_one_body_generator(std::string name) {
+  std::ofstream f_file(name);
+  for (const auto &e : eta1) {
+    f_file << e.s << "\t" << e.ss << "\t" << e.me << "\n";
   }
   f_file.close();
 }

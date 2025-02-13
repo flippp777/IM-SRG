@@ -1,10 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-fs001 = np.loadtxt("output/f/im_srg_euler_f_s0.txt")
-fs018 = np.loadtxt("output/f/im_srg_euler_f_s0.0498.txt")
-# fs036 = np.loadtxt("im_srg_euler_f_s3.txt")
-fs036 = np.loadtxt("f_after_full_s0.0.txt")
+fs00 = np.loadtxt("output/f/im_srg_euler_f_s0.txt")
+fs03 = np.loadtxt("output/f/f_s0.3.txt")
+fs5 = np.loadtxt("output/f/f_s5.txt")
 
 N = 140
 
@@ -16,19 +15,31 @@ def fill_mat(matrix_list):
     return matrix
 
 
-fd001_mat = fill_mat(fs001)
-fd018_mat = fill_mat(fs018)
-fd036_mat = fill_mat(fs036)
+f00_mat = fill_mat(fs00)
+f03_mat = fill_mat(fs03)
+f5_mat = fill_mat(fs5)
 
 plt.figure()
 plt.title("f, s = 0")
-plt.matshow(fd001_mat, fignum=0)
+plt.matshow(f00_mat, fignum=0, cmap="seismic", vmin=-5, vmax=5)
 plt.colorbar()
+plt.savefig("f_s0.svg", bbox_inches='tight')
 
 plt.figure()
-plt.title("f, s = 0.1")
-plt.matshow(fd036_mat, fignum=0)
+plt.title("f, s = 0.3")
+plt.matshow(f03_mat, fignum=0, cmap="seismic", vmin=-5, vmax=5)
 plt.colorbar()
+plt.savefig("f_s0.5.svg", bbox_inches='tight')
+
+plt.figure()
+plt.title("f, s = 5")
+plt.matshow(f5_mat, fignum=0, cmap="seismic", vmin=-5, vmax=5)
+plt.colorbar()
+plt.savefig("f_s5.svg", bbox_inches='tight')
+
+# plt.figure()
+# plt.title("f, s = 0.3")
+# plt.spy(f03_mat)
 
 # plt.figure()
 # plt.title("s = 0.048")

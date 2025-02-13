@@ -1,5 +1,7 @@
 #include "Hamiltonian/Hamiltonian.hpp"
 #include "MatrixRepresentation/MatrixRepresentation.hpp"
+#include <algorithm>
+#include <bits/getopt_core.h>
 #include <cstdlib>
 #include <getopt.h>
 #include <iostream>
@@ -14,7 +16,7 @@ int main(int argc, char *argv[]) {
   bool output = 0;
   int opt;
 
-  while ((opt = getopt(argc, argv, ":i:N:s:d:o")) != -1) {
+  while ((opt = getopt(argc, argv, ":i:N:s:d:og:")) != -1) {
     switch (opt) {
     case 'i':
       integration_method = optarg;
@@ -40,7 +42,6 @@ int main(int argc, char *argv[]) {
   std::cout << "Inetgration method: " << integration_method << std::endl;
   std::cout << "Number of single particle states: " << N << std::endl;
   std::cout << "Integrating to s = " << s1 << std::endl;
-  std::cout << std::endl;
 
   const char integral = integration_method.c_str()[0];
   switch (integral) {
@@ -54,15 +55,13 @@ int main(int argc, char *argv[]) {
     std::cout << "Wrong integration method specification" << std::endl;
     return 0;
   }
+  std::cout << std::endl;
 
   std::string filepath = "matrix_elements/"
                          "hint_He4_chi2bM3A_srg0800_eMax04_nMax02_lMax04_"
                          "hwHO020.me2m";
 
   Hamiltonian H = Hamiltonian(filepath);
-
-  MatrixRepresentation Matrix = MatrixRepresentation(H);
-  Matrix.export_two_body("Gamma_s0.txt");
 
   switch (integral) {
   case 'r':
@@ -75,11 +74,10 @@ int main(int argc, char *argv[]) {
     break;
   }
 
-  Matrix.set_one_body(H.get_one_body());
-  Matrix.set_two_body(H.get_two_body());
-
-  Matrix.export_one_body("f_s0.3.txt");
-  Matrix.export_two_body("Gamma_s0.3.txt");
+  // MatrixRepresentation Matrix = MatrixRepresentation(H);
+  // Matrix.export_one_body("f_s0.3.txt");
+  // Matrix.export_one_body_generator("eta1_s5.txt");
+  // Matrix.export_two_body("Gamma_s1_test.txt");
 
   return 0;
 }

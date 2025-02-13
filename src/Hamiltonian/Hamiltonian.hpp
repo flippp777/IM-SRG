@@ -45,6 +45,7 @@ public:
 
   const std::vector<double> get_full_vector();
   const void set_generators();
+void const set_it_generators();
   const void set_flow_eq();
   const void set_flow_eq_print();
   int alt_flow_eq();
