@@ -1,7 +1,7 @@
 #ifndef REDUCELIST
 #define REDUCELIST 
-#include "OneBody.hpp"
-#include "TwoBody.hpp"
+#include "../matrixElementClasses/OneBody.hpp"
+#include "../matrixElementClasses/TwoBody.hpp"
 #include <unordered_map>
 #include <vector>
 

@@ -1,6 +1,6 @@
 #include "reduce_lists.hpp"
-#include "OneBody.hpp"
-#include "TwoBody.hpp"
+#include "../matrixElementClasses/OneBody.hpp"
+#include "../matrixElementClasses/TwoBody.hpp"
 #include <iostream>
 #include <omp.h>
 #include <unordered_map>

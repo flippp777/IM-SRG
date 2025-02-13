@@ -1,12 +1,11 @@
 #include "Hamiltonian.hpp"
-#include "OneBody.hpp"
-#include "TwoBody.hpp"
+#include "../matrixElementClasses/OneBody.hpp"
+#include "../matrixElementClasses/TwoBody.hpp"
 
 #include <chrono>
 #include <cmath>
 #include <fstream>
 #include <iostream>
-#include <map>
 #include <ostream>
 #include <ratio>
 #include <sstream>

@@ -21,7 +21,7 @@ plt.plot(srk, Erk)
 plt.xlabel("s")
 plt.ylabel("E (MeV)")
 plt.grid(linestyle="--")
-plt.legend(["ds = 0.03", "ds = 0.001", "rk"])
+plt.legend(["Euler: ds = 0.03", "Euler: ds = 0.001", "Runge Kutta"])
 plt.semilogx()
 
 # plt.figure()

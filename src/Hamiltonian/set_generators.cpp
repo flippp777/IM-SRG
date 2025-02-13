@@ -1,5 +1,4 @@
 #include "Hamiltonian.hpp"
-#include <chrono>
 #include <iostream>
 
 void const Hamiltonian::set_generators() {

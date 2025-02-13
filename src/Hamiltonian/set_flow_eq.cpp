@@ -1,5 +1,5 @@
 #include "Hamiltonian.hpp"
-#include "TwoBodyQA.hpp"
+#include "../matrixElementClasses/TwoBodyQA.hpp"
 #include "omp.h"
 #include <iostream>
 #include <omp.h>

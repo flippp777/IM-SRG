@@ -1,5 +1,4 @@
 #include "TwoBody.hpp"
-#include <memory>
 #include <unordered_map>
 #include <vector>
 #ifndef TWOBODYQA

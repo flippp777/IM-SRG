@@ -1,5 +1,5 @@
-#include "OneBody.hpp"
-#include "TwoBody.hpp"
+#include "../matrixElementClasses/OneBody.hpp"
+#include "../matrixElementClasses/TwoBody.hpp"
 
 #include <map>
 #include <string>

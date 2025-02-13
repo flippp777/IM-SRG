@@ -1,8 +1,6 @@
 #include "Hamiltonian.hpp"
-#include "OneBody.hpp"
-#include "TwoBody.hpp"
-#include "TwoBodyQA.hpp"
-#include "reduce_lists.hpp"
+#include "../matrixElementClasses/TwoBodyQA.hpp"
+#include "../testFunctions/reduce_lists.hpp"
 #include <chrono>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
