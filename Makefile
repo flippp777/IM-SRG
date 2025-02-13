@@ -5,7 +5,7 @@ INCLUDES =
 LDFLAGS = -lgsl -lgslcblas -lm
 
 # directories
-SRC_DIRS = src src/Hamiltonian src/matrixElementClasses
+SRC_DIRS = src src/Hamiltonian src/matrixElementClasses src/MatrixRepresentation
 OBJ_DIRS = $(patsubst src/%, build/src/%, $(SRC_DIRS))
 BIN_DIR = build/bin
 
@@ -32,10 +32,7 @@ $(TARGET): $(OBJ_FILES) | $(BIN_DIR)
 	$(CC) $(CFLAGS) $(INCLUDES) -o $(TARGET) $(OBJ_FILES) $(LDFLAGS)
 
 clean:
-	rm -rf build/src/Hamiltonian/*
-	rm -rf build/src/matrixElementClasses/*
-	rm -rf build/src/*.o
-	rm -rf build/bin/*
+	rm -rf build/* 
 
 print-debug:
 	@echo "SRC_FILES: $(SRC_FILES)"
