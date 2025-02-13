@@ -18,6 +18,9 @@ private:
 public:
   MatrixRepresentation (Hamiltonian &H);
 
+  const void set_one_body(std::vector<OneBody> new_f) { f = new_f; }
+  const void set_two_body(std::vector<TwoBody> new_Gamma) { Gamma = new_Gamma; }
+
   const void export_one_body (std::string name);
   const void export_two_body (std::string name);
 };

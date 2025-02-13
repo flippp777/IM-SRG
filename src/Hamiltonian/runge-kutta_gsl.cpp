@@ -32,10 +32,10 @@ void Hamiltonian::runge_kutta_gsl(double s, const double s1, double h) {
   gsl_odeiv2_system sys = {im_srg_ode, NULL, dim, this};
 
   std::vector<double> y = full_vector();
-  if (y.size() != dim) {
-    std::cerr << "Error: Vector size mismatch" << std::endl;
-    return;
-  }
+  // if (y.size() != dim) {
+  //   std::cerr << "Error: Vector size mismatch" << std::endl;
+  //   return;
+  // }
 
   while (s < s1) {
     auto start_step = std::chrono::high_resolution_clock::now();
