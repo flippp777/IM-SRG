@@ -40,6 +40,7 @@ int main(int argc, char *argv[]) {
   std::cout << "Inetgration method: " << integration_method << std::endl;
   std::cout << "Number of single particle states: " << N << std::endl;
   std::cout << "Integrating to s = " << s1 << std::endl;
+  std::cout << std::endl;
 
   const char integral = integration_method.c_str()[0];
   switch (integral) {
@@ -66,6 +67,7 @@ int main(int argc, char *argv[]) {
   switch (integral) {
   case 'r':
     H.set_num_states(N);
+    H.set_index_maps();
     H.runge_kutta_gsl(0, s1, ds);
     break;
   case 'e':

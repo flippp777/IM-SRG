@@ -143,8 +143,7 @@ const void Hamiltonian::set_index_maps() {
   }
 }
 
-const std::vector<double> Hamiltonian::full_vector() {
-  set_index_maps();
+const std::vector<double> Hamiltonian::get_full_vector() {
 
   std::unordered_map<OneBodyKey, double> f_map;
   for (const auto &el : f) {

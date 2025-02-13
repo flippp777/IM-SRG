@@ -43,7 +43,7 @@ public:
 
   const void set_index_maps();
 
-  const std::vector<double> full_vector();
+  const std::vector<double> get_full_vector();
   const void set_generators();
   const void set_flow_eq();
   const void set_flow_eq_print();
