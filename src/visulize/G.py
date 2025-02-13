@@ -8,16 +8,6 @@ N = int(140**2 *0.5)
 
 coo_Gamma = coo_array((vals, (rows, cols)))
 
-
-def fill_mat(matrix_list):
-    matrix = np.empty(shape=(N, N))
-    matrix[:] = np.nan
-    for element in matrix_list:
-        if int(element[0]) < N and int(element[1]) < N:
-            matrix[int(element[0]), int(element[1])] = element[2]
-    return matrix
-
-
 # Gamma_mat2 = Gamma_mat[int(140*140/2):, int(140*140/2):]
 
 plt.figure()

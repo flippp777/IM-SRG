@@ -4,22 +4,22 @@
 #include "../Hamiltonian/Hamiltonian.hpp"
 #include "../matrixElementClasses/OneBody.hpp"
 #include "../matrixElementClasses/TwoBody.hpp"
-#include <unordered_map>
 
 class MatrixRepresentation
 {
 private:
-  std::unordered_map<OneBodyKey, double> f;
-  std::unordered_map<TwoBodyKey, double> G;
+  int num_states;
 
-  std::unordered_map<OneBodyKey, int> index_f;
-  std::unordered_map<OneBodyKey, int> index_G;
+  std::vector<OneBody> f;
+  std::vector<TwoBody> Gamma;
+
+  std::unordered_map<OneBodyKey, int> index_two_body;
 
 public:
-  MatrixRepresentation (const Hamiltonian &H);
+  MatrixRepresentation (Hamiltonian &H);
 
-  const void export_one_body ();
-  const void export_two_body ();
+  const void export_one_body (std::string name);
+  const void export_two_body (std::string name);
 };
 
 #endif // !MATRIX

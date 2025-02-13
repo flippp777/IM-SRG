@@ -13,7 +13,7 @@ BIN_DIR = build/bin
 SRC_FILES = $(wildcard $(foreach dir, $(SRC_DIRS), $(dir)/*.cpp))
 OBJ_FILES = $(patsubst src/%.cpp, build/src/%.o, $(SRC_FILES))
 
-TARGET = $(BIN_DIR)/main
+TARGET = $(BIN_DIR)/IM-SRG
 
 .PHONY: all clean print-debug
 
