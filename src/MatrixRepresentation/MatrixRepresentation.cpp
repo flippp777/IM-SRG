@@ -1,5 +1,6 @@
 #include "MatrixRepresentation.hpp"
 #include <fstream>
+#include <iostream>
 
 MatrixRepresentation::MatrixRepresentation(Hamiltonian &H) {
   num_states = H.get_num_states();
@@ -9,13 +10,13 @@ MatrixRepresentation::MatrixRepresentation(Hamiltonian &H) {
 
   int idx = 0;
   for (int i = 0; i < 4; ++i) {
-    for (int j = i; i < 4; ++i) {
+    for (int j = i; j < 4; ++j) {
       index_two_body.insert({{i, j}, idx});
       idx++;
     }
   }
   for (int i = 4; i < num_states; ++i) {
-    for (int j = i; i < num_states; ++i) {
+    for (int j = i; j < num_states; ++j) {
       index_two_body.insert({{i, j}, idx});
       idx++;
     }
