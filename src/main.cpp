@@ -1,12 +1,34 @@
 #include "Hamiltonian/Hamiltonian.hpp"
-#include "MatrixRepresentation/MatrixRepresentation.hpp"
-#include <algorithm>
-#include <bits/getopt_core.h>
 #include <cstdlib>
 #include <getopt.h>
 #include <iostream>
 #include <ostream>
 #include <string>
+
+// Usage: Execute the IM-SRG program **in the IM-SRG directory** with flags for 
+//        different options to integrate the flow equations
+//        from 0 to a desired point.
+//
+//
+// -i (string): Integration method, use "rk" for Runge-Kutta or "e" for Euler
+//  defaut: rk
+//
+// -N (int): Number of single particle states used in the Basis (0-140)
+//  default: 140
+//
+// -s1 (double): Integrate up to a flow parameter of s1
+//  defaut: 1
+//
+// -ds (double): Initial step size in the case of Runge-Kutta and
+//               step size in the case of Euler
+//  default: 0.1
+//
+// 
+//
+// Example: ./IM-SRG -i rk -N 140 -s1 5 -ds 1e-6
+//    Integrates the flow equations with Runge-Kutta and 140 single
+//    particle states from s=0 to s=5 with a initial step size
+//    of 10^(-6)
 
 int main(int argc, char *argv[]) {
   std::string integration_method = "rk";
@@ -73,11 +95,6 @@ int main(int argc, char *argv[]) {
     H.euler_print(0, s1, ds);
     break;
   }
-
-  // MatrixRepresentation Matrix = MatrixRepresentation(H);
-  // Matrix.export_one_body("f_s0.3.txt");
-  // Matrix.export_one_body_generator("eta1_s5.txt");
-  // Matrix.export_two_body("Gamma_s1_test.txt");
 
   return 0;
 }
