@@ -38,5 +38,5 @@ Output files and plots go to [`output/`](output), for example the energy flow in
 
 ![Zero-Body Part E(s) of H for 4He during the flow](output/plots/E_rk_N.svg)
 
-*Zero-Body Part $E(s)$ of $H$ for $^4$He during the flow (Runge–Kutta), for $N = 40, 90, 140$ single-particle states.*
+*Zero-Body Part E(s) of H for ⁴He during the flow (Runge–Kutta), for N = 40, 90, 140 single-particle states.*
 
