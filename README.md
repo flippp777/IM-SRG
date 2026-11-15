@@ -10,7 +10,7 @@ until the particle–hole couplings are suppressed and $E(s)$ approaches the gro
 
 ## Features
 
-- Reads two-body matrix elements of a chiral NN interaction from `matrix_elements/`
+- Reads two-body matrix elements of a chiral NN interaction from `matrix_elements/` (not included, see [`matrix_elements/README.md`](matrix_elements/README.md))
 - White-type generator $\eta$ built from the particle–hole parts of $f$ and $\Gamma$
 - Flow equations for $dE/ds$, $df/ds$ and $d\Gamma/ds$, parallelised with **OpenMP**
 - Integration with an explicit **Euler** scheme or an adaptive **Runge–Kutta** solver from the GSL
@@ -40,3 +40,7 @@ Output files and plots go to [`output/`](output), for example the energy flow in
 
 *Zero-Body Part E(s) of H for ⁴He during the flow (Runge–Kutta), for N = 40, 90, 140 single-particle states.*
 
+
+## License
+
+The code is released under the [MIT License](LICENSE). The nuclear matrix elements used as input are not included and not covered by this license.

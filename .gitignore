@@ -5,3 +5,7 @@ bin
 compile.sh
 compile_and_run.sh
 core.*
+
+# matrix elements are not distributed
+matrix_elements/*
+!matrix_elements/README.md
