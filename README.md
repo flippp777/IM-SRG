@@ -14,7 +14,7 @@ until the particle–hole couplings are suppressed and $E(s)$ approaches the gro
 - White-type generator $\eta$ built from the particle–hole parts of $f$ and $\Gamma$
 - Flow equations for $dE/ds$, $df/ds$ and $d\Gamma/ds$, parallelised with **OpenMP**
 - Integration with an explicit **Euler** scheme or an adaptive **Runge–Kutta** solver from the GSL
-- Export of $E$, $f$, $\Gamma$ and $\eta$ during the flow, with Python scripts in `src/visulize/` that plot them as functions of $s$
+- Export of $E$, $f$, $\Gamma$ and $\eta$ during the flow, with Python scripts in `src/visualize/` that plot them as functions of $s$
 
 ## Build & run
 
@@ -35,3 +35,6 @@ Run it from the repository root.
 | `-d` | step size (initial step size for Runge–Kutta) | 0.1 |
 
 Output files and plots go to [`output/`](output), for example the energy flow in [`output/plots/E_rk_N.pdf`](output/plots/E_rk_N.pdf).
+
+![Flow of the zero-body energy E(s) for different numbers of single-particle states N](output/plots/E_rk_N.svg)
+
