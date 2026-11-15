@@ -13,7 +13,7 @@ class Hamiltonian {
 private:
   int num_states = 140;
 
-  double E;
+  double E = 0.0;
   std::vector<OneBody> f;
   std::vector<TwoBody> gamma;
 

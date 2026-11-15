@@ -57,12 +57,12 @@ Hamiltonian::set_flow_eq ()
         if (f[i].s > 3 && f[i].ss < 4
             && eta1_map.find ({ f[i].ss, f[i].s }) != eta1_map.end ())
           {
-            dEds += f[i].me * eta1_map[OneBodyKey (f[i].ss, f[i].s)];
+            dEds += f[i].me * eta1_map.at (OneBodyKey (f[i].ss, f[i].s));
           }
-        else if (f[i].s < 4 && f[i].s > 3
+        else if (f[i].s < 4 && f[i].ss > 3
                  && eta1_map.find ({ f[i].ss, f[i].s }) != eta1_map.end ())
           {
-            dEds += -f[i].me * eta1_map[OneBodyKey (f[i].ss, f[i].s)];
+            dEds += -f[i].me * eta1_map.at (OneBodyKey (f[i].ss, f[i].s));
           }
       }
 #pragma omp for reduction(+ : dEds) nowait
@@ -77,8 +77,8 @@ Hamiltonian::set_flow_eq ()
               {
                 dEds += 0.5 * eta_2body[i].me
                         * gamma_qa
-                              .map[{ eta_2body[i].ss1, eta_2body[i].ss2,
-                                     eta_2body[i].s1, eta_2body[i].s2 }]
+                              .map.at ({ eta_2body[i].ss1, eta_2body[i].ss2,
+                                     eta_2body[i].s1, eta_2body[i].s2 })
                               .me;
               }
           }
@@ -405,11 +405,11 @@ Hamiltonian::set_flow_eq_print ()
       {
         if (f[i].s > 3 && f[i].ss < 4 && eta1_map.find({f[i].ss, f[i].s}) != eta1_map.end())
           {
-            dEds += f[i].me * eta1_map[OneBodyKey (f[i].ss, f[i].s)];
+            dEds += f[i].me * eta1_map.at (OneBodyKey (f[i].ss, f[i].s));
           }
-        else if (f[i].s < 4 && f[i].s > 3 && eta1_map.find({f[i].ss, f[i].s}) != eta1_map.end())
+        else if (f[i].s < 4 && f[i].ss > 3 && eta1_map.find({f[i].ss, f[i].s}) != eta1_map.end())
           {
-            dEds += -f[i].me * eta1_map[OneBodyKey (f[i].ss, f[i].s)];
+            dEds += -f[i].me * eta1_map.at (OneBodyKey (f[i].ss, f[i].s));
           }
       }
 #pragma omp for reduction(+ : dEds) nowait
@@ -424,8 +424,8 @@ Hamiltonian::set_flow_eq_print ()
               {
                 dEds += 0.5 * eta_2body[i].me
                         * gamma_qa
-                              .map[{ eta_2body[i].ss1, eta_2body[i].ss2,
-                                     eta_2body[i].s1, eta_2body[i].s2 }]
+                              .map.at ({ eta_2body[i].ss1, eta_2body[i].ss2,
+                                     eta_2body[i].s1, eta_2body[i].s2 })
                               .me;
               }
           }
