@@ -36,5 +36,7 @@ Run it from the repository root.
 
 Output files and plots go to [`output/`](output), for example the energy flow in [`output/plots/E_rk_N.pdf`](output/plots/E_rk_N.pdf).
 
-![Flow of the zero-body energy E(s) for different numbers of single-particle states N](output/plots/E_rk_N.svg)
+![Zero-Body Part E(s) of H for 4He during the flow](output/plots/E_rk_N.svg)
+
+*Zero-Body Part $E(s)$ of $H$ for $^4$He during the flow (Runge–Kutta), for $N = 40, 90, 140$ single-particle states.*
 
