@@ -40,3 +40,7 @@ Output files and plots go to [`output/`](output), for example the energy flow in
 
 *Zero-Body Part E(s) of H for ⁴He during the flow (Runge–Kutta), for N = 40, 90, 140 single-particle states.*
 
+
+## License
+
+The code is released under the [MIT License](LICENSE). The nuclear matrix elements in `matrix_elements/` are not covered by this license.
